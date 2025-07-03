@@ -1,16 +1,50 @@
-# harmoni_sehat_frontend
+# Frontend Harmoni Sehat
 
-A new Flutter project.
+Aplikasi mobile untuk Proyek Harmoni Sehat, dibangun menggunakan Flutter.
 
-## Getting Started
+## Fitur
 
-This project is a starting point for a Flutter application.
+*   Antarmuka untuk melihat, menambah, mengubah, dan menghapus data kesehatan.
+*   Visualisasi data kesehatan (misalnya dalam bentuk grafik).
+*   Berjalan di platform Android dan iOS.
 
-A few resources to get you started if this is your first Flutter project:
+## Prasyarat
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+*   [Flutter SDK](https://flutter.dev/docs/get-started/install) (versi 3.x atau lebih tinggi)
+*   [Dart SDK](https://dart.dev/get-dart) (terinstal bersama Flutter)
+*   Emulator Android atau iOS, atau perangkat fisik untuk pengujian.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Instalasi & Menjalankan Aplikasi
+
+1.  **Masuk ke direktori frontend:**
+    ```bash
+    cd harmoni_sehat_frontend
+    ```
+
+2.  **Install dependensi:**
+    Jalankan perintah berikut untuk mengunduh semua paket yang dibutuhkan.
+    ```bash
+    flutter pub get
+    ```
+
+3.  **Konfigurasi Backend:**
+    Pastikan server backend sudah berjalan. Buka file konfigurasi di dalam `lib/` (misalnya `lib/app/data/providers/api_provider.dart` atau file sejenisnya) dan pastikan URL API menunjuk ke alamat server backend yang benar.
+    ```dart
+    // Contoh
+    final String _baseUrl = "http://10.0.2.2:3000/api"; // Gunakan 10.0.2.2 untuk emulator Android
+    ```
+
+4.  **Jalankan aplikasi:**
+    Pastikan Anda memiliki perangkat yang terhubung atau emulator yang sedang berjalan.
+    ```bash
+    flutter run
+    ```
+    Aplikasi akan di-build dan diinstal pada perangkat/emulator yang dipilih.
+
+## Struktur Direktori Penting
+
+*   `lib/`: Berisi semua kode sumber Dart aplikasi.
+    *   `main.dart`: Titik masuk utama aplikasi.
+    *   `app/`: Direktori utama yang berisi logika aplikasi, dibagi berdasarkan fitur atau lapisan (controllers, models, ui, dll).
+*   `pubspec.yaml`: Mendefinisikan dependensi dan aset proyek.
+*   `assets/`: Untuk menyimpan file aset seperti gambar dan font.
