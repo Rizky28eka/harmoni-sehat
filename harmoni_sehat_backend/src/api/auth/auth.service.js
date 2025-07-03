@@ -14,14 +14,15 @@ const registerUser = async (userData) => {
   // 2. Gunakan transaksi untuk memastikan integritas data
   const [newUser] = await knex.transaction(async (trx) => {
     // Masukkan ke tabel 'users'
-    const [user] = await trx('users')
+    const [userId] = await trx('users')
       .insert({
         email,
         password: hashedPassword,
         no_hp,
         role: 'pasien', // Default role untuk registrasi
-      })
-      .returning('*');
+      });
+
+    const user = await trx('users').where({ id: userId }).first();
 
     // Masukkan ke tabel 'pasiens'
     await trx('pasiens').insert({

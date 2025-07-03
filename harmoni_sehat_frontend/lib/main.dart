@@ -1,24 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'app/ui/pages/home_page.dart';
+
+import 'package:harmoni_sehat_frontend/app/routes/app_pages.dart';
 
 void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'Harmoni Sehat',
+  WidgetsFlutterBinding.ensureInitialized(); // Pastikan Flutter binding diinisialisasi
+  runApp(
+    GetMaterialApp(
+      title: "Harmoni Sehat",
+      initialRoute: AppPages.INITIAL,
+      getPages: AppPages.routes,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.teal,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: HomePage(),
-    );
-  }
+    ),
+  );
 }

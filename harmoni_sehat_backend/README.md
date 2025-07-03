@@ -78,3 +78,109 @@ src/
 5.  **Controller (`*.controller.js`)**: Memvalidasi input, memanggil service untuk eksekusi logika bisnis, dan mengirimkan respons ke klien menggunakan `ApiResponse`.
 6.  **Service (`*.service.js`)**: Berisi logika bisnis murni, berinteraksi dengan database (melalui model atau Knex), dan tidak terikat dengan HTTP request/response.
 7.  **Error Handling**: Semua error ditangkap dan diproses oleh middleware error handler global untuk memastikan format respons error yang konsisten.
+
+## API Endpoints
+
+Berikut adalah daftar endpoint API yang tersedia:
+
+### Autentikasi (`/api/auth`)
+*   **`POST /api/auth/register`**
+    *   **Deskripsi:** Mendaftarkan pengguna baru (role pasien).
+    *   **Akses:** Public
+    *   **Body Request:**
+        ```json
+        {
+          "nama_lengkap": "Nama Lengkap Pengguna",
+          "email": "email@example.com",
+          "password": "password123",
+          "no_hp": "081234567890"
+        }
+        ```
+    *   **Respons Sukses (201 Created):**
+        ```json
+        {
+          "message": "Registrasi berhasil",
+          "userId": 1
+        }
+        ```
+    *   **Respons Error (400 Bad Request / 409 Conflict / 500 Internal Server Error):**
+        ```json
+        {
+          "message": "Pesan kesalahan"
+        }
+        ```
+
+*   **`POST /api/auth/login`**
+    *   **Deskripsi:** Melakukan login pengguna dan mengembalikan token JWT.
+    *   **Akses:** Public
+    *   **Body Request:**
+        ```json
+        {
+          "email": "email@example.com",
+          "password": "password123"
+        }
+        ```
+    *   **Respons Sukses (200 OK):**
+        ```json
+        {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        }
+        ```
+    *   **Respons Error (400 Bad Request / 401 Unauthorized):**
+        ```json
+        {
+          "message": "Pesan kesalahan"
+        }
+        ```
+
+### Data Kesehatan (`/api/kesehatan`)
+*   **`GET /api/kesehatan`**
+    *   **Deskripsi:** Mengambil semua data kesehatan.
+    *   **Akses:** Authenticated (Role: `pasien`)
+    *   **Header:** `Authorization: Bearer <token_jwt>`
+    *   **Respons Sukses (200 OK):**
+        ```json
+        [
+          {
+            "id": 1,
+            "nama": "John Doe",
+            "detakJantung": 75,
+            "suhuTubuh": 36.5,
+            "tanggal": "2025-07-04T10:00:00.000Z"
+          }
+        ]
+        ```
+    *   **Respons Error (401 Unauthorized / 403 Forbidden / 500 Internal Server Error):**
+        ```json
+        {
+          "message": "Pesan kesalahan"
+        }
+        ```
+
+*   **`POST /api/kesehatan`**
+    *   **Deskripsi:** Menambahkan data kesehatan baru.
+    *   **Akses:** Authenticated (Any role)
+    *   **Header:** `Authorization: Bearer <token_jwt>`
+    *   **Body Request:**
+        ```json
+        {
+          "nama": "Jane Doe",
+          "detakJantung": 80,
+          "suhuTubuh": 37.0
+        }
+        ```
+    *   **Respons Sukses (201 Created):**
+        ```json
+        {
+          "id": 2,
+          "nama": "Jane Doe",
+          "detakJantung": 80,
+          "suhuTubuh": 37.0
+        }
+        ```
+    *   **Respons Error (400 Bad Request / 401 Unauthorized / 500 Internal Server Error):**
+        ```json
+        {
+          "message": "Pesan kesalahan"
+        }
+        ```
