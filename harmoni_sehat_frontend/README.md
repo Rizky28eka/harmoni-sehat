@@ -7,6 +7,7 @@ Aplikasi mobile untuk Proyek Harmoni Sehat, dibangun menggunakan Flutter.
 *   Antarmuka untuk melihat, menambah, mengubah, dan menghapus data kesehatan.
 *   Visualisasi data kesehatan (misalnya dalam bentuk grafik).
 *   Berjalan di platform Android dan iOS.
+*   Manajemen state menggunakan GetX.
 
 ## Prasyarat
 
@@ -28,10 +29,12 @@ Aplikasi mobile untuk Proyek Harmoni Sehat, dibangun menggunakan Flutter.
     ```
 
 3.  **Konfigurasi Backend:**
-    Pastikan server backend sudah berjalan. Buka file konfigurasi di dalam `lib/` (misalnya `lib/app/data/providers/api_provider.dart` atau file sejenisnya) dan pastikan URL API menunjuk ke alamat server backend yang benar.
+    Pastikan server backend sudah berjalan. Buka file konfigurasi di dalam `lib/app/data/providers/api_constants.dart` dan pastikan URL API menunjuk ke alamat server backend yang benar.
     ```dart
-    // Contoh
-    final String _baseUrl = "http://10.0.2.2:3000/api"; // Gunakan 10.0.2.2 untuk emulator Android
+    // lib/app/data/providers/api_constants.dart
+    class ApiConstants {
+      static const String baseUrl = 'http://10.0.2.2:5000/api'; // Gunakan 10.0.2.2 untuk emulator Android, atau IP lokal Anda
+    }
     ```
 
 4.  **Jalankan aplikasi:**
@@ -45,6 +48,11 @@ Aplikasi mobile untuk Proyek Harmoni Sehat, dibangun menggunakan Flutter.
 
 *   `lib/`: Berisi semua kode sumber Dart aplikasi.
     *   `main.dart`: Titik masuk utama aplikasi.
-    *   `app/`: Direktori utama yang berisi logika aplikasi, dibagi berdasarkan fitur atau lapisan (controllers, models, ui, dll).
+    *   `app/`: Direktori utama yang berisi logika aplikasi, dibagi berdasarkan fitur atau lapisan.
+        *   `bindings/`: Mengelola dependensi dan inisialisasi controller (Get.put, Get.lazyPut).
+        *   `controllers/`: Berisi logika bisnis dan state aplikasi.
+        *   `data/`: Berisi models, providers (untuk interaksi API), dan services.
+        *   `routes/`: Mendefinisikan rute navigasi aplikasi.
+        *   `ui/`: Berisi widget dan halaman UI.
 *   `pubspec.yaml`: Mendefinisikan dependensi dan aset proyek.
 *   `assets/`: Untuk menyimpan file aset seperti gambar dan font.

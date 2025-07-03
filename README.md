@@ -20,9 +20,9 @@ harmoni_sehat_project/
 
 ## Teknologi yang Digunakan
 
-*   **Frontend:** Flutter & Dart
-*   **Backend:** Node.js, Express.js
-*   **Database:** (Sebutkan database yang Anda gunakan, misal: MongoDB, PostgreSQL)
+*   **Frontend:** Flutter, Dart, GetX (State Management)
+*   **Backend:** Node.js, Express.js, Knex.js (Query Builder), bcryptjs (Password Hashing), jsonwebtoken (JWT)
+*   **Database:** MySQL
 
 ## Memulai
 

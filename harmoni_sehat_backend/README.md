@@ -12,7 +12,7 @@ Layanan backend untuk aplikasi Harmoni Sehat. Dibangun menggunakan Node.js, Expr
 
 *   [Node.js](https://nodejs.org/) (versi 16.x atau lebih tinggi)
 *   [NPM](https://www.npmjs.com/) (biasanya terinstal bersama Node.js)
-*   Database MySQL atau database lain yang didukung Knex.js.
+*   Database MySQL.
 
 ## Instalasi & Menjalankan Server
 
