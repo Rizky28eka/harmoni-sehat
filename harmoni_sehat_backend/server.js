@@ -1,24 +1,19 @@
-// server.js
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const dotenv = require('dotenv');
-
-dotenv.config();
-
-const app = express();
-
-// Middleware
-app.use(cors());
-app.use(express.json()); // Body parser untuk JSON
-
-// Koneksi ke MongoDB
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB Terhubung...'))
-  .catch((err) => console.error(err));
-
-// Routes
-app.use('/api', require('./routes/api'));
+require('dotenv').config();
+const app = require('./src/app');
+const db = require('./src/config/db');
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server berjalan di port ${PORT}`));
+
+// Cek koneksi database sebelum server berjalan
+db.getConnection()
+  .then(connection => {
+    console.log('MySQL Terhubung...');
+    connection.release();
+    app.listen(PORT, () => {
+      console.log(`Server berjalan di port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('Gagal terhubung ke MySQL:', err);
+    process.exit(1); // Keluar dari aplikasi jika tidak bisa konek DB
+  });
