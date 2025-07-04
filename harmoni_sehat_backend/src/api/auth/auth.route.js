@@ -4,11 +4,13 @@ const router = express.Router();
 const authController = require('./auth.controller');
 const socialController = require('./social.controller');
 const otpController = require('./otp.controller');
+const { registerValidationRules } = require('./validation');
+const validate = require('../../middleware/validate');
 
 // @route   POST /api/auth/register
-// @desc    Registrasi pengguna baru (pasien)
+// @desc    Registrasi pengguna baru (pasien, dokter, apoteker)
 // @access  Public
-router.post('/register', authController.register);
+router.post('/register', registerValidationRules(), validate, authController.register);
 
 // @route   POST /api/auth/login
 // @desc    Login pengguna

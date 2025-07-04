@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:harmoni_sehat_frontend/app/data/providers/auth_service.dart';
 import 'package:harmoni_sehat_frontend/app/modules/auth/controllers/auth_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:harmoni_sehat_frontend/app/routes/app_pages.dart';
-import 'package:harmoni_sehat_frontend/app/data/providers/auth_service.dart';
+import 'package:harmoni_sehat_frontend/app/data/providers/auth_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Pastikan Flutter binding diinisialisasi
@@ -26,5 +27,6 @@ Future<void> initServices() async {
 
   // Daftarkan AuthService dan AuthController secara permanen
   Get.put(AuthService(), permanent: true);
+  Get.put(AuthProvider(), permanent: true);
   Get.put(AuthController(), permanent: true);
 }

@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:harmoni_sehat_frontend/app/data/models/user_model.dart';
-import 'package:harmoni_sehat_frontend/app/data/providers/auth_service.dart';
+import 'package:harmoni_sehat_frontend/app/data/providers/auth_provider.dart'; // Ganti ke provider
 import 'package:harmoni_sehat_frontend/app/routes/app_pages.dart';
 
 class AuthController extends GetxController {
-  final AuthService _authService = Get.find<AuthService>();
+  final AuthProvider _authProvider =
+      Get.find<AuthProvider>(); // Ganti ke provider
 
   final RxBool isLoading = false.obs;
-  final RxString errorMessage = ''.obs;
   final Rx<User?> currentUser = Rx<User?>(null);
 
-  // New properties for registration
+  // Form Key
+  final GlobalKey<FormState> registerFormKey = GlobalKey<FormState>();
+
+  // Role selectors
   final RxString selectedRole = 'Pasien'.obs;
   final RxString selectedLoginRole = 'Pasien'.obs;
-  final PageController pageController = PageController();
 
   // Text editing controllers
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController =
+      TextEditingController(); // Tambah controller HP
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
@@ -29,20 +33,22 @@ class AuthController extends GetxController {
   final TextEditingController pharmacyNameController = TextEditingController();
   final TextEditingController verificationCodeController =
       TextEditingController();
+  final RxString errorMessage = ''.obs;
 
   @override
-  void onInit() {
-    super.onInit();
-    // Initial navigation is handled by SplashScreenController.
-  }
-
-  // This method is for checking authentication status, not for initial navigation.
-  void checkAuthStatus() async {
-    if (_authService.isAuthenticated()) {
-      print('User is authenticated. Token: ${_authService.getToken()}');
-    } else {
-      print('User is not authenticated.');
-    }
+  void onClose() {
+    // Dispose controllers
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    strController.dispose();
+    specializationController.dispose();
+    straController.dispose();
+    pharmacyNameController.dispose();
+    verificationCodeController.dispose();
+    super.onClose();
   }
 
   void selectRole(String role) {
@@ -53,60 +59,27 @@ class AuthController extends GetxController {
     selectedLoginRole.value = role;
   }
 
-  Future<void> login(String email, String password) async {
-    isLoading.value = true;
-    errorMessage.value = '';
-    try {
-      final response = await _authService.login(
-        email,
-        password,
-        selectedLoginRole.value.toLowerCase(),
-      );
-      if (response != null) {
-        final String? userRole = _authService.getUserRole();
-        if (userRole != null) {
-          switch (userRole) {
-            case 'pasien':
-              Get.offAllNamed(Routes.PASIEN_HOME);
-              break;
-            case 'dokter':
-              Get.offAllNamed(Routes.DOKTER_HOME);
-              break;
-            case 'apoteker':
-              Get.offAllNamed(Routes.APOTEKER_HOME);
-              break;
-            default:
-              Get.offAllNamed(Routes.HOME); // Fallback or error page
-              break;
-          }
-        } else {
-          // If role is null, navigate to a default home or login again
-          Get.offAllNamed(Routes.HOME);
-        }
-      }
-    } catch (e) {
-      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
-      print('Login Error: $e');
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
   Future<void> register() async {
-    isLoading.value = true;
-    errorMessage.value = '';
-    try {
-      // Basic validation
-      if (passwordController.text != confirmPasswordController.text) {
-        throw Exception("Passwords do not match");
-      }
+    // 1. Validasi form
+    if (!registerFormKey.currentState!.validate()) {
+      Get.snackbar(
+        'Error',
+        'Harap isi semua field dengan benar.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
 
+    isLoading.value = true;
+    try {
       final String role = selectedRole.value.toLowerCase();
       Map<String, dynamic> userData = {
         'nama_lengkap': nameController.text,
         'email': emailController.text,
         'password': passwordController.text,
-        'no_hp': '081234567890', // Placeholder, adjust as needed
+        'no_hp': phoneController.text, // Ambil dari controller
         'role': role,
       };
 
@@ -118,16 +91,84 @@ class AuthController extends GetxController {
         userData['alamat_tempat_kerja'] = pharmacyNameController.text;
       }
 
-      final user = await _authService.register(userData);
-      if (user != null) {
-        Get.snackbar('Success', 'Registration successful! Please login.');
-        Get.offAllNamed(Routes.LOGIN);
-      } else {
-        throw Exception('Registration failed: No user data returned.');
-      }
+      await _authProvider.register(userData); // Panggil provider
+
+      Get.snackbar(
+        'Sukses',
+        'Registrasi berhasil! Silakan login.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+      Get.offAllNamed(Routes.LOGIN);
     } catch (e) {
-      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
-      print('Register Error: $e');
+      // Menampilkan pesan error dari backend
+      Get.snackbar(
+        'Registrasi Gagal',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> login() async {
+    isLoading.value = true;
+    errorMessage.value = ''; // Clear previous errors
+    try {
+      final String role = selectedLoginRole.value.toLowerCase();
+      Map<String, dynamic> loginData = {
+        'email': emailController.text,
+        'password': passwordController.text,
+        'role': role,
+      };
+
+      final loginResponse = await _authProvider.login(loginData);
+      currentUser.value = User(
+        id: loginResponse['userId'],
+        name: loginResponse['name'],
+        email: emailController.text,
+        role: loginResponse['role'],
+        
+      );
+      Get.snackbar(
+        'Sukses',
+        'Login berhasil!',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+      // Navigate to role-specific home page
+      String homeRoute;
+      switch (loginResponse['role']) {
+        case 'pasien':
+          homeRoute = Routes.PASIEN_HOME;
+          break;
+        case 'dokter':
+          homeRoute = Routes.DOKTER_HOME;
+          break;
+        case 'apoteker':
+          homeRoute = Routes.APOTEKER_HOME;
+          break;
+        default:
+          homeRoute = Routes.LOGIN; // Fallback or error page
+          Get.snackbar('Error', 'Role tidak dikenal: ${loginResponse['role']}',
+              snackPosition: SnackPosition.BOTTOM, backgroundColor: Colors.red, colorText: Colors.white);
+          break;
+      }
+      Get.offAllNamed(homeRoute);
+    } catch (e) {
+      errorMessage.value = e.toString();
+      Get.snackbar(
+        'Login Gagal',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -135,19 +176,48 @@ class AuthController extends GetxController {
 
   Future<void> forgotPassword() async {
     isLoading.value = true;
-    errorMessage.value = '';
     try {
-      // Simulate sending a verification code
-      print("Sending verification code to ${emailController.text}");
-      await Future.delayed(const Duration(seconds: 2));
-      Get.toNamed(Routes.VERIFICATION);
+      // Implement forgot password logic here
+      // This might involve sending an email with a reset link or OTP
       Get.snackbar(
-        'Success',
-        'Verification code sent to ${emailController.text}',
+        'Info',
+        'Fitur lupa password akan segera diimplementasikan.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.blue,
+        colorText: Colors.white,
       );
     } catch (e) {
-      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
-      print('Forgot Password Error: $e');
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    isLoading.value = true;
+    try {
+      // Implement Google Sign-In logic here
+      Get.snackbar(
+        'Info',
+        'Fitur Google Sign-In akan segera diimplementasikan.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.blue,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -155,30 +225,25 @@ class AuthController extends GetxController {
 
   Future<void> verifyCode() async {
     isLoading.value = true;
-    errorMessage.value = '';
     try {
-      // Simulate verifying the code
-      print("Verifying code ${verificationCodeController.text}");
-      await Future.delayed(const Duration(seconds: 2));
-      Get.offAllNamed(Routes.LOGIN); // Or navigate to a reset password page
-      Get.snackbar('Success', 'Account verified successfully!');
+      // Implement OTP verification logic here
+      Get.snackbar(
+        'Info',
+        'Verifikasi kode akan segera diimplementasikan.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.blue,
+        colorText: Colors.white,
+      );
     } catch (e) {
-      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
-      print('Verification Error: $e');
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
-  }
-
-  Future<void> logout() async {
-    await _authService.logout();
-    currentUser.value = null;
-    Get.offAllNamed(Routes.LOGIN);
-  }
-
-  Future<void> signInWithGoogle() async {
-    // Placeholder for Google Sign-In logic
-    print("Attempting to sign in with Google...");
-    Get.snackbar('Coming Soon', 'Google Sign-In is not yet implemented.');
   }
 }

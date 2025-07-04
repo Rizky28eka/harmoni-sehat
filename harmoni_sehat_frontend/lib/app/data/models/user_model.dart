@@ -19,7 +19,6 @@ class User {
     required this.email,
     this.role,
     this.photoUrl,
-    required username,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
@@ -27,8 +26,7 @@ class User {
     name: json["name"],
     email: json["email"],
     role: json["role"], // Ambil role jika ada
-    photoUrl: json["photo_url"],
-    username: null, // Ambil URL foto jika ada
+    photoUrl: json["photo_url"], // Ambil URL foto jika ada
   );
 
   Map<String, dynamic> toJson() => {

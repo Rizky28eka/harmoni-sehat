@@ -94,7 +94,7 @@ class AuthService extends GetConnect {
           id: parsedId,
           name: userData['nama_lengkap'],
           email: userData['email'],
-          username: null,
+          
         );
       } catch (e) {
         print('Error saat parsing respons registrasi: $e');

@@ -19,60 +19,70 @@ class RegisterPage extends GetView<AuthController> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Create Your Account',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Create your personal account now to access all the exclusive benefits we have to offer.',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-            const SizedBox(height: 32),
-            _buildRoleSelector(),
-            const SizedBox(height: 32),
-            Obx(() => _buildFormForRole(controller.selectedRole.value)),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: controller.register,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-                backgroundColor: const Color(0xFF1c8086),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+        child: Form(
+          key: controller.registerFormKey, // Tambahkan GlobalKey
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Create Your Account',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
-              child: const Text(
-                'Register',
-                style: TextStyle(color: Colors.white),
+              const SizedBox(height: 8),
+              const Text(
+                'Create your personal account now to access all the exclusive benefits we have to offer.',
+                style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
-            ),
-            const SizedBox(height: 24),
-            _buildDivider(),
-            const SizedBox(height: 24),
-            _buildSocialButtons(),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text("Already have an account?"),
-                TextButton(
-                  onPressed: () => Get.back(),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(color: Color(0xFF1c8086)),
+              const SizedBox(height: 32),
+              _buildRoleSelector(),
+              const SizedBox(height: 32),
+              Obx(() => _buildFormForRole(controller.selectedRole.value)),
+              const SizedBox(height: 32),
+              Obx(() => ElevatedButton(
+                    onPressed: controller.isLoading.value
+                        ? null // Disable tombol saat loading
+                        : () {
+                            controller.register();
+                          },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 50),
+                      backgroundColor: const Color(0xFF1c8086),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: controller.isLoading.value
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            'Register',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                  )),
+              const SizedBox(height: 24),
+              _buildDivider(),
+              const SizedBox(height: 24),
+              _buildSocialButtons(),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Already have an account?"),
+                  TextButton(
+                    onPressed: () => Get.back(),
+                    child: const Text(
+                      'Login',
+                      style: TextStyle(color: Color(0xFF1c8086)),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+  // ... (sisa widget tetap sama, tapi _buildTextField akan diubah)
 
   Widget _buildRoleSelector() {
     return Obx(
@@ -123,37 +133,94 @@ class RegisterPage extends GetView<AuthController> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildTextField(controller.nameController, 'Full Name'),
-        _buildTextField(controller.emailController, 'Email'),
-        _buildTextField(
-          controller.passwordController,
-          'Password',
-          isObscure: true,
+        _buildTextFormField(
+          controller: controller.nameController,
+          label: 'Full Name',
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Nama lengkap tidak boleh kosong';
+            }
+            return null;
+          },
         ),
-        _buildTextField(
-          controller.confirmPasswordController,
-          'Confirm Password',
+        _buildTextFormField(
+          controller: controller.emailController,
+          label: 'Email',
+          keyboardType: TextInputType.emailAddress,
+          validator: (value) {
+            if (value == null || !GetUtils.isEmail(value)) {
+              return 'Masukkan email yang valid';
+            }
+            return null;
+          },
+        ),
+        _buildTextFormField(
+          controller: controller.phoneController, // Tambahkan controller HP
+          label: 'Nomor HP',
+          keyboardType: TextInputType.phone,
+          validator: (value) {
+            if (value == null || !GetUtils.isPhoneNumber(value)) {
+              return 'Masukkan nomor HP yang valid';
+            }
+            return null;
+          },
+        ),
+        _buildTextFormField(
+          controller: controller.passwordController,
+          label: 'Password',
           isObscure: true,
+          validator: (value) {
+            if (value == null || value.length < 6) {
+              return 'Password minimal harus 6 karakter';
+            }
+            return null;
+          },
+        ),
+        _buildTextFormField(
+          controller: controller.confirmPasswordController,
+          label: 'Confirm Password',
+          isObscure: true,
+          validator: (value) {
+            if (value != controller.passwordController.text) {
+              return 'Password tidak cocok';
+            }
+            return null;
+          },
         ),
         if (role == 'Dokter') ...[
-          _buildTextField(controller.strController, 'STR Number'),
-          _buildTextField(
-            controller.specializationController,
-            'Specialization',
+          _buildTextFormField(
+            controller: controller.strController,
+            label: 'Nomor SIP',
+            validator: (value) => value!.isEmpty ? 'Nomor SIP tidak boleh kosong' : null,
+          ),
+          _buildTextFormField(
+            controller: controller.specializationController,
+            label: 'Spesialisasi',
+            validator: (value) => value!.isEmpty ? 'Spesialisasi tidak boleh kosong' : null,
           ),
         ],
         if (role == 'Apoteker') ...[
-          _buildTextField(controller.straController, 'STRA Number'),
-          _buildTextField(controller.pharmacyNameController, 'Pharmacy Name'),
+          _buildTextFormField(
+            controller: controller.straController,
+            label: 'Nomor STRA',
+            validator: (value) => value!.isEmpty ? 'Nomor STRA tidak boleh kosong' : null,
+          ),
+          _buildTextFormField(
+            controller: controller.pharmacyNameController,
+            label: 'Alamat Tempat Kerja',
+            validator: (value) => value!.isEmpty ? 'Alamat tidak boleh kosong' : null,
+          ),
         ],
       ],
     );
   }
 
-  Widget _buildTextField(
-    TextEditingController controller,
-    String label, {
+  Widget _buildTextFormField({
+    required TextEditingController controller,
+    required String label,
     bool isObscure = false,
+    TextInputType keyboardType = TextInputType.text,
+    String? Function(String?)? validator,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -165,9 +232,11 @@ class RegisterPage extends GetView<AuthController> {
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 8),
-          TextField(
+          TextFormField(
             controller: controller,
             obscureText: isObscure,
+            keyboardType: keyboardType,
+            validator: validator,
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),

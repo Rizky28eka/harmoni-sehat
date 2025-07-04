@@ -51,10 +51,7 @@ class LoginPage extends GetView<AuthController> {
                     ? const Center(child: CircularProgressIndicator())
                     : ElevatedButton(
                         onPressed: () {
-                          controller.login(
-                            controller.emailController.text,
-                            controller.passwordController.text,
-                          );
+                          controller.login();
                         },
                         style: ElevatedButton.styleFrom(
                           minimumSize: const Size(double.infinity, 50),
