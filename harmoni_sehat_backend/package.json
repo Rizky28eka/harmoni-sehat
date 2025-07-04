@@ -22,9 +22,12 @@
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
+    "google-auth-library": "^10.1.0",
     "jsonwebtoken": "^9.0.2",
     "knex": "^3.1.0",
-    "mysql2": "^3.14.1"
+    "midtrans-client": "^1.4.3",
+    "mysql2": "^3.14.1",
+    "twilio": "^5.7.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
