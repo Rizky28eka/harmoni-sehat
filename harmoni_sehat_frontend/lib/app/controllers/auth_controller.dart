@@ -1,4 +1,4 @@
-// lib/app/controllers/auth_controller.dart
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../data/models/user_model.dart';
 import '../data/providers/auth_service.dart';
@@ -10,6 +10,22 @@ class AuthController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString errorMessage = ''.obs;
   final Rx<User?> currentUser = Rx<User?>(null);
+
+  // New properties for registration
+  final RxString selectedRole = 'Pasien'.obs;
+  final RxString selectedLoginRole = 'Pasien'.obs;
+  final PageController pageController = PageController();
+
+  // Text editing controllers
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController strController = TextEditingController();
+  final TextEditingController specializationController = TextEditingController();
+  final TextEditingController straController = TextEditingController();
+  final TextEditingController pharmacyNameController = TextEditingController();
+  final TextEditingController verificationCodeController = TextEditingController();
 
   @override
   void onInit() {
@@ -26,14 +42,20 @@ class AuthController extends GetxController {
     }
   }
 
+  void selectRole(String role) {
+    selectedRole.value = role;
+  }
+
+  void selectLoginRole(String role) {
+    selectedLoginRole.value = role;
+  }
+
   Future<void> login(String email, String password) async {
     isLoading.value = true;
     errorMessage.value = '';
     try {
       final response = await _authService.login(email, password);
       if (response != null) {
-        // Backend hanya mengembalikan token, tidak ada data user di sini
-        // Anda bisa menambahkan logika untuk mengambil profil user setelah login jika diperlukan
         Get.offAllNamed(Routes.HOME);
       }
     } catch (e) {
@@ -44,18 +66,72 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> register(String username, String email, String password, String noHp) async {
+  Future<void> register() async {
     isLoading.value = true;
     errorMessage.value = '';
     try {
-      final user = await _authService.register(username, email, password, noHp);
-      if (user != null) {
-        Get.snackbar('Success', 'Registration successful! Please login.');
-        Get.offAllNamed(Routes.LOGIN);
+      // Basic validation
+      if (passwordController.text != confirmPasswordController.text) {
+        throw Exception("Passwords do not match");
       }
+
+      // For now, we'll just print the registration data
+      // In a real app, you would send this to your auth_service
+      print("Registering as ${selectedRole.value}");
+      print("Name: ${nameController.text}");
+      print("Email: ${emailController.text}");
+      print("Password: ${passwordController.text}");
+
+      if (selectedRole.value == 'Dokter') {
+        print("STR: ${strController.text}");
+        print("Specialization: ${specializationController.text}");
+      } else if (selectedRole.value == 'Apoteker') {
+        print("STRA: ${straController.text}");
+        print("Pharmacy Name: ${pharmacyNameController.text}");
+      }
+
+      // Simulate a successful registration
+      await Future.delayed(const Duration(seconds: 2));
+      Get.snackbar('Success', 'Registration successful! Please login.');
+      Get.offAllNamed(Routes.LOGIN);
+
     } catch (e) {
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
       print('Register Error: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> forgotPassword() async {
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      // Simulate sending a verification code
+      print("Sending verification code to ${emailController.text}");
+      await Future.delayed(const Duration(seconds: 2));
+      Get.toNamed(Routes.VERIFICATION);
+      Get.snackbar('Success', 'Verification code sent to ${emailController.text}');
+    } catch (e) {
+      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      print('Forgot Password Error: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> verifyCode() async {
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      // Simulate verifying the code
+      print("Verifying code ${verificationCodeController.text}");
+      await Future.delayed(const Duration(seconds: 2));
+      Get.offAllNamed(Routes.LOGIN); // Or navigate to a reset password page
+      Get.snackbar('Success', 'Account verified successfully!');
+    } catch (e) {
+      errorMessage.value = e.toString().replaceFirst('Exception: ', '');
+      print('Verification Error: $e');
     } finally {
       isLoading.value = false;
     }
@@ -65,5 +141,11 @@ class AuthController extends GetxController {
     await _authService.logout();
     currentUser.value = null;
     Get.offAllNamed(Routes.LOGIN);
+  }
+
+  Future<void> signInWithGoogle() async {
+    // Placeholder for Google Sign-In logic
+    print("Attempting to sign in with Google...");
+    Get.snackbar('Coming Soon', 'Google Sign-In is not yet implemented.');
   }
 }

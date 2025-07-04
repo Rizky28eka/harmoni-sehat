@@ -36,7 +36,7 @@ class SplashScreenController extends GetxController {
 
     // Navigate to login page
     isLoading.value = false;
-    Get.offAllNamed(Routes.LOGIN);
+    Get.offAllNamed(Routes.INTRODUCTION);
   }
 
   Future<void> _updateLoadingText(String text, int delayMs) async {
