@@ -18,13 +18,19 @@ void main() {
       // Initialize GetX dependencies before each test
       Get.reset(); // Reset GetX bindings before each test
       mockSharedPreferences = MockSharedPreferences();
-      when(mockSharedPreferences.getString(any as String)).thenAnswer((_) => ''); // Mock token as empty string initially
-      when(mockSharedPreferences.setString(any as String, any as String)).thenAnswer((_) async => true); // Mock setString
+      when(
+        mockSharedPreferences.getString(any as String),
+      ).thenAnswer((_) => ''); // Mock token as empty string initially
+      when(
+        mockSharedPreferences.setString(any as String, any as String),
+      ).thenAnswer((_) async => true); // Mock setString
 
       Get.put<SharedPreferences>(mockSharedPreferences);
     });
 
-    testWidgets('Login Page and Navigation to Home Test', (WidgetTester tester) async {
+    testWidgets('Login Page and Navigation to Home Test', (
+      WidgetTester tester,
+    ) async {
       // Build our app and trigger a frame, starting from the login page.
       await tester.pumpWidget(
         GetMaterialApp(
@@ -40,8 +46,14 @@ void main() {
       expect(find.text('Login'), findsOneWidget); // AppBar title
 
       // Simulate typing email and password
-      await tester.enterText(find.widgetWithText(TextField, 'Email'), 'test@example.com');
-      await tester.enterText(find.widgetWithText(TextField, 'Password'), 'password123');
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Email'),
+        'test@example.com',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Password'),
+        'password123',
+      );
 
       // Tap the login button
       await tester.tap(find.widgetWithText(ElevatedButton, 'Login'));
