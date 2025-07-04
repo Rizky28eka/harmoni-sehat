@@ -14,7 +14,7 @@ const { authenticate, authorize } = require('../middleware/auth.middleware');
 router
   .route('/kesehatan')
   .get(authenticate, authorize('pasien'), getAllData)
-  .post(authenticate, createData);
+  .post(authenticate, authorize('pasien'), createData);
 
 module.exports = router;
 

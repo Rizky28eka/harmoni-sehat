@@ -42,7 +42,7 @@ const findOrCreateUser = async (profile) => {
 };
 
 const registerUser = async (userData) => {
-  const { nama_lengkap, email, password, no_hp } = userData;
+  const { nama_lengkap, email, password, no_hp, role, nomor_sip, spesialisasi, nomor_stra, alamat_tempat_kerja } = userData;
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
@@ -53,15 +53,32 @@ const registerUser = async (userData) => {
         email,
         password: hashedPassword,
         no_hp,
-        role: 'pasien',
+        role, // Use the provided role
       });
 
     const user = await trx('users').where({ id: userId }).first();
 
-    await trx('pasiens').insert({
-      user_id: user.id,
-      nama_lengkap,
-    });
+    // Insert into specific role table
+    if (role === 'pasien') {
+      await trx('pasiens').insert({
+        user_id: user.id,
+        nama_lengkap,
+      });
+    } else if (role === 'dokter') {
+      await trx('dokters').insert({
+        user_id: user.id,
+        nama_lengkap,
+        nomor_sip,
+        spesialisasi,
+      });
+    } else if (role === 'apoteker') {
+      await trx('apotekers').insert({
+        user_id: user.id,
+        nama_lengkap,
+        nomor_stra,
+        alamat_tempat_kerja,
+      });
+    }
 
     return [user];
   });
@@ -71,20 +88,27 @@ const registerUser = async (userData) => {
 };
 
 const loginUser = async (credentials) => {
-  const { email, password } = credentials;
+  const { email, password, expectedRole } = credentials;
 
   const user = await knex('users').where({ email }).first();
   if (!user) {
-    throw new Error('Kredensial tidak valid');
+    throw new Error('Email tidak terdaftar');
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw new Error('Kredensial tidak valid');
+    throw new Error('Password salah');
+  }
+
+  // Validate if the user's actual role matches the expected role for login
+  if (expectedRole && user.role !== expectedRole) {
+    const error = new Error('Role tidak sesuai.');
+    error.statusCode = 403; // Custom status code for role mismatch
+    throw error;
   }
 
   const token = generateToken(user);
-  return { token };
+  return { token, role: user.role };
 };
 
 module.exports = {

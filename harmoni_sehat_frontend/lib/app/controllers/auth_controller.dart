@@ -30,13 +30,13 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    checkAuthStatus();
+    // Initial navigation is handled by SplashScreenController.
   }
 
+  // This method is for checking authentication status, not for initial navigation.
   void checkAuthStatus() async {
     if (_authService.isAuthenticated()) {
       print('User is authenticated. Token: ${_authService.getToken()}');
-      Get.offAllNamed(Routes.HOME);
     } else {
       print('User is not authenticated.');
     }
@@ -54,7 +54,7 @@ class AuthController extends GetxController {
     isLoading.value = true;
     errorMessage.value = '';
     try {
-      final response = await _authService.login(email, password);
+      final response = await _authService.login(email, password, selectedLoginRole.value.toLowerCase());
       if (response != null) {
         Get.offAllNamed(Routes.HOME);
       }
@@ -75,25 +75,30 @@ class AuthController extends GetxController {
         throw Exception("Passwords do not match");
       }
 
-      // For now, we'll just print the registration data
-      // In a real app, you would send this to your auth_service
-      print("Registering as ${selectedRole.value}");
-      print("Name: ${nameController.text}");
-      print("Email: ${emailController.text}");
-      print("Password: ${passwordController.text}");
+      final String role = selectedRole.value.toLowerCase();
+      Map<String, dynamic> userData = {
+        'nama_lengkap': nameController.text,
+        'email': emailController.text,
+        'password': passwordController.text,
+        'no_hp': '081234567890', // Placeholder, adjust as needed
+        'role': role,
+      };
 
-      if (selectedRole.value == 'Dokter') {
-        print("STR: ${strController.text}");
-        print("Specialization: ${specializationController.text}");
-      } else if (selectedRole.value == 'Apoteker') {
-        print("STRA: ${straController.text}");
-        print("Pharmacy Name: ${pharmacyNameController.text}");
+      if (role == 'dokter') {
+        userData['nomor_sip'] = strController.text;
+        userData['spesialisasi'] = specializationController.text;
+      } else if (role == 'apoteker') {
+        userData['nomor_stra'] = straController.text;
+        userData['alamat_tempat_kerja'] = pharmacyNameController.text;
       }
 
-      // Simulate a successful registration
-      await Future.delayed(const Duration(seconds: 2));
-      Get.snackbar('Success', 'Registration successful! Please login.');
-      Get.offAllNamed(Routes.LOGIN);
+      final user = await _authService.register(userData);
+      if (user != null) {
+        Get.snackbar('Success', 'Registration successful! Please login.');
+        Get.offAllNamed(Routes.LOGIN);
+      } else {
+        throw Exception('Registration failed: No user data returned.');
+      }
 
     } catch (e) {
       errorMessage.value = e.toString().replaceFirst('Exception: ', '');
