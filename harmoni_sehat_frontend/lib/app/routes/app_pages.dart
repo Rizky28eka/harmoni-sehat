@@ -1,22 +1,32 @@
 import 'package:get/get.dart';
-import 'package:harmoni_sehat_frontend/app/bindings/introduction_binding.dart';
-import 'package:harmoni_sehat_frontend/app/bindings/splash_screen_binding.dart';
-import 'package:harmoni_sehat_frontend/app/ui/pages/auth/forgot_password_page.dart';
-import 'package:harmoni_sehat_frontend/app/ui/pages/auth/verification_page.dart';
-import 'package:harmoni_sehat_frontend/app/ui/pages/introduction/introduction_page.dart';
-import 'package:harmoni_sehat_frontend/app/ui/pages/splash_screen/splash_screen_page.dart';
-import '../bindings/auth_binding.dart';
-import '../bindings/home_binding.dart';
-import '../ui/pages/auth/login_page.dart';
-import '../ui/pages/auth/register_page.dart';
-import '../ui/pages/home/home_page.dart';
+import 'package:get/get.dart';
+import 'package:harmoni_sehat_frontend/app/modules/auth/bindings/auth_binding.dart';
+import 'package:harmoni_sehat_frontend/app/modules/auth/views/forgot_password_page.dart';
+import 'package:harmoni_sehat_frontend/app/modules/auth/views/login_page.dart';
+import 'package:harmoni_sehat_frontend/app/modules/auth/views/register_page.dart';
+import 'package:harmoni_sehat_frontend/app/modules/auth/views/verification_page.dart';
+import 'package:harmoni_sehat_frontend/app/modules/introduction/bindings/introduction_binding.dart';
+import 'package:harmoni_sehat_frontend/app/modules/introduction/views/introduction_page.dart';
+import 'package:harmoni_sehat_frontend/app/modules/splash_screen/bindings/splash_screen_binding.dart';
+import 'package:harmoni_sehat_frontend/app/modules/splash_screen/views/splash_screen_page.dart';
+import 'package:harmoni_sehat_frontend/app/modules/apoteker/bindings/apoteker_home_binding.dart';
+import 'package:harmoni_sehat_frontend/app/modules/apoteker/views/apoteker_home_view.dart';
+import 'package:harmoni_sehat_frontend/app/modules/dokter/bindings/dokter_home_binding.dart';
+import 'package:harmoni_sehat_frontend/app/modules/dokter/views/dokter_home_view.dart';
+import 'package:harmoni_sehat_frontend/app/modules/pasien/bindings/pasien_home_binding.dart';
+import 'package:harmoni_sehat_frontend/app/modules/pasien/views/pasien_home_view.dart';
+import 'package:harmoni_sehat_frontend/app/modules/pasien/bindings/layanan_binding.dart';
+import 'package:harmoni_sehat_frontend/app/modules/pasien/views/layanan_view.dart';
+import 'package:harmoni_sehat_frontend/app/modules/pasien/bindings/profil_binding.dart';
+import 'package:harmoni_sehat_frontend/app/modules/pasien/views/profil_view.dart';
 
 part 'app_routes.dart';
 
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.SPLASH; // Mengubah INITIAL ke SPLASH
+  static const INITIAL =
+      Routes.SPLASH; // Changed to SPLASH for better startup flow
 
   static final routes = [
     GetPage(
@@ -49,11 +59,35 @@ class AppPages {
       page: () => const VerificationPage(),
       binding: AuthBinding(),
     ),
+    // GetPage(
+    //   name: Routes.HOME, // This route can be removed or repurposed
+    //   page: () => HomePage(),
+    //   binding: HomeBinding(),
+    // ),
     GetPage(
-      name: Routes.HOME,
-      page: () => HomePage(),
-      binding: HomeBinding(),
+      name: Routes.PASIEN_HOME,
+      page: () => const PasienHomeView(),
+      binding: PasienHomeBinding(),
+    ),
+    GetPage(
+      name: Routes.PASIEN_LAYANAN,
+      page: () => const LayananView(),
+      binding: LayananBinding(),
+    ),
+    GetPage(
+      name: Routes.PASIEN_PROFIL,
+      page: () => ProfilView(),
+      binding: ProfilBinding(),
+    ),
+    GetPage(
+      name: Routes.DOKTER_HOME,
+      page: () => const DokterHomeView(),
+      binding: DokterHomeBinding(),
+    ),
+    GetPage(
+      name: Routes.APOTEKER_HOME,
+      page: () => ApotekerHomeView(),
+      binding: ApotekerHomeBinding(),
     ),
   ];
 }
-

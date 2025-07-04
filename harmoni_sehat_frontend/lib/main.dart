@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:harmoni_sehat_frontend/app/modules/auth/controllers/auth_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:harmoni_sehat_frontend/app/routes/app_pages.dart';
-import 'package:harmoni_sehat_frontend/app/controllers/auth_controller.dart';
 import 'package:harmoni_sehat_frontend/app/data/providers/auth_service.dart';
 
 void main() async {

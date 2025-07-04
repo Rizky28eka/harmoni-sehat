@@ -30,7 +30,11 @@ class AuthService extends GetConnect {
     });
   }
 
-  Future<LoginResponse?> login(String email, String password, String role) async {
+  Future<LoginResponse?> login(
+    String email,
+    String password,
+    String role,
+  ) async {
     final response = await post('/auth/login', {
       'email': email,
       'password': password,
@@ -43,15 +47,14 @@ class AuthService extends GetConnect {
       if (response.body == null || response.body is! Map<String, dynamic>) {
         throw Exception('Invalid response body from login API');
       }
-      final loginResponse = LoginResponse.fromJson(response.body as Map<String, dynamic>);
+      final loginResponse = LoginResponse.fromJson(
+        response.body as Map<String, dynamic>,
+      );
       await _prefs.setString(_tokenKey, loginResponse.token);
 
-      // Decode JWT token to get user role
-      final Map<String, dynamic> decodedToken = _decodeJwtToken(loginResponse.token);
-      final String? role = decodedToken['role'];
-
-      if (role != null) {
-        await _prefs.setString('user_role', role);
+      // Store user role from login response
+      if (loginResponse.role != null) {
+        await _prefs.setString('user_role', loginResponse.role!);
       } else {
         await _prefs.remove('user_role');
       }
@@ -62,40 +65,8 @@ class AuthService extends GetConnect {
     }
   }
 
-  Map<String, dynamic> _decodeJwtToken(String token) {
-    debugPrint('AuthService: Decoding JWT token: $token');
-    final parts = token.split('.');
-    if (parts.length != 3) {
-      debugPrint('AuthService: Invalid JWT token format. Parts: ${parts.length}');
-      throw Exception('Invalid JWT token format');
-    }
-    final payload = _decodeBase64(parts[1]);
-    debugPrint('AuthService: Decoded Base64 Payload: $payload');
-    final Map<String, dynamic> jsonPayload = json.decode(payload);
-    debugPrint('AuthService: JSON Payload: $jsonPayload');
-    return jsonPayload;
-  }
-
-  String _decodeBase64(String str) {
-    debugPrint('AuthService: Decoding Base64 string: $str');
-    String output = str.replaceAll('-', '+').replaceAll('_', '/');
-    switch (output.length % 4) {
-      case 0:
-        break;
-      case 2:
-        output += '==';
-        break;
-      case 3:
-        output += '=';
-        break;
-      default:
-        throw Exception('Illegal base64url string!');
-    }
-    final decodedBytes = base64Url.decode(output);
-    final decodedString = utf8.decode(decodedBytes);
-    debugPrint('AuthService: Base64 Decoded to UTF8: $decodedString');
-    return decodedString;
-  }
+  // Removed _decodeJwtToken and _decodeBase64 as role is now directly from response
+  // String? getUserRole() remains the same
 
   String? getUserRole() {
     final role = _prefs.getString('user_role');
@@ -106,15 +77,33 @@ class AuthService extends GetConnect {
   Future<User?> register(Map<String, dynamic> userData) async {
     final response = await post('/auth/register', userData);
 
-    if (response.statusCode == 201) {
-      return User(
-        id: response.body['userId'].toString(),
-        username: userData['nama_lengkap'],
-        email: userData['email'],
-      );
+    if (response.statusCode == 201 && response.body != null) {
+      try {
+        final dynamic userIdValue = response.body['userId'];
+
+        if (userIdValue == null) {
+          print(
+            'Error: Kunci "userId" tidak ditemukan atau null di dalam respons.',
+          );
+          return null;
+        }
+
+        final int parsedId = int.parse(userIdValue.toString());
+
+        return User(
+          id: parsedId,
+          name: userData['nama_lengkap'],
+          email: userData['email'],
+          username: null,
+        );
+      } catch (e) {
+        print('Error saat parsing respons registrasi: $e');
+        return null;
+      }
     } else {
-      print('Register failed: ${response.bodyString}');
-      throw Exception(response.body?['message'] ?? 'Registration failed');
+      print('Registrasi gagal: ${response.bodyString}');
+      // Melempar exception agar bisa ditangkap di UI untuk menampilkan pesan error
+      throw Exception(response.body?['message'] ?? 'Registrasi gagal');
     }
   }
 

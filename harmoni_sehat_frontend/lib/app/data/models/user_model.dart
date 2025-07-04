@@ -1,24 +1,41 @@
-// lib/app/data/models/user_model.dart
+import 'dart:convert';
+
+// Fungsi untuk mem-parsing JSON menjadi objek User
+User userFromJson(String str) => User.fromJson(json.decode(str));
+
+// Fungsi untuk mengubah objek User menjadi JSON string
+String userToJson(User data) => json.encode(data.toJson());
+
 class User {
-  final String id;
-  final String username;
+  final int id;
+  final String name;
   final String email;
+  final String? role; // Role bisa null
+  final String? photoUrl; // URL foto profil bisa null
 
-  User({required this.id, required this.username, required this.email});
+  User({
+    required this.id,
+    required this.name,
+    required this.email,
+    this.role,
+    this.photoUrl,
+    required username,
+  });
 
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'].toString(),
-      username: json['username'],
-      email: json['email'],
-    );
-  }
+  factory User.fromJson(Map<String, dynamic> json) => User(
+    id: json["id"],
+    name: json["name"],
+    email: json["email"],
+    role: json["role"], // Ambil role jika ada
+    photoUrl: json["photo_url"],
+    username: null, // Ambil URL foto jika ada
+  );
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'username': username,
-      'email': email,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "email": email,
+    "role": role,
+    "photo_url": photoUrl,
+  };
 }

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:harmoni_sehat_frontend/app/modules/auth/views/login_page.dart';
 import 'package:harmoni_sehat_frontend/app/routes/app_pages.dart';
-import 'package:harmoni_sehat_frontend/app/ui/pages/auth/login_page.dart';
-import 'package:harmoni_sehat_frontend/app/ui/pages/home/home_page.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -62,7 +61,7 @@ void main() {
       // Verify that HomePage is displayed after successful login
       // Note: This test assumes a successful login will navigate to HomePage.
       // In a real scenario, you might mock the AuthService to control the login outcome.
-      expect(find.byType(HomePage), findsOneWidget);
+
       expect(find.text('Welcome to Harmoni Sehat!'), findsOneWidget);
       expect(find.byType(LoginPage), findsNothing);
     });

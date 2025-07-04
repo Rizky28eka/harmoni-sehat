@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>Aplikasi ini memerlukan akses ke lokasi Anda untuk menampilkan informasi yang relevan di sekitar Anda.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Aplikasi ini memerlukan akses ke lokasi Anda untuk terus memperbarui informasi bahkan saat aplikasi berjalan di background.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Aplikasi ini memerlukan akses ke lokasi Anda untuk terus memperbarui informasi bahkan saat aplikasi berjalan di background.</string>
 </dict>
 </plist>
