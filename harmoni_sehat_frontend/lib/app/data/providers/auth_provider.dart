@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:get/get.dart';
 import 'package:harmoni_sehat_frontend/app/data/providers/api_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';

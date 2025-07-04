@@ -145,13 +145,13 @@ class AuthController extends GetxController {
       String homeRoute;
       switch (loginResponse['role']) {
         case 'pasien':
-          homeRoute = Routes.PASIEN_HOME;
+          homeRoute = Routes.PASIEN_MAIN;
           break;
         case 'dokter':
-          homeRoute = Routes.DOKTER_HOME;
+          homeRoute = Routes.DOKTER_MAIN;
           break;
         case 'apoteker':
-          homeRoute = Routes.APOTEKER_HOME;
+          homeRoute = Routes.APOTEKER_MAIN;
           break;
         default:
           homeRoute = Routes.LOGIN; // Fallback or error page

@@ -9,11 +9,9 @@ abstract class Routes {
   static const INTRODUCTION = _Paths.INTRODUCTION;
   static const FORGOT_PASSWORD = _Paths.FORGOT_PASSWORD;
   static const VERIFICATION = _Paths.VERIFICATION;
-  static const PASIEN_HOME = _Paths.PASIEN_HOME;
-  static const DOKTER_HOME = _Paths.DOKTER_HOME;
-  static const APOTEKER_HOME = _Paths.APOTEKER_HOME;
-  static const PASIEN_LAYANAN = _Paths.PASIEN_LAYANAN;
-  static const PASIEN_PROFIL = _Paths.PASIEN_PROFIL;
+  static const PASIEN_MAIN = _Paths.PASIEN_MAIN;
+  static const DOKTER_MAIN = _Paths.DOKTER_MAIN;
+  static const APOTEKER_MAIN = _Paths.APOTEKER_MAIN;
 }
 
 abstract class _Paths {
@@ -25,9 +23,7 @@ abstract class _Paths {
   static const INTRODUCTION = '/introduction';
   static const FORGOT_PASSWORD = '/forgot-password';
   static const VERIFICATION = '/verification';
-  static const PASIEN_HOME = '/pasien-home';
-  static const DOKTER_HOME = '/dokter-home';
-  static const APOTEKER_HOME = '/apoteker-home';
-  static const PASIEN_LAYANAN = '/pasien-layanan';
-  static const PASIEN_PROFIL = '/pasien-profil';
+  static const PASIEN_MAIN = '/pasien-main';
+  static const DOKTER_MAIN = '/dokter-main';
+  static const APOTEKER_MAIN = '/apoteker-main';
 }
