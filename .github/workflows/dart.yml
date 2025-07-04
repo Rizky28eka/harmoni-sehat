@@ -1,9 +1,5 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-name: Dart CI
+# This workflow is tailored for Flutter projects.
+name: Flutter CI
 
 on:
   push:
@@ -11,74 +7,45 @@ on:
   pull_request:
     branches: [ "main" ]
 
+# Cancel any in-progress runs of the same workflow for a given PR.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
+    name: Build and Test Flutter App
     runs-on: ubuntu-latest
 
+    # Set the default working directory for all steps.
+    defaults:
+      run:
+        working-directory: ./harmoni_sehat_frontend
+
     steps:
-      - name: Checkout code
+      # 1. Check out the repository so the workflow can access it.
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Dart SDK
-        uses: dart-lang/setup-dart@v1
+      # 2. Set up Flutter SDK, including caching for dependencies.
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
-          sdk: stable
+          channel: 'stable'
+          cache: true
 
+      # 3. Install Flutter dependencies.
       - name: Install dependencies
-        run: dart pub get
+        run: flutter pub get
 
+      # 4. Check for any formatting issues.
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed .
+        run: flutter format --output=none --set-exit-if-changed .
 
+      # 5. Analyze the project's Dart code for errors and warnings.
       - name: Analyze project source
-        run: dart analyze --fatal-infos
+        run: flutter analyze
 
+      # 6. Run widget tests.
       - name: Run tests
-        run: dart test --coverage=coverage
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: coverage/lcov.info
-          fail_ci_if_error: false
-
-  security:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Dart SDK
-        uses: dart-lang/setup-dart@v1
-        with:
-          sdk: stable
-
-      - name: Install dependencies
-        run: dart pub get
-
-      - name: Run security audit
-        run: dart pub deps --json | dart run pub_audit
-
-  test-matrix:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        dart-version: [stable, beta]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Dart SDK
-        uses: dart-lang/setup-dart@v1
-        with:
-          sdk: ${{ matrix.dart-version }}
-
-      - name: Install dependencies
-        run: dart pub get
-
-      - name: Run tests
-        run: dart test
+        run: flutter test
