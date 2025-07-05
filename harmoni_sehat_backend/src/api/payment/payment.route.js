@@ -1,9 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const paymentController = require('./payment.controller');
-const { authenticate, authorize } = require('../../middleware/auth.middleware');
+const pembayaranController = require('./payment.controller');
+const { createPembayaranValidation, updatePembayaranValidation } = require('./payment.validation');
 
-router.post('/create-transaction', authenticate, authorize('pasien'), paymentController.createTransaction);
-router.post('/notification', paymentController.handleNotification);
+router.get('/', pembayaranController.getAllPembayaran);
+router.get('/:id', pembayaranController.getPembayaranById);
+router.post('/', createPembayaranValidation, pembayaranController.createPembayaran);
+router.put('/:id', updatePembayaranValidation, pembayaranController.updatePembayaran);
+router.delete('/:id', pembayaranController.deletePembayaran);
 
 module.exports = router;

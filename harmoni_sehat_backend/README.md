@@ -1,124 +1,120 @@
-# Backend Harmoni Sehat
+# Dokumentasi Backend Harmoni Sehat
 
-Selamat datang di dokumentasi resmi untuk backend aplikasi **Harmoni Sehat**. Proyek ini dibangun menggunakan Node.js dan Express.js, dengan fokus pada arsitektur yang bersih, modular, dan scalable untuk mendukung pengembangan fitur kesehatan digital yang andal.
+Dokumentasi ini menjelaskan tentang proyek backend untuk aplikasi Harmoni Sehat, yang dibangun menggunakan Node.js dengan framework Express.js dan database MySQL.
 
-## Fitur Utama
+## Deskripsi Umum
 
-Berikut adalah rangkuman fitur-fitur utama yang sudah tersedia di backend:
+Backend ini berfungsi sebagai tulang punggung aplikasi Harmoni Sehat, menyediakan RESTful API untuk mengelola berbagai entitas seperti pengguna, dokter, pasien, apotek, obat-obatan, konsultasi, pembayaran, dan banyak lagi. Dibangun dengan modularitas, backend ini dirancang untuk skalabilitas dan kemudahan pemeliharaan.
 
-1.  **Autentikasi Pengguna Berbasis JWT**:
-    *   Sistem registrasi dan login yang aman untuk pengguna (pasien).
-    *   Menggunakan JSON Web Tokens (JWT) untuk mengelola sesi pengguna setelah login berhasil.
-    *   Password disimpan dengan aman menggunakan hashing `bcryptjs`.
+- **Framework:** Express.js
+- **Bahasa:** JavaScript (Node.js)
+- **Database:** MySQL (melalui Knex.js ORM)
+- **Manajemen Paket:** npm
 
-2.  **Autentikasi Sosial & OTP (Siap Dikembangkan)**:
-    *   Endpoint untuk **Login dengan Google** sudah terintegrasi.
-    *   Struktur endpoint untuk **Login dengan Apple** dan **Login via OTP (nomor telepon)** sudah disiapkan, mempermudah integrasi di masa depan.
-    *   Semua metode login (tradisional, sosial, OTP) menghasilkan JWT yang sama, menjaga konsistensi sistem otorisasi.
+## Instalasi dan Menjalankan di Local Development
 
-3.  **Sistem Otorisasi Berbasis Peran (Role-Based)**:
-    *   Middleware otorisasi untuk memproteksi rute tertentu.
-    *   Memastikan hanya pengguna dengan peran (role) yang sesuai (misalnya `pasien`, `dokter`, `admin`) yang dapat mengakses endpoint tertentu.
+Ikuti langkah-langkah berikut untuk menginstal dan menjalankan proyek backend di lingkungan lokal Anda.
 
-4.  **Integrasi Payment Gateway (Siap Dikembangkan)**:
-    *   Infrastruktur untuk mengelola pembayaran sudah disiapkan menggunakan **Midtrans**.
-    *   Endpoint untuk membuat transaksi dan menangani notifikasi pembayaran (webhook) sudah tersedia.
+### Prasyarat
 
-5.  **Struktur Proyek Profesional & Scalable**:
-    *   **Modular**: Kode dipecah menjadi modul-modul logis (`auth`, `payment`, dll.) di dalam direktori `src/api/`.
-    *   **Pemisahan Tanggung Jawab**: Mengikuti pola desain *Controller-Service* (`auth.controller.js` untuk menangani request/response dan `auth.service.js` untuk logika bisnis).
-    *   **Manajemen Konfigurasi**: Kunci API, kredensial database, dan variabel lingkungan lainnya dikelola melalui file `.env` untuk keamanan.
+Pastikan Anda telah menginstal perangkat lunak berikut:
 
-6.  **Standardisasi Respons API**:
-    *   Menggunakan utility `ApiResponse` untuk format respons sukses yang konsisten.
-    *   Menggunakan `ApiError` untuk penanganan kesalahan yang terstruktur dan informatif.
+- [Node.js](https://nodejs.org/en/download/) (disarankan versi LTS)
+- [npm](https://www.npmjs.com/get-npm) (biasanya terinstal bersama Node.js)
+- [MySQL Server](https://dev.mysql.com/downloads/mysql/) (atau akses ke instance MySQL)
 
-## Prasyarat
+### Langkah-langkah Instalasi
 
-Sebelum memulai, pastikan Anda memiliki:
-*   Node.js (v18 atau lebih tinggi)
-*   NPM atau Yarn
-*   Database MySQL yang sedang berjalan
-
-## Instalasi & Konfigurasi
-
-1.  **Clone repository ini:**
+1.  **Clone Repositori:**
     ```bash
-    git clone <URL_REPOSITORY>
-    cd harmoni_sehat_backend
+    git clone <URL_REPOSITORI_ANDA>
+    cd harmoni_sehat_project/harmoni_sehat_backend
     ```
 
-2.  **Install dependensi:**
+2.  **Instal Dependensi:**
     ```bash
     npm install
     ```
 
-3.  **Konfigurasi Environment:**
-    *   Salin file `.env.example` menjadi `.env`.
-    *   Isi semua variabel yang dibutuhkan seperti kredensial database, kunci API Google, Twilio, dan Midtrans.
-    ```bash
-    cp .env.example .env
+3.  **Konfigurasi Environment Variables:**
+    Buat file `.env` di root direktori `harmoni_sehat_backend` berdasarkan contoh `.env.example`.
+
+    ```dotenv
+    # Database Configuration
+    DB_HOST=localhost
+    DB_USER=your_mysql_user
+    DB_PASSWORD=your_mysql_password
+    DB_NAME=harmoni_sehat_db
+
+    # Application Configuration
+    PORT=3000
+    FRONTEND_URL=http://localhost:3000 # Ganti dengan URL frontend Anda
+    JWT_SECRET=your_jwt_secret_key # Ganti dengan kunci rahasia yang kuat
+    # Tambahkan variabel lingkungan lainnya sesuai kebutuhan
     ```
+    Ganti nilai `your_mysql_user`, `your_mysql_password`, `harmoni_sehat_db`, dan `your_jwt_secret_key` dengan kredensial database dan kunci rahasia Anda.
 
 4.  **Jalankan Migrasi Database:**
-    Perintah ini akan membuat semua tabel yang dibutuhkan dalam database Anda sesuai dengan skema yang didefinisikan di direktori `db/migrations`.
+    Ini akan membuat tabel-tabel database sesuai skema yang didefinisikan.
     ```bash
     npm run migrate
     ```
 
-5.  **Jalankan Server:**
-    *   Untuk mode development dengan hot-reloading:
-        ```bash
-        npm run dev
-        ```
-    *   Untuk mode produksi:
-        ```bash
-        npm start
-        ```
-    Server akan berjalan di `http://localhost:PORT` (sesuai konfigurasi di `.env` atau default).
+5.  **Seed Data Dummy (Opsional):**
+    Untuk mengisi database dengan data contoh menggunakan `faker-js`:
+    ```bash
+    npm run seed
+    ```
 
-## Struktur Folder
+6.  **Jalankan Server Backend:**
+    ```bash
+    npm start
+    ```
+    Server akan berjalan di `http://localhost:3000` (atau port yang Anda tentukan di `.env`).
+
+## Struktur Folder Backend
+
+Struktur direktori backend diatur secara modular untuk memisahkan tanggung jawab dan memudahkan pengembangan:
 
 ```
-/Users/rizky28eka/Development/flutterDev/harmoni_sehat_project/harmoni_sehat_backend/
-├───.env                # File konfigurasi environment (JANGAN DI-COMMIT)
-├───knexfile.js         # Konfigurasi Knex untuk migrasi dan seed
-├───package.json        # Daftar dependensi dan skrip proyek
-├───server.js           # Entry point aplikasi
-└───src/
-    ├───app.js          # Konfigurasi utama Express (middleware, router)
-    ├───api/
-    │   ├───index.js    # Router utama yang menggabungkan semua rute API
-    │   └───auth/       # Modul autentikasi
-    │       ├───auth.controller.js  # Logika request/response (HTTP layer)
-    │       ├───auth.route.js       # Definisi endpoint untuk autentikasi
-    │       └───auth.service.js     # Logika bisnis (berinteraksi dengan database)
-    ├───config/
-    │   └───db.js       # Konfigurasi koneksi database (Knex)
-    ├───db/
-    │   └───migrations/ # Skema database
-    ├───middleware/
-    │   └───auth.middleware.js # Middleware untuk validasi JWT dan otorisasi
-    └───utils/
-        ├───ApiError.js # Kelas untuk standardisasi error
-        └───ApiResponse.js# Kelas untuk standardisasi respons sukses
+harmoni_sehat_backend/
+├───db/                     # Konfigurasi database, migrasi, dan seeder
+│   ├───migrations/         # Skema perubahan database
+│   ├───seeds/              # Skrip untuk mengisi data dummy
+│   └───knexfile.js         # Konfigurasi Knex.js
+├───src/                    # Kode sumber aplikasi
+│   ├───api/                # Modul-modul API (per entitas/tabel)
+│   │   ├───[entity_name]/  # Contoh: users, doctors, pasien, dll.
+│   │   │   ├───[entity_name].controller.js # Logika request/response
+│   │   │   ├───[entity_name].service.js    # Logika bisnis & interaksi DB
+│   │   │   ├───[entity_name].route.js      # Definisi endpoint API
+│   │   │   └───[entity_name].validation.js # Validasi input dengan express-validator
+│   │   └───index.js        # Mengumpulkan semua rute API
+│   ├───config/             # Konfigurasi aplikasi (mis. koneksi DB)
+│   ├───middleware/         # Middleware Express.js (mis. error handling, auth)
+│   ├───utils/              # Fungsi utilitas (mis. ApiError, ApiResponse)
+│   └───app.js              # Konfigurasi utama aplikasi Express.js
+├───.env.example            # Contoh file environment variables
+├───package.json            # Metadata proyek & dependensi
+├───server.js               # Titik masuk utama aplikasi
+└───README.md               # Dokumentasi proyek ini
 ```
 
-## Dokumentasi API
+## Perintah Penting
 
-Berikut adalah daftar endpoint utama yang sudah tersedia.
+-   **`npm install`**: Menginstal semua dependensi proyek.
+-   **`npm start`**: Menjalankan server backend dalam mode produksi.
+-   **`npm run dev`**: Menjalankan server backend dalam mode pengembangan dengan `nodemon` (auto-restart).
+-   **`npm run migrate`**: Menjalankan semua migrasi database yang belum diterapkan.
+-   **`npm run migrate:make [nama_migrasi]`**: Membuat file migrasi baru.
+-   **`npm run migrate:rollback`**: Mengembalikan migrasi terakhir.
+-   **`npm run seed`**: Menjalankan semua seeder untuk mengisi data dummy.
+-   **`npm run seed:make [nama_seeder]`**: Membuat file seeder baru.
 
-### Modul Autentikasi (`/api/auth`)
+## Penanganan Error
 
-| Method | Endpoint               | Deskripsi                                    | Akses   |
-|--------|------------------------|----------------------------------------------|---------|
-| `POST` | `/register`            | Registrasi pengguna baru (pasien).           | Publik  |
-| `POST` | `/login`               | Login dengan email dan password.             | Publik  |
-| `POST` | `/google/login`        | Login atau registrasi menggunakan Akun Google. | Publik  |
-| `POST` | `/apple/login`         | (Tersedia) Login dengan Apple ID.            | Publik  |
-| `POST` | `/otp/send`            | (Tersedia) Mengirim kode OTP ke nomor telepon. | Publik  |
-| `POST` | `/otp/verify`          | (Tersedia) Verifikasi OTP untuk login/reg.   | Publik  |
+Backend ini menggunakan penanganan error terpusat untuk memberikan respons error yang konsisten. Error akan dikembalikan dalam format JSON dengan `statusCode` dan `message` yang relevan.
 
----
+## Kontribusi
 
-Dokumentasi ini diharapkan dapat menjadi panduan yang jelas bagi tim developer dalam melanjutkan pengembangan backend Harmoni Sehat.
+Untuk berkontribusi pada proyek ini, silakan ikuti struktur folder dan panduan kode yang ada. Pastikan untuk menjalankan tes dan migrasi sebelum membuat pull request.

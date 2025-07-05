@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:harmoni_sehat_frontend/app/modules/pasien/controllers/pasien_main_controller.dart';
 import 'package:harmoni_sehat_frontend/app/modules/pasien/views/beranda_screen.dart';
@@ -26,23 +27,32 @@ class PasienMainScreen extends GetView<PasienMainController> {
       bottomNavigationBar: Obx(
         () => BottomNavigationBar(
           currentIndex: controller.tabIndex.value,
-          onTap: controller.changeTabIndex,
+          onTap: (index) {
+            HapticFeedback.lightImpact(); // Add haptic feedback
+            controller.changeTabIndex(index);
+          },
           type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.white, // White background
+          selectedItemColor: const Color(0xFF7C3AED), // Active tab color
+          unselectedItemColor: Colors.grey, // Inactive tab color
+          showUnselectedLabels: true,
+          selectedLabelStyle: const TextStyle(fontSize: 12), // Small text
+          unselectedLabelStyle: const TextStyle(fontSize: 12), // Small text
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home),
+              icon: Icon(Icons.home_outlined),
               label: 'Beranda',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.calendar_today),
+              icon: Icon(Icons.calendar_today_outlined),
               label: 'Jadwal',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat),
+              icon: Icon(Icons.chat_outlined),
               label: 'Chat',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person),
+              icon: Icon(Icons.person_outline),
               label: 'Profil',
             ),
           ],

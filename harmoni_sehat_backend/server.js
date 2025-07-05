@@ -4,11 +4,10 @@ const db = require('./src/config/db');
 
 const PORT = process.env.PORT || 5000;
 
-// Cek koneksi database sebelum server berjalan
-db.getConnection()
-  .then(connection => {
+// Cek koneksi database menggunakan Knex
+db.raw('SELECT 1')
+  .then(() => {
     console.log('MySQL Terhubung...');
-    connection.release();
     app.listen(PORT, () => {
       console.log(`Server berjalan di port ${PORT}`);
     });
