@@ -30,3 +30,11 @@ To run this project, you need to set up and run both the backend and frontend co
 
 - **[Backend Instructions](./harmoni_sehat_backend/README.md)**
 - **[Frontend Instructions](./harmoni_sehat_frontend/README.md)**
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! This project is maintained by [rizky28eka](https://github.com/Rizky28eka).

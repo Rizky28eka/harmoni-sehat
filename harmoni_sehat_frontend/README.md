@@ -88,10 +88,11 @@ This project relies on several key dependencies:
 *   `geolocator` & `geocoding`: For location-based services.
 *   `cupertino_icons`: For iOS-style icons.
 
-## Contribution
-
-(Contribution guidelines can be added here in the future.)
-
 ## License
 
-(License information can be added here in the future.)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! This project is maintained by [rizky28eka](https://github.com/Rizky28eka).
+

@@ -103,3 +103,12 @@ Each resource (e.g., `pasiens`, `doctors`) has a simple route file that wires up
 ## Error Handling
 
 The API uses centralized error handling to provide consistent and meaningful JSON error responses, typically including a `status` and `message` field.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+Contributions are welcome! This project is maintained by [rizky28eka](https://github.com/Rizky28eka).
+
