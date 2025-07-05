@@ -42,14 +42,10 @@ const PasienSchema = new mongoose.Schema({
   golongan_darah: {
     type: String,
     enum: ['A', 'B', 'AB', 'O'],
-    default: '', // Default to empty string instead of null
-    trim: true,
   },
   rhesus: {
     type: String,
     enum: ['+', '-'],
-    default: '', // Default to empty string instead of null
-    trim: true,
   },
   riwayat_alergi: {
     type: String,
@@ -92,12 +88,12 @@ const PasienSchema = new mongoose.Schema({
   provinsi_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Provinsi',
-    required: true, // Made required as per user's no-null request for FKs
+    required: false, // Made optional for initial registration
   },
   kota_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Kota',
-    required: true, // Made required as per user's no-null request for FKs
+    required: false, // Made optional for initial registration
   },
   pekerjaan: {
     type: String,

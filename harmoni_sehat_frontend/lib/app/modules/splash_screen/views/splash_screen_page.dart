@@ -28,7 +28,7 @@ class SplashScreenPage extends GetView<SplashScreenController> {
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
+                      color: Color.fromARGB((0.2 * 255).round(), Colors.black.red, Colors.black.green, Colors.black.blue),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     ),

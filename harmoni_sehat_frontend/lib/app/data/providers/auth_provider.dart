@@ -53,14 +53,14 @@ class AuthProvider extends GetConnect {
     print("RESPONSE [${response.statusCode}] => ${response.bodyString}");
 
     if (response.isOk) {
-      if (response.body != null && response.body['token'] != null) {
+      if (response.body != null && response.body['data'] != null && response.body['data']['token'] != null) {
         final SharedPreferences prefs = Get.find<SharedPreferences>();
-        await prefs.setString('jwt_token', response.body['token']);
+        await prefs.setString('jwt_token', response.body['data']['token']);
         return {
-          'token': response.body['token'],
-          'userId': response.body['userId'], // Assuming userId is returned
-          'role': response.body['role'],     // Assuming role is returned
-          'name': response.body['name'],     // Assuming name is returned
+          'token': response.body['data']['token'],
+          'userId': response.body['data']['user']['_id'],
+          'role': response.body['data']['user']['role'],
+          'name': response.body['data']['user']['nama_lengkap'], // Assuming nama_lengkap is returned in user object
         };
       }
       throw 'Token tidak ditemukan dalam respons login.';

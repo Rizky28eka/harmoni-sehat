@@ -21,7 +21,7 @@ const ApotekerSchema = new mongoose.Schema({
   apotek_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Apotek',
-    required: true, // Made required as per user's no-null request for FKs
+    required: false, // Made optional for initial registration
   },
   is_verified: {
     type: Boolean,

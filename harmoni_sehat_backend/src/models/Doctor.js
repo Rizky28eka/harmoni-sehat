@@ -21,7 +21,7 @@ const DoctorSchema = new mongoose.Schema({
   spesialisasi_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Spesialisasi',
-    required: true, // Made required as per user's no-null request for FKs
+    required: false, // Made optional for initial registration
   },
   pengalaman_tahun: {
     type: Number,
@@ -34,12 +34,12 @@ const DoctorSchema = new mongoose.Schema({
   rumah_sakit_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'RumahSakit',
-    required: true, // Made required as per user's no-null request for FKs
+    required: false, // Made optional for initial registration
   },
   klinik_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Klinik',
-    required: true, // Made required as per user's no-null request for FKs
+    required: false, // Made optional for initial registration
   },
   rating: {
     type: Number,

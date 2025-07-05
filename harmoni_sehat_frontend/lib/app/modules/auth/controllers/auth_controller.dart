@@ -128,8 +128,8 @@ class AuthController extends GetxController {
 
       final loginResponse = await _authProvider.login(loginData);
       currentUser.value = User(
-        id: loginResponse['userId'],
-        name: loginResponse['name'],
+        id: loginResponse['userId'] ?? '',
+        name: loginResponse['name'] ?? '',
         email: emailController.text,
         role: loginResponse['role'],
         

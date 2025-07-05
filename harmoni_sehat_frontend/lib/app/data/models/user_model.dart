@@ -7,7 +7,7 @@ User userFromJson(String str) => User.fromJson(json.decode(str));
 String userToJson(User data) => json.encode(data.toJson());
 
 class User {
-  final int id;
+  final String id;
   final String name;
   final String email;
   final String? role; // Role bisa null

@@ -4,6 +4,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class PasienBerandaScreen extends StatefulWidget {
   const PasienBerandaScreen({super.key});
@@ -13,7 +14,7 @@ class PasienBerandaScreen extends StatefulWidget {
 }
 
 class Hospital {
-  final int id;
+  final String id;
   final String name;
   final String address;
   final String imageUrl;
@@ -29,11 +30,29 @@ class Hospital {
 
   factory Hospital.fromJson(Map<String, dynamic> json) {
     return Hospital(
-      id: json['id'],
-      name: json['name'],
-      address: json['address'],
-      imageUrl: json['image_url'] ?? 'https://via.placeholder.com/150', // Default image if null
-      phoneNumber: json['phone_number'] ?? 'N/A',
+      id: json['_id'] as String,
+      name: json['nama_rumah_sakit'],
+      address: json['alamat'],
+      imageUrl:
+          json['foto_rumah_sakit'] ??
+          'https://via.placeholder.com/150', // Default image if null
+      phoneNumber: json['no_telepon'] ?? 'N/A',
+    );
+  }
+}
+
+class Speciality {
+  final String id;
+  final String namaSpesialisasi;
+  final String? icon; // Make icon nullable
+
+  Speciality({required this.id, required this.namaSpesialisasi, this.icon});
+
+  factory Speciality.fromJson(Map<String, dynamic> json) {
+    return Speciality(
+      id: json['_id'] as String, // Changed from json['id'] to json['_id']
+      namaSpesialisasi: json['nama_spesialisasi'],
+      icon: json['icon'],
     );
   }
 }
@@ -43,13 +62,19 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
   List<Hospital> _hospitals = [];
   bool _isLoadingHospitals = true;
   String _hospitalError = '';
-  final Set<int> _favoriteHospitalIds = {}; // New state for favorite hospitals
+  late Set<String> _favoriteHospitalIds; // New state for favorite hospitals
+
+  List<Speciality> _spesialisasiList = [];
+  bool _isLoadingSpesialisasi = true;
+  String _spesialisasiError = '';
 
   @override
   void initState() {
     super.initState();
+    _favoriteHospitalIds = {}; // Initialize here
     _getCurrentLocation();
     _fetchHospitals();
+    _fetchSpecialities();
   }
 
   Future<void> _getCurrentLocation() async {
@@ -84,9 +109,12 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
 
     try {
       Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+        desiredAccuracy: LocationAccuracy.high,
+      );
       List<Placemark> placemarks = await placemarkFromCoordinates(
-          position.latitude, position.longitude);
+        position.latitude,
+        position.longitude,
+      );
 
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
@@ -112,10 +140,23 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
     });
     try {
       final response = await http.get(
-          Uri.parse('http://192.168.1.14:5000/api/hospitals'));
+        Uri.parse('http://192.168.1.14:3000/api/rumahsakit'),
+      );
 
       if (response.statusCode == 200) {
-        List<dynamic> data = json.decode(response.body);
+        final dynamic decodedData = json.decode(response.body);
+        List<dynamic> data = [];
+        if (decodedData is Map &&
+            decodedData.containsKey('data') &&
+            decodedData['data'] is Map &&
+            decodedData['data'].containsKey('data') &&
+            decodedData['data']['data'] is List) {
+          data = decodedData['data']['data'];
+        } else {
+          _hospitalError = 'Unexpected API response format for hospitals.';
+          _hospitals = []; // Ensure hospitals list is empty on error
+          _isLoadingHospitals = false;
+        }
         setState(() {
           _hospitals = data.map((json) => Hospital.fromJson(json)).toList();
           _isLoadingHospitals = false;
@@ -134,7 +175,7 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
     }
   }
 
-  void _toggleFavoriteHospital(int hospitalId) {
+  void _toggleFavoriteHospital(String hospitalId) {
     setState(() {
       if (_favoriteHospitalIds.contains(hospitalId)) {
         _favoriteHospitalIds.remove(hospitalId);
@@ -148,7 +189,54 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
     await Future.wait([
       _getCurrentLocation(),
       _fetchHospitals(),
+      _fetchSpecialities(),
     ]);
+  }
+
+  Future<void> _fetchSpecialities() async {
+    setState(() {
+      _isLoadingSpesialisasi = true;
+      _spesialisasiError = '';
+    });
+    try {
+      final response = await http.get(
+        Uri.parse('http://192.168.1.14:3000/api/spesialisasis'),
+      );
+
+      if (response.statusCode == 200) {
+        final dynamic decodedData = json.decode(response.body);
+        List<dynamic> data = [];
+        if (decodedData is Map &&
+            decodedData.containsKey('data') &&
+            decodedData['data'] is Map &&
+            decodedData['data'].containsKey('data') &&
+            decodedData['data']['data'] is List) {
+          data = decodedData['data']['data'];
+        } else {
+          _spesialisasiError =
+              'Unexpected API response format for specialities.';
+          _spesialisasiList = []; // Ensure specialities list is empty on error
+          _isLoadingSpesialisasi = false;
+        }
+        setState(() {
+          _spesialisasiList = data
+              .map((json) => Speciality.fromJson(json))
+              .toList();
+          _isLoadingSpesialisasi = false;
+        });
+      } else {
+        setState(() {
+          _spesialisasiError =
+              'Failed to load specialities: ${response.statusCode}. Body: ${response.body}';
+          _isLoadingSpesialisasi = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _spesialisasiError = 'Error fetching specialities: $e';
+        _isLoadingSpesialisasi = false;
+      });
+    }
   }
 
   @override
@@ -170,9 +258,10 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
             Text(
               _currentAddress,
               style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500),
+                color: Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             const Icon(Icons.expand_more, color: Colors.black),
           ],
@@ -206,7 +295,8 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
         onRefresh: _onRefresh,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
-          physics: const AlwaysScrollableScrollPhysics(), // Always allow scrolling for RefreshIndicator
+          physics:
+              const AlwaysScrollableScrollPhysics(), // Always allow scrolling for RefreshIndicator
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -267,7 +357,7 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1c8086).withOpacity(0.1),
+                  color: const Color.fromRGBO(28, 128, 134, 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -432,59 +522,93 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
   }
 
   Widget _buildDoctorSpeciality(Color primaryColor) {
-    final specialities = [
-      {'icon': Icons.local_hospital, 'label': 'Dentist'},
-      {'icon': Icons.favorite, 'label': 'Cardiolo..'},
-      {'icon': Icons.healing, 'label': 'Orthopae..'},
-      {'icon': Icons.psychology, 'label': 'Neurolo..'},
-      {'icon': Icons.local_hospital, 'label': 'Umum'},
-      {'icon': Icons.pregnant_woman, 'label': 'Obgyn'},
-      {'icon': Icons.remove_red_eye, 'label': 'Mata'},
-      {'icon': Icons.earbuds, 'label': 'THT'},
-    ];
+    if (_isLoadingSpesialisasi) {
+      return const Center(child: CircularProgressIndicator());
+    } else if (_spesialisasiError.isNotEmpty) {
+      return Center(child: Text(_spesialisasiError));
+    } else if (_spesialisasiList.isEmpty) {
+      return const Center(child: Text('No specialities found.'));
+    } else {
+      return SizedBox(
+        height: 140,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          itemCount: _spesialisasiList.length > 5
+              ? 5
+              : _spesialisasiList.length,
+          separatorBuilder: (context, index) => const SizedBox(width: 20),
+          itemBuilder: (context, index) {
+            final speciality = _spesialisasiList[index];
+            IconData iconData = Icons.local_hospital; // Default icon
+            if (speciality.icon != null) {
+              switch (speciality.icon) {
+                case 'tooth':
+                  iconData = FontAwesomeIcons.tooth;
+                  break;
+                case 'heart-pulse':
+                  iconData = FontAwesomeIcons.heartPulse;
+                  break;
+                case 'bone':
+                  iconData = FontAwesomeIcons.bone;
+                  break;
+                case 'brain':
+                  iconData = FontAwesomeIcons.brain;
+                  break;
+                case 'baby':
+                  iconData = Icons.child_care;
+                  break;
+                case 'eye':
+                  iconData = Icons.remove_red_eye;
+                  break;
+                case 'ear':
+                  iconData = Icons.earbuds;
+                  break;
+                default:
+                  iconData = Icons.local_hospital;
+              }
+            }
 
-    return SizedBox(
-      height: 110,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(), // For snapping feel
-        itemCount: specialities.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 20),
-        itemBuilder: (context, index) {
-          final speciality = specialities[index];
-          return Column(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
+            return Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Container(
+                width: 100, // Increased width for better visual
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+                  color: Colors.white, // Or a subtle gradient
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      iconData,
+                      color: primaryColor,
+                      size: 36,
+                    ), // Larger icon
+                    const SizedBox(height: 8),
+                    Text(
+                      speciality.namaSpesialisasi,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.black87, // Darker text
+                        fontWeight: FontWeight.bold, // Bolder text
+                        fontSize: 12, // Slightly larger font
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-                child: Icon(
-                  speciality['icon'] as IconData,
-                  color: primaryColor,
-                  size: 28,
-                ),
               ),
-              const SizedBox(height: 12),
-              Text(
-                speciality['label'] as String,
-                style: const TextStyle(
-                    color: Colors.black54, fontWeight: FontWeight.w500, fontSize: 10),
-              ),
-            ],
-          );
-        },
-      ),
-    );
+            );
+          },
+        ),
+      );
+    }
   }
 
   Widget _buildNearbyHospitals() {
@@ -496,22 +620,27 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
       return const Center(child: Text('No hospitals found.'));
     } else {
       return SizedBox(
-        height: 220,
+        height: 250,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
-          itemCount: _hospitals.length,
+          itemCount: _hospitals.length > 5 ? 5 : _hospitals.length,
           separatorBuilder: (context, index) => const SizedBox(width: 16),
           itemBuilder: (context, index) {
             final hospital = _hospitals[index];
             final isFavorite = _favoriteHospitalIds.contains(hospital.id);
             return Container(
-              width: 110, // Reduced width
+              width: 150, // Increased width
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.05),
+                    color: Color.fromARGB(
+                      (0.05 * 255).round(),
+                      (Colors.grey.value >> 16) & 0xFF,
+                      (Colors.grey.value >> 8) & 0xFF,
+                      Colors.grey.value & 0xFF,
+                    ),
                     blurRadius: 10,
                     spreadRadius: 0,
                     offset: const Offset(0, 5),
@@ -529,7 +658,7 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
                         ), // Rounded corner for image
                         child: Image.network(
                           hospital.imageUrl,
-                          height: 100, // Increased height
+                          height: 120, // Increased height
                           width: double.infinity,
                           fit: BoxFit.cover,
                         ),
@@ -542,7 +671,12 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.8),
+                              color: Color.fromRGBO(
+                                Colors.white.red,
+                                Colors.white.green,
+                                Colors.white.blue,
+                                0.8,
+                              ),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -593,7 +727,12 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
                             vertical: 2,
                           ), // Reduced padding
                           decoration: BoxDecoration(
-                            color: Colors.amber.withOpacity(0.2),
+                            color: Color.fromRGBO(
+                              Colors.amber.red,
+                              Colors.amber.green,
+                              Colors.amber.blue,
+                              0.2,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Row(
@@ -660,7 +799,7 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
       height: 190,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: doctors.length,
+        itemCount: doctors.length > 5 ? 5 : doctors.length,
         separatorBuilder: (context, index) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
           final doctor = doctors[index];
@@ -671,7 +810,12 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.05),
+                  color: Color.fromRGBO(
+                    Colors.grey.red,
+                    Colors.grey.green,
+                    Colors.grey.blue,
+                    0.05,
+                  ),
                   blurRadius: 10,
                   spreadRadius: 0,
                   offset: const Offset(0, 5),
@@ -818,7 +962,12 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Color.fromRGBO(
+                    Colors.grey.red,
+                    Colors.grey.green,
+                    Colors.grey.blue,
+                    0.1,
+                  ),
                   blurRadius: 10,
                   spreadRadius: 1,
                   offset: const Offset(0, 5),
@@ -903,7 +1052,12 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Color.fromRGBO(
+                    Colors.grey.red,
+                    Colors.grey.green,
+                    Colors.grey.blue,
+                    0.1,
+                  ),
                   blurRadius: 10,
                   spreadRadius: 1,
                   offset: const Offset(0, 5),
@@ -928,7 +1082,7 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withOpacity(0.7),
+                            Colors.black.withAlpha((0.7 * 255).round()),
                           ],
                         ),
                       ),
@@ -957,7 +1111,6 @@ class _PasienBerandaScreenState extends State<PasienBerandaScreen> {
       ),
     );
   }
-
 }
 
 // Using FontAwesomeIcons for better icon matching from the reference

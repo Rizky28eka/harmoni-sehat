@@ -78,22 +78,19 @@ class AuthService extends GetConnect {
 
     if (response.statusCode == 201 && response.body != null) {
       try {
-        final dynamic userIdValue = response.body['userId'];
+        final Map<String, dynamic> responseData = response.body['data'];
+        final Map<String, dynamic> userResponse = responseData['user'];
 
-        if (userIdValue == null) {
-          print(
-            'Error: Kunci "userId" tidak ditemukan atau null di dalam respons.',
-          );
-          return null;
-        }
-
-        final int parsedId = int.parse(userIdValue.toString());
+        final String id = userResponse['_id'];
+        final String email = userResponse['email'];
+        final String role = userResponse['role'];
+        final String name = userData['nama_lengkap']; // Get name from initial userData
 
         return User(
-          id: parsedId,
-          name: userData['nama_lengkap'],
-          email: userData['email'],
-          
+          id: id,
+          name: name,
+          email: email,
+          role: role,
         );
       } catch (e) {
         print('Error saat parsing respons registrasi: $e');
