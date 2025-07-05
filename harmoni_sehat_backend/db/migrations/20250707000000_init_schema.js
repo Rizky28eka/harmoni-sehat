@@ -3,6 +3,7 @@
  * @returns { Promise<void> }
  */
 exports.up = async function(knex) {
+  // From 20250705001603_create_all_tables.js
   await knex.schema.createTable('provinsi', function(table) {
     table.increments('provinsi_id').primary();
     table.string('nama_provinsi', 255).notNullable().unique();
@@ -498,6 +499,32 @@ exports.up = async function(knex) {
     table.foreign('pasien_id').references('pasien.pasien_id').onDelete('CASCADE').onUpdate('CASCADE');
     table.foreign('doctor_id').references('doctor.doctor_id').onDelete('CASCADE').onUpdate('CASCADE');
   });
+
+  // From 20250705090309_create_klinik_table.js
+  await knex.schema.createTable('klinik', function(table) {
+    table.increments('klinik_id').primary();
+    table.string('nama_klinik', 255).notNullable();
+    table.text('alamat');
+    table.string('no_telepon', 20);
+    table.string('email', 255).unique();
+    table.time('jam_buka');
+    table.time('jam_tutup');
+    table.decimal('koordinat_lat', 10, 8);
+    table.decimal('koordinat_lng', 11, 8);
+    table.string('foto_klinik', 255);
+    table.boolean('is_24_jam').defaultTo(false);
+    table.boolean('is_active').defaultTo(true);
+    table.decimal('rating', 3, 2).defaultTo(0.00);
+    table.enum('tipe_klinik', ['pratama', 'utama']);
+  });
+
+  // From 20250706120000_add_reset_token_to_users.js
+  await knex.schema.table('users', function(table) {
+    table.string('password_reset_token');
+    table.timestamp('password_reset_expires');
+    table.string('provider').nullable();
+    table.string('provider_id').nullable();
+  });
 };
 
 /**
@@ -505,6 +532,8 @@ exports.up = async function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = async function(knex) {
+  // Drop tables in reverse order of creation
+  await knex.schema.dropTableIfExists('klinik');
   await knex.schema.dropTableIfExists('appointment');
   await knex.schema.dropTableIfExists('jadwal_doctor');
   await knex.schema.dropTableIfExists('chat_messages');
@@ -536,7 +565,7 @@ exports.down = async function(knex) {
   await knex.schema.dropTableIfExists('apoteker');
   await knex.schema.dropTableIfExists('apotek');
   await knex.schema.dropTableIfExists('admin');
-  await knex.schema.dropTableIfExists('users');
+  await knex.schema.dropTableIfExists('users'); // The users table is dropped last among the main tables
   await knex.schema.dropTableIfExists('kota');
   await knex.schema.dropTableIfExists('provinsi');
 };

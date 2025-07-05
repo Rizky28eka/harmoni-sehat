@@ -1,35 +1,39 @@
-// controllers/auth.controller.js
 const authService = require('./auth.service');
+const ApiResponse = require('../../utils/ApiResponse');
 
 const register = async (req, res, next) => {
   try {
-    // Data sudah divalidasi oleh middleware
     const user = await authService.registerUser(req.body);
-    res
-      .status(201)
-      .json({ message: 'Registrasi berhasil', userId: user.id, role: user.role });
+    res.status(201).json(new ApiResponse(201, { userId: user.id, role: user.role }, 'Registrasi berhasil. Silakan cek email Anda untuk verifikasi.'));
   } catch (error) {
-    // Teruskan error ke middleware error handling terpusat
     next(error);
   }
 };
 
 const login = async (req, res, next) => {
-  const { email, password, role } = req.body;
-
-  // Validasi sederhana untuk login, bisa juga pakai express-validator
-  if (!email || !password || !role) {
-    return res.status(400).json({ message: 'Email, password, dan role harus diisi' });
-  }
-  
-  const allowedRoles = ['pasien', 'dokter', 'apoteker'];
-  if (!allowedRoles.includes(role)) {
-    return res.status(400).json({ message: 'Role tidak valid untuk login.' });
-  }
-
   try {
+    const { email, password, role } = req.body;
     const result = await authService.loginUser({ email, password, expectedRole: role });
-    res.json(result);
+    res.status(200).json(new ApiResponse(200, result, 'Login berhasil.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const forgotPassword = async (req, res, next) => {
+  try {
+    await authService.forgotPassword(req.body.email);
+    res.status(200).json(new ApiResponse(200, null, 'Email untuk reset password telah dikirim.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const resetPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+    await authService.resetPassword(token, password);
+    res.status(200).json(new ApiResponse(200, null, 'Password berhasil direset.'));
   } catch (error) {
     next(error);
   }
@@ -38,4 +42,6 @@ const login = async (req, res, next) => {
 module.exports = {
   register,
   login,
+  forgotPassword,
+  resetPassword,
 };

@@ -4,7 +4,7 @@ const router = express.Router();
 const authController = require('./auth.controller');
 const socialController = require('./social.controller');
 const otpController = require('./otp.controller');
-const { registerValidationRules } = require('./validation');
+const { registerValidationRules, loginValidationRules, forgotPasswordValidationRules, resetPasswordValidationRules } = require('./validation');
 const validate = require('../../middleware/validate');
 
 // @route   POST /api/auth/register
@@ -15,7 +15,17 @@ router.post('/register', registerValidationRules(), validate, authController.reg
 // @route   POST /api/auth/login
 // @desc    Login pengguna
 // @access  Public
-router.post('/login', authController.login);
+router.post('/login', loginValidationRules(), validate, authController.login);
+
+// @route   POST /api/auth/forgot-password
+// @desc    Kirim email untuk reset password
+// @access  Public
+router.post('/forgot-password', forgotPasswordValidationRules(), validate, authController.forgotPassword);
+
+// @route   POST /api/auth/reset-password
+// @desc    Reset password dengan token
+// @access  Public
+router.post('/reset-password', resetPasswordValidationRules(), validate, authController.resetPassword);
 
 // @route   POST /api/auth/google/login
 // @desc    Login dengan Google
