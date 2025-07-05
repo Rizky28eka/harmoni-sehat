@@ -1,12 +1,16 @@
 const express = require('express');
-const router = express.Router();
-const adminController = require('./admin.controller');
-const { createAdminValidation, updateAdminValidation } = require('./admin.validation');
+const Admin = require('../../models/Admin');
+const { createOne, getAll, getOne, updateOne, deleteOne } = require('../crud.controller');
 
-router.get('/', adminController.getAllAdmin);
-router.get('/:id', adminController.getAdminById);
-router.post('/', createAdminValidation, adminController.createAdmin);
-router.put('/:id', updateAdminValidation, adminController.updateAdmin);
-router.delete('/:id', adminController.deleteAdmin);
+const router = express.Router();
+
+router.route('/')
+  .post(createOne(Admin))
+  .get(getAll(Admin));
+
+router.route('/:id')
+  .get(getOne(Admin))
+  .patch(updateOne(Admin))
+  .delete(deleteOne(Admin));
 
 module.exports = router;

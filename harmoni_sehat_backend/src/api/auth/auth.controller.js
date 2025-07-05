@@ -1,47 +1,74 @@
-const authService = require('./auth.service');
-const ApiResponse = require('../../utils/ApiResponse');
+const User = require('../../models/User');
+const jwt = require('jsonwebtoken');
+const asyncHandler = require('express-async-handler'); // Assuming you have this or will add it
 
-const register = async (req, res, next) => {
-  try {
-    const user = await authService.registerUser(req.body);
-    res.status(201).json(new ApiResponse(201, { userId: user.id, role: user.role }, 'Registrasi berhasil. Silakan cek email Anda untuk verifikasi.'));
-  } catch (error) {
-    next(error);
-  }
+// Helper function to generate JWT token
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 };
 
-const login = async (req, res, next) => {
-  try {
-    const { email, password, role } = req.body;
-    const result = await authService.loginUser({ email, password, expectedRole: role });
-    res.status(200).json(new ApiResponse(200, result, 'Login berhasil.'));
-  } catch (error) {
-    next(error);
-  }
-};
+// @desc    Register a new user
+// @route   POST /api/auth/register
+// @access  Public
+const registerUser = asyncHandler(async (req, res) => {
+  const { email, password, role } = req.body;
 
-const forgotPassword = async (req, res, next) => {
-  try {
-    await authService.forgotPassword(req.body.email);
-    res.status(200).json(new ApiResponse(200, null, 'Email untuk reset password telah dikirim.'));
-  } catch (error) {
-    next(error);
+  // Basic validation
+  if (!email || !password) {
+    res.status(400);
+    throw new Error('Please enter all fields');
   }
-};
 
-const resetPassword = async (req, res, next) => {
-  try {
-    const { token, password } = req.body;
-    await authService.resetPassword(token, password);
-    res.status(200).json(new ApiResponse(200, null, 'Password berhasil direset.'));
-  } catch (error) {
-    next(error);
+  // Check if user already exists
+  const userExists = await User.findOne({ email });
+  if (userExists) {
+    res.status(400);
+    throw new Error('User already exists');
   }
-};
+
+  // Create user
+  const user = await User.create({
+    email,
+    password,
+    role: role || 'pasien', // Default role to 'pasien' if not provided
+  });
+
+  if (user) {
+    res.status(201).json({
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
+  } else {
+    res.status(400);
+    throw new Error('Invalid user data');
+  }
+});
+
+// @desc    Authenticate user & get token
+// @route   POST /api/auth/login
+// @access  Public
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  // Check for user email
+  const user = await User.findOne({ email });
+
+  if (user && (await user.matchPassword(password))) {
+    res.json({
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+      token: generateToken(user._id),
+    });
+  } else {
+    res.status(401);
+    throw new Error('Invalid email or password');
+  }
+});
 
 module.exports = {
-  register,
-  login,
-  forgotPassword,
-  resetPassword,
+  registerUser,
+  loginUser,
 };

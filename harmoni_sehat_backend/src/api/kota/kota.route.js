@@ -1,12 +1,16 @@
 const express = require('express');
-const router = express.Router();
-const kotaController = require('./kota.controller');
-const { createKotaValidation, updateKotaValidation } = require('./kota.validation');
+const Kota = require('../../models/Kota');
+const { createOne, getAll, getOne, updateOne, deleteOne } = require('../crud.controller');
 
-router.get('/', kotaController.getAllKota);
-router.get('/:id', kotaController.getKotaById);
-router.post('/', createKotaValidation, kotaController.createKota);
-router.put('/:id', updateKotaValidation, kotaController.updateKota);
-router.delete('/:id', kotaController.deleteKota);
+const router = express.Router();
+
+router.route('/')
+  .post(createOne(Kota))
+  .get(getAll(Kota));
+
+router.route('/:id')
+  .get(getOne(Kota))
+  .patch(updateOne(Kota))
+  .delete(deleteOne(Kota));
 
 module.exports = router;

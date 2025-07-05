@@ -1,12 +1,16 @@
 const express = require('express');
-const router = express.Router();
-const klinikController = require('./klinik.controller');
-const { createKlinikValidation, updateKlinikValidation } = require('./klinik.validation');
+const Klinik = require('../../models/Klinik');
+const { createOne, getAll, getOne, updateOne, deleteOne } = require('../crud.controller');
 
-router.get('/', klinikController.getAllKlinik);
-router.get('/:id', klinikController.getKlinikById);
-router.post('/', createKlinikValidation, klinikController.createKlinik);
-router.put('/:id', updateKlinikValidation, klinikController.updateKlinik);
-router.delete('/:id', klinikController.deleteKlinik);
+const router = express.Router();
+
+router.route('/')
+  .post(createOne(Klinik))
+  .get(getAll(Klinik));
+
+router.route('/:id')
+  .get(getOne(Klinik))
+  .patch(updateOne(Klinik))
+  .delete(deleteOne(Klinik));
 
 module.exports = router;

@@ -1,12 +1,16 @@
 const express = require('express');
-const router = express.Router();
-const appointmentController = require('./appointment.controller');
-const { createAppointmentValidation, updateAppointmentValidation } = require('./appointment.validation');
+const Appointment = require('../../models/Appointment');
+const { createOne, getAll, getOne, updateOne, deleteOne } = require('../crud.controller');
 
-router.get('/', appointmentController.getAllAppointment);
-router.get('/:id', appointmentController.getAppointmentById);
-router.post('/', createAppointmentValidation, appointmentController.createAppointment);
-router.put('/:id', updateAppointmentValidation, appointmentController.updateAppointment);
-router.delete('/:id', appointmentController.deleteAppointment);
+const router = express.Router();
+
+router.route('/')
+  .post(createOne(Appointment))
+  .get(getAll(Appointment));
+
+router.route('/:id')
+  .get(getOne(Appointment))
+  .patch(updateOne(Appointment))
+  .delete(deleteOne(Appointment));
 
 module.exports = router;

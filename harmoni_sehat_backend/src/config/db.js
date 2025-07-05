@@ -1,7 +1,14 @@
-const knex = require('knex');
-const knexfile = require('../../knexfile');
+const mongoose = require('mongoose');
+require('dotenv').config();
 
-const environment = process.env.NODE_ENV || 'development';
-const config = knexfile[environment];
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URI, {});
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    process.exit(1); // Exit process with failure
+  }
+};
 
-module.exports = knex(config);
+module.exports = connectDB; // Export the connection function

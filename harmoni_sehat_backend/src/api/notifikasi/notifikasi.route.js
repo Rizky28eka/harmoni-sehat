@@ -1,12 +1,16 @@
 const express = require('express');
-const router = express.Router();
-const notifikasiController = require('./notifikasi.controller');
-const { createNotifikasiValidation, updateNotifikasiValidation } = require('./notifikasi.validation');
+const Notifikasi = require('../../models/Notifikasi');
+const { createOne, getAll, getOne, updateOne, deleteOne } = require('../crud.controller');
 
-router.get('/', notifikasiController.getAllNotifikasi);
-router.get('/:id', notifikasiController.getNotifikasiById);
-router.post('/', createNotifikasiValidation, notifikasiController.createNotifikasi);
-router.put('/:id', updateNotifikasiValidation, notifikasiController.updateNotifikasi);
-router.delete('/:id', notifikasiController.deleteNotifikasi);
+const router = express.Router();
+
+router.route('/')
+  .post(createOne(Notifikasi))
+  .get(getAll(Notifikasi));
+
+router.route('/:id')
+  .get(getOne(Notifikasi))
+  .patch(updateOne(Notifikasi))
+  .delete(deleteOne(Notifikasi));
 
 module.exports = router;

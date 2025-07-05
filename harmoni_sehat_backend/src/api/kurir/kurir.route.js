@@ -1,12 +1,16 @@
 const express = require('express');
-const router = express.Router();
-const kurirController = require('./kurir.controller');
-const { createKurirValidation, updateKurirValidation } = require('./kurir.validation');
+const Kurir = require('../../models/Kurir');
+const { createOne, getAll, getOne, updateOne, deleteOne } = require('../crud.controller');
 
-router.get('/', kurirController.getAllKurir);
-router.get('/:id', kurirController.getKurirById);
-router.post('/', createKurirValidation, kurirController.createKurir);
-router.put('/:id', updateKurirValidation, kurirController.updateKurir);
-router.delete('/:id', kurirController.deleteKurir);
+const router = express.Router();
+
+router.route('/')
+  .post(createOne(Kurir))
+  .get(getAll(Kurir));
+
+router.route('/:id')
+  .get(getOne(Kurir))
+  .patch(updateOne(Kurir))
+  .delete(deleteOne(Kurir));
 
 module.exports = router;

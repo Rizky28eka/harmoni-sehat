@@ -1,12 +1,16 @@
 const express = require('express');
-const router = express.Router();
-const obatController = require('./obat.controller');
-const { createObatValidation, updateObatValidation } = require('./obat.validation');
+const Obat = require('../../models/Obat');
+const { createOne, getAll, getOne, updateOne, deleteOne } = require('../crud.controller');
 
-router.get('/', obatController.getAllObat);
-router.get('/:id', obatController.getObatById);
-router.post('/', createObatValidation, obatController.createObat);
-router.put('/:id', updateObatValidation, obatController.updateObat);
-router.delete('/:id', obatController.deleteObat);
+const router = express.Router();
+
+router.route('/')
+  .post(createOne(Obat))
+  .get(getAll(Obat));
+
+router.route('/:id')
+  .get(getOne(Obat))
+  .patch(updateOne(Obat))
+  .delete(deleteOne(Obat));
 
 module.exports = router;

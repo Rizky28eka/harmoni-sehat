@@ -1,12 +1,16 @@
 const express = require('express');
-const router = express.Router();
-const promoController = require('./promo.controller');
-const { createPromoValidation, updatePromoValidation } = require('./promo.validation');
+const Promo = require('../../models/Promo');
+const { createOne, getAll, getOne, updateOne, deleteOne } = require('../crud.controller');
 
-router.get('/', promoController.getAllPromo);
-router.get('/:id', promoController.getPromoById);
-router.post('/', createPromoValidation, promoController.createPromo);
-router.put('/:id', updatePromoValidation, promoController.updatePromo);
-router.delete('/:id', promoController.deletePromo);
+const router = express.Router();
+
+router.route('/')
+  .post(createOne(Promo))
+  .get(getAll(Promo));
+
+router.route('/:id')
+  .get(getOne(Promo))
+  .patch(updateOne(Promo))
+  .delete(deleteOne(Promo));
 
 module.exports = router;

@@ -1,12 +1,16 @@
 const express = require('express');
-const router = express.Router();
-const faqController = require('./faq.controller');
-const { createFaqValidation, updateFaqValidation } = require('./faq.validation');
+const FAQ = require('../../models/FAQ');
+const { createOne, getAll, getOne, updateOne, deleteOne } = require('../crud.controller');
 
-router.get('/', faqController.getAllFaq);
-router.get('/:id', faqController.getFaqById);
-router.post('/', createFaqValidation, faqController.createFaq);
-router.put('/:id', updateFaqValidation, faqController.updateFaq);
-router.delete('/:id', faqController.deleteFaq);
+const router = express.Router();
+
+router.route('/')
+  .post(createOne(FAQ))
+  .get(getAll(FAQ));
+
+router.route('/:id')
+  .get(getOne(FAQ))
+  .patch(updateOne(FAQ))
+  .delete(deleteOne(FAQ));
 
 module.exports = router;

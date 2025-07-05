@@ -1,15 +1,16 @@
 const express = require('express');
+const Provinsi = require('../../models/Provinsi');
+const { createOne, getAll, getOne, updateOne, deleteOne } = require('../crud.controller');
+
 const router = express.Router();
-const provinsiController = require('./provinsi.controller');
-const { createProvinsiValidation, updateProvinsiValidation } = require('./provinsi.validation');
 
-router.get('/', provinsiController.getAllProvinsi);
-router.get('/:id', provinsiController.getProvinsiById);
-router.post('/', createProvinsiValidation, provinsiController.createProvinsi);
-router.put('/:id', updateProvinsiValidation, provinsiController.updateProvinsi);
-router.delete('/:id', provinsiController.deleteProvinsi);
+router.route('/')
+  .post(createOne(Provinsi))
+  .get(getAll(Provinsi));
 
-// Relational routes
-router.get('/:id/kota', provinsiController.getProvinsiKota);
+router.route('/:id')
+  .get(getOne(Provinsi))
+  .patch(updateOne(Provinsi))
+  .delete(deleteOne(Provinsi));
 
 module.exports = router;

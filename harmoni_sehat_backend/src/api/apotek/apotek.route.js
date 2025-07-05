@@ -1,15 +1,16 @@
 const express = require('express');
+const Apotek = require('../../models/Apotek');
+const { createOne, getAll, getOne, updateOne, deleteOne } = require('../crud.controller');
+
 const router = express.Router();
-const apotekController = require('./apotek.controller');
-const { createApotekValidation, updateApotekValidation } = require('./apotek.validation');
 
-router.get('/', apotekController.getAllApotek);
-router.get('/:id', apotekController.getApotekById);
-router.post('/', createApotekValidation, apotekController.createApotek);
-router.put('/:id', updateApotekValidation, apotekController.updateApotek);
-router.delete('/:id', apotekController.deleteApotek);
+router.route('/')
+  .post(createOne(Apotek))
+  .get(getAll(Apotek));
 
-// Relational routes
-router.get('/:id/apoteker', apotekController.getApotekApoteker);
+router.route('/:id')
+  .get(getOne(Apotek))
+  .patch(updateOne(Apotek))
+  .delete(deleteOne(Apotek));
 
 module.exports = router;

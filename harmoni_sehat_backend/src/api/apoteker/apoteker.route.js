@@ -1,12 +1,16 @@
 const express = require('express');
-const router = express.Router();
-const apotekerController = require('./apoteker.controller');
-const { createApotekerValidation, updateApotekerValidation } = require('./apoteker.validation');
+const Apoteker = require('../../models/Apoteker');
+const { createOne, getAll, getOne, updateOne, deleteOne } = require('../crud.controller');
 
-router.get('/', apotekerController.getAllApoteker);
-router.get('/:id', apotekerController.getApotekerById);
-router.post('/', createApotekerValidation, apotekerController.createApoteker);
-router.put('/:id', updateApotekerValidation, apotekerController.updateApoteker);
-router.delete('/:id', apotekerController.deleteApoteker);
+const router = express.Router();
+
+router.route('/')
+  .post(createOne(Apoteker))
+  .get(getAll(Apoteker));
+
+router.route('/:id')
+  .get(getOne(Apoteker))
+  .patch(updateOne(Apoteker))
+  .delete(deleteOne(Apoteker));
 
 module.exports = router;

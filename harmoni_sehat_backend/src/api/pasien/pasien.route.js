@@ -1,15 +1,16 @@
 const express = require('express');
+const Pasien = require('../../models/Pasien');
+const { createOne, getAll, getOne, updateOne, deleteOne } = require('../crud.controller');
+
 const router = express.Router();
-const pasienController = require('./pasien.controller');
-const { createPasienValidation, updatePasienValidation } = require('./pasien.validation');
 
-router.get('/', pasienController.getAllPasien);
-router.get('/:id', pasienController.getPasienById);
-router.post('/', createPasienValidation, pasienController.createPasien);
-router.put('/:id', updatePasienValidation, pasienController.updatePasien);
-router.delete('/:id', pasienController.deletePasien);
+router.route('/')
+  .post(createOne(Pasien))
+  .get(getAll(Pasien));
 
-// Relational routes
-router.get('/:id/konsultasi', pasienController.getPasienKonsultasi);
+router.route('/:id')
+  .get(getOne(Pasien))
+  .patch(updateOne(Pasien))
+  .delete(deleteOne(Pasien));
 
 module.exports = router;

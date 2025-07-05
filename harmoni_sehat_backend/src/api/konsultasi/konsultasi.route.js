@@ -1,16 +1,16 @@
 const express = require('express');
+const Konsultasi = require('../../models/Konsultasi');
+const { createOne, getAll, getOne, updateOne, deleteOne } = require('../crud.controller');
+
 const router = express.Router();
-const konsultasiController = require('./konsultasi.controller');
-const { createKonsultasiValidation, updateKonsultasiValidation } = require('./konsultasi.validation');
 
-router.get('/', konsultasiController.getAllKonsultasi);
-router.get('/:id', konsultasiController.getKonsultasiById);
-router.post('/', createKonsultasiValidation, konsultasiController.createKonsultasi);
-router.put('/:id', updateKonsultasiValidation, konsultasiController.updateKonsultasi);
-router.delete('/:id', konsultasiController.deleteKonsultasi);
+router.route('/')
+  .post(createOne(Konsultasi))
+  .get(getAll(Konsultasi));
 
-// Relational routes
-router.get('/:id/resep', konsultasiController.getKonsultasiResep);
-router.get('/:id/pembayaran', konsultasiController.getKonsultasiPembayaran);
+router.route('/:id')
+  .get(getOne(Konsultasi))
+  .patch(updateOne(Konsultasi))
+  .delete(deleteOne(Konsultasi));
 
 module.exports = router;
