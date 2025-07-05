@@ -1,111 +1,97 @@
 # Harmoni Sehat Frontend
 
-![Flutter Version](https://img.shields.io/badge/Flutter-3.8.1-blue?logo=flutter)
+![Flutter Version](https://img.shields.io/badge/Flutter-3.x-blue?logo=flutter)
 ![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen)
 
-Aplikasi mobile `Harmoni Sehat` adalah platform kesehatan yang dibangun menggunakan Flutter dengan arsitektur GetX. Aplikasi ini dirancang untuk memfasilitasi interaksi antara pasien, dokter, dan apoteker, menyediakan fitur-fitur penting untuk manajemen kesehatan yang terintegrasi.
+The `Harmoni Sehat` mobile application is a health platform built with Flutter and the GetX architecture. It is designed to facilitate seamless interaction between patients, doctors, and pharmacists, providing essential features for integrated health management.
 
-## Fitur Utama
+## Key Features
 
-*   **Autentikasi Pengguna**: Sistem login, registrasi, dan verifikasi OTP yang aman.
-*   **Navigasi Berbasis Role**: Pengguna akan diarahkan ke dashboard yang sesuai setelah login (Pasien, Dokter, Apoteker).
-*   **Manajemen Profil**: Pengguna dapat mengelola informasi profil mereka.
-*   **Konsultasi Online**: (Fitur yang akan dikembangkan/dijelaskan lebih lanjut)
-*   **Manajemen Resep**: (Fitur yang akan dikembangkan/dijelaskan lebih lanjut)
-*   **Informasi Obat**: (Fitur yang akan dikembangkan/dijelaskan lebih lanjut)
+*   **User Authentication**: Secure login, registration, and OTP verification system.
+*   **Role-Based Navigation**: Users are directed to a dashboard tailored to their role (Patient, Doctor, Pharmacist) upon login.
+*   **Profile Management**: Users can manage their personal and professional information.
+*   **Online Consultations**: (Feature to be further developed/detailed)
+*   **Prescription Management**: (Feature to be further developed/detailed)
+*   **Medication Information**: (Feature to be further developed/detailed)
 
-## Struktur Folder
+## Folder Structure
 
-Proyek ini mengikuti arsitektur modular dengan GetX, memisahkan fitur berdasarkan role pengguna untuk kemudahan pengembangan dan pemeliharaan.
+The project follows a modular architecture powered by GetX, separating features by user role to enhance scalability and ease of maintenance.
 
 ```
 lib/
 ├── main.dart
 └── app/
-    ├── data/             # Repositories, providers, models, dll.
-    ├── modules/          # Modul utama aplikasi, dibagi berdasarkan role
-    │   ├── pasien/       # Modul untuk role Pasien
+    ├── data/             # Repositories, providers, models, etc.
+    ├── modules/          # Core application modules, divided by role
+    │   ├── pasien/       # Module for the Patient role
     │   │   ├── bindings/
     │   │   ├── controllers/
     │   │   └── views/
-    │   ├── dokter/       # Modul untuk role Dokter
-    │   │   ├── bindings/
-    │   │   ├── controllers/
-    │   │   └── views/
-    │   └── apoteker/     # Modul untuk role Apoteker
-    │       ├── bindings/
-    │       ├── controllers/
-    │       └── views/
-    ├── routes/           # Definisi rute aplikasi (AppPages, AppRoutes)
-    └── shared/           # Komponen, utilitas, konstanta, tema yang digunakan bersama
+    │   ├── dokter/       # Module for the Doctor role
+    │   │   └── ...
+    │   └── apoteker/     # Module for the Pharmacist role
+    │       └── ...
+    ├── routes/           # Application route definitions (AppPages, AppRoutes)
+    └── shared/           # Shared components, utilities, constants, and themes
         ├── widgets/
         ├── utils/
         ├── constants/
         └── theme/
 ```
 
-## Cara Menjalankan Proyek Secara Lokal
+## Local Development Setup
 
-Ikuti langkah-langkah berikut untuk menjalankan proyek `Harmoni Sehat Frontend` di lingkungan lokal Anda.
+Follow these steps to run the `Harmoni Sehat Frontend` project in your local environment.
 
-### Prasyarat
+### Prerequisites
 
-*   [Flutter SDK](https://flutter.dev/docs/get-started/install) (Versi 3.8.1 atau lebih tinggi direkomendasikan)
-*   [Android Studio](https://developer.android.com/studio) atau [Xcode](https://developer.apple.com/xcode/) (untuk pengembangan mobile)
-*   Editor kode seperti [VS Code](https://code.visualstudio.com/) dengan ekstensi Flutter.
+*   [Flutter SDK](https://flutter.dev/docs/get-started/install) (Latest stable version recommended)
+*   [Android Studio](https://developer.android.com/studio) or [Xcode](https://developer.apple.com/xcode/) (for mobile development)
+*   A code editor like [VS Code](https://code.visualstudio.com/) with the Flutter extension.
 
-### Langkah-langkah
+### Steps
 
-1.  **Clone Repositori**:
+1.  **Clone the Repository**:
     ```bash
     git clone https://github.com/your-username/harmoni_sehat_project.git
     cd harmoni_sehat_project/harmoni_sehat_frontend
     ```
 
-2.  **Install Dependensi**:
-    Jalankan perintah berikut di terminal untuk mengunduh semua dependensi yang diperlukan:
+2.  **Install Dependencies**:
+    Run the following command in your terminal to download all required dependencies:
     ```bash
     flutter pub get
     ```
 
-3.  **Setup Android (Opsional)**:
-    *   Pastikan Anda memiliki Android SDK yang terinstal dan emulator atau perangkat fisik yang terhubung.
-    *   Jalankan `flutter doctor` untuk memeriksa konfigurasi Android Anda.
+3.  **Platform Setup (Android/iOS)**:
+    *   Ensure you have a configured emulator or a physical device connected.
+    *   Run `flutter doctor` to verify your setup and resolve any issues.
+    *   For iOS, you may need to run `pod install` in the `ios/` directory.
 
-4.  **Setup iOS (Opsional)**:
-    *   Pastikan Anda memiliki Xcode yang terinstal.
-    *   Jalankan `pod install` di direktori `ios/` jika ada masalah dengan dependensi CocoaPods:
-        ```bash
-        cd ios
-        pod install
-        cd ..
-        ```
-    *   Jalankan `flutter doctor` untuk memeriksa konfigurasi iOS Anda.
-
-5.  **Jalankan Aplikasi**:
-    Setelah semua dependensi terinstal dan setup platform selesai, Anda bisa menjalankan aplikasi:
+4.  **Run the Application**:
+    Once dependencies are installed and your platform is configured, you can run the app:
     ```bash
     flutter run
     ```
-    Pilih perangkat atau emulator yang tersedia saat diminta.
+    Select an available device or emulator when prompted.
 
-## Dependensi Penting
+## Core Dependencies
 
-Berikut adalah daftar dependensi utama yang digunakan dalam proyek ini:
+This project relies on several key dependencies:
 
-*   `get`: ^4.7.2 - Framework untuk manajemen state, injeksi dependensi, dan manajemen rute.
-*   `http`: ^1.4.0 - Untuk melakukan HTTP requests.
-*   `shared_preferences`: ^2.2.3 - Untuk menyimpan data sederhana secara lokal.
-*   `font_awesome_flutter`: ^10.7.0 - Icon set Font Awesome untuk Flutter.
-*   `geolocator`: ^12.0.0 - Untuk mendapatkan lokasi geografis perangkat.
-*   `geocoding`: ^3.0.0 - Untuk geocoding dan reverse geocoding.
-*   `get_storage`: ^2.1.1 - Solusi penyimpanan key-value yang cepat dan mudah digunakan, dibangun di atas GetX.
-*   `cupertino_icons`: ^1.0.8 - Icon set gaya iOS.
+*   `get`: For state management, dependency injection, and route management.
+*   `http`: For making HTTP requests to the backend API.
+*   `shared_preferences`: For storing simple key-value data locally.
+*   `get_storage`: A fast, extra-light, and synchronous key-value storage solution.
+*   `font_awesome_flutter`: For a wide range of icons.
+*   `geolocator` & `geocoding`: For location-based services.
+*   `cupertino_icons`: For iOS-style icons.
 
-## Kontribusi
+## Contribution
 
-(Bagian ini dapat ditambahkan nanti jika ada panduan kontribusi)
+(Contribution guidelines can be added here in the future.)
 
-## Lisensi
+## License
 
-(Bagian ini dapat ditambahkan nanti jika ada informasi lisensi)
+(License information can be added here in the future.)

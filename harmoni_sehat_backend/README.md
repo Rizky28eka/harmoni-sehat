@@ -1,120 +1,105 @@
-# Dokumentasi Backend Harmoni Sehat
+# Harmoni Sehat Backend Documentation
 
-Dokumentasi ini menjelaskan tentang proyek backend untuk aplikasi Harmoni Sehat, yang dibangun menggunakan Node.js dengan framework Express.js dan database MySQL.
+This document provides a comprehensive overview of the backend project for the Harmoni Sehat application, built with Node.js, Express.js, and MongoDB.
 
-## Deskripsi Umum
+## General Description
 
-Backend ini berfungsi sebagai tulang punggung aplikasi Harmoni Sehat, menyediakan RESTful API untuk mengelola berbagai entitas seperti pengguna, dokter, pasien, apotek, obat-obatan, konsultasi, pembayaran, dan banyak lagi. Dibangun dengan modularitas, backend ini dirancang untuk skalabilitas dan kemudahan pemeliharaan.
+The backend serves as the backbone for the Harmoni Sehat application, offering a complete RESTful API to manage various data models, including users, doctors, patients, pharmacies, medications, consultations, and more. The architecture has been refactored to use Mongoose and a generic, reusable CRUD controller, ensuring scalability, maintainability, and rapid development.
 
 - **Framework:** Express.js
-- **Bahasa:** JavaScript (Node.js)
-- **Database:** MySQL (melalui Knex.js ORM)
-- **Manajemen Paket:** npm
+- **Language:** JavaScript (Node.js)
+- **Database:** MongoDB (via Mongoose ODM)
+- **Package Manager:** npm
 
-## Instalasi dan Menjalankan di Local Development
+## Local Development Setup
 
-Ikuti langkah-langkah berikut untuk menginstal dan menjalankan proyek backend di lingkungan lokal Anda.
+Follow these steps to install and run the backend project in your local environment.
 
-### Prasyarat
+### Prerequisites
 
-Pastikan Anda telah menginstal perangkat lunak berikut:
+Ensure you have the following software installed:
 
-- [Node.js](https://nodejs.org/en/download/) (disarankan versi LTS)
-- [npm](https://www.npmjs.com/get-npm) (biasanya terinstal bersama Node.js)
-- [MySQL Server](https://dev.mysql.com/downloads/mysql/) (atau akses ke instance MySQL)
+- [Node.js](https://nodejs.org/en/download/) (LTS version recommended)
+- [npm](https://www.npmjs.com/get-npm) (usually included with Node.js)
+- [MongoDB](https://www.mongodb.com/try/download/community) (or access to a MongoDB instance, e.g., MongoDB Atlas)
 
-### Langkah-langkah Instalasi
+### Installation Steps
 
-1.  **Clone Repositori:**
+1.  **Clone the Repository:**
     ```bash
-    git clone <URL_REPOSITORI_ANDA>
+    git clone <YOUR_REPOSITORY_URL>
     cd harmoni_sehat_project/harmoni_sehat_backend
     ```
 
-2.  **Instal Dependensi:**
+2.  **Install Dependencies:**
     ```bash
     npm install
     ```
 
-3.  **Konfigurasi Environment Variables:**
-    Buat file `.env` di root direktori `harmoni_sehat_backend` berdasarkan contoh `.env.example`.
+3.  **Configure Environment Variables:**
+    Create a `.env` file in the `harmoni_sehat_backend` root directory. You can use the following as a template:
 
     ```dotenv
-    # Database Configuration
-    DB_HOST=localhost
-    DB_USER=your_mysql_user
-    DB_PASSWORD=your_mysql_password
-    DB_NAME=harmoni_sehat_db
+    # MongoDB Configuration
+    # Example for a local MongoDB instance
+    MONGO_URI=mongodb://localhost:27017/harmoni_sehat_db
+
+    # Example for MongoDB Atlas
+    # MONGO_URI=mongodb+srv://<user>:<password>@<cluster-url>/harmoni_sehat_db?retryWrites=true&w=majority
 
     # Application Configuration
     PORT=3000
-    FRONTEND_URL=http://localhost:3000 # Ganti dengan URL frontend Anda
-    JWT_SECRET=your_jwt_secret_key # Ganti dengan kunci rahasia yang kuat
-    # Tambahkan variabel lingkungan lainnya sesuai kebutuhan
+    JWT_SECRET=your_strong_jwt_secret_key # Replace with a strong secret key
     ```
-    Ganti nilai `your_mysql_user`, `your_mysql_password`, `harmoni_sehat_db`, dan `your_jwt_secret_key` dengan kredensial database dan kunci rahasia Anda.
+    Replace the placeholder values with your actual database credentials and a secure JWT secret.
 
-4.  **Jalankan Migrasi Database:**
-    Ini akan membuat tabel-tabel database sesuai skema yang didefinisikan.
+4.  **Seed the Database (Optional):**
+    To populate the database with sample data using the custom seeder script:
     ```bash
-    npm run migrate
+    npm run seed-mongo
     ```
 
-5.  **Seed Data Dummy (Opsional):**
-    Untuk mengisi database dengan data contoh menggunakan `faker-js`:
-    ```bash
-    npm run seed
-    ```
-
-6.  **Jalankan Server Backend:**
+5.  **Run the Backend Server:**
     ```bash
     npm start
     ```
-    Server akan berjalan di `http://localhost:3000` (atau port yang Anda tentukan di `.env`).
+    The server will run on `http://localhost:3000` (or the port specified in your `.env` file).
 
-## Struktur Folder Backend
+## Backend Folder Structure
 
-Struktur direktori backend diatur secara modular untuk memisahkan tanggung jawab dan memudahkan pengembangan:
+The backend directory is organized around a generic, resource-based API structure to promote code reuse and simplify maintenance.
 
 ```
 harmoni_sehat_backend/
-├───db/                     # Konfigurasi database, migrasi, dan seeder
-│   ├───migrations/         # Skema perubahan database
-│   ├───seeds/              # Skrip untuk mengisi data dummy
-│   └───knexfile.js         # Konfigurasi Knex.js
-├───src/                    # Kode sumber aplikasi
-│   ├───api/                # Modul-modul API (per entitas/tabel)
-│   │   ├───[entity_name]/  # Contoh: users, doctors, pasien, dll.
-│   │   │   ├───[entity_name].controller.js # Logika request/response
-│   │   │   ├───[entity_name].service.js    # Logika bisnis & interaksi DB
-│   │   │   ├───[entity_name].route.js      # Definisi endpoint API
-│   │   │   └───[entity_name].validation.js # Validasi input dengan express-validator
-│   │   └───index.js        # Mengumpulkan semua rute API
-│   ├───config/             # Konfigurasi aplikasi (mis. koneksi DB)
-│   ├───middleware/         # Middleware Express.js (mis. error handling, auth)
-│   ├───utils/              # Fungsi utilitas (mis. ApiError, ApiResponse)
-│   └───app.js              # Konfigurasi utama aplikasi Express.js
-├───.env.example            # Contoh file environment variables
-├───package.json            # Metadata proyek & dependensi
-├───server.js               # Titik masuk utama aplikasi
-└───README.md               # Dokumentasi proyek ini
+├───src/
+│   ├───api/
+│   │   ├───{resource_name}/
+│   │   │   └───{resource_name}.route.js  # Defines API endpoints for a model
+│   │   ├───auth/                       # Authentication-specific routes & controller
+│   │   └───crud.controller.js          # Generic, reusable CRUD logic
+│   ├───config/
+│   │   ├───db.js                       # MongoDB connection logic
+│   │   └───indonesiaLocations.js       # Static location data
+│   ├───models/                         # Mongoose schema definitions for all models
+│   └───app.js                          # Main Express.js application setup and route mounting
+├───.env                              # Environment variables (ignored by git)
+├───package.json                      # Project metadata and dependencies
+├───seedMongo.js                      # Script for seeding the database
+└───server.js                         # Main application entry point
 ```
 
-## Perintah Penting
+## Key Scripts
 
--   **`npm install`**: Menginstal semua dependensi proyek.
--   **`npm start`**: Menjalankan server backend dalam mode produksi.
--   **`npm run dev`**: Menjalankan server backend dalam mode pengembangan dengan `nodemon` (auto-restart).
--   **`npm run migrate`**: Menjalankan semua migrasi database yang belum diterapkan.
--   **`npm run migrate:make [nama_migrasi]`**: Membuat file migrasi baru.
--   **`npm run migrate:rollback`**: Mengembalikan migrasi terakhir.
--   **`npm run seed`**: Menjalankan semua seeder untuk mengisi data dummy.
--   **`npm run seed:make [nama_seeder]`**: Membuat file seeder baru.
+-   **`npm install`**: Installs all project dependencies.
+-   **`npm start`**: Starts the backend server.
+-   **`npm run seed-mongo`**: Clears and seeds the database with a complete set of sample data.
 
-## Penanganan Error
+## API Architecture
 
-Backend ini menggunakan penanganan error terpusat untuk memberikan respons error yang konsisten. Error akan dikembalikan dalam format JSON dengan `statusCode` dan `message` yang relevan.
+This backend employs a generic controller pattern (`crud.controller.js`) that provides standard **Create, Read, Update, and Delete** operations for all Mongoose models. This approach dramatically reduces boilerplate code.
 
-## Kontribusi
+Each resource (e.g., `pasiens`, `doctors`) has a simple route file that wires up its endpoints to the generic controller. The controller also includes a powerful `APIFeatures` class, enabling advanced filtering, sorting, field selection, and pagination directly through URL query parameters.
 
-Untuk berkontribusi pada proyek ini, silakan ikuti struktur folder dan panduan kode yang ada. Pastikan untuk menjalankan tes dan migrasi sebelum membuat pull request.
+## Error Handling
+
+The API uses centralized error handling to provide consistent and meaningful JSON error responses, typically including a `status` and `message` field.

@@ -1,32 +1,32 @@
-# Proyek Harmoni Sehat
+# Harmoni Sehat Project
 
-Selamat datang di Proyek Harmoni Sehat, sebuah aplikasi mobile yang dirancang untuk membantu pengguna memantau dan mengelola data kesehatan pribadi mereka.
+Welcome to the Harmoni Sehat Project, a comprehensive mobile health application designed to help users monitor and manage their personal health data.
 
-## Ringkasan Proyek
+## Project Overview
 
-Aplikasi ini terdiri dari dua komponen utama:
+This application consists of two main components:
 
-1.  **Frontend Mobile:** Dibangun menggunakan Flutter, menyediakan antarmuka yang ramah pengguna untuk platform Android dan iOS.
-2.  **Backend Service:** Dibangun menggunakan Node.js dengan Express.js, bertanggung jawab untuk mengelola data dan menyediakan API untuk aplikasi mobile.
+1.  **Mobile Frontend:** Built with Flutter, providing a user-friendly interface for both Android and iOS platforms.
+2.  **Backend Service:** Built with Node.js and Express.js, responsible for data management and providing a robust API for the mobile application.
 
-## Struktur Direktori
+## Directory Structure
 
 ```
 harmoni_sehat_project/
-├── harmoni_sehat_backend/   # Direktori untuk server backend (Node.js)
-├── harmoni_sehat_frontend/  # Direktori untuk aplikasi mobile (Flutter)
-└── README.md                # Informasi umum proyek
+├── harmoni_sehat_backend/   # Backend server directory (Node.js)
+├── harmoni_sehat_frontend/  # Mobile application directory (Flutter)
+└── README.md                # General project information
 ```
 
-## Teknologi yang Digunakan
+## Technology Stack
 
 *   **Frontend:** Flutter, Dart, GetX (State Management)
-*   **Backend:** Node.js, Express.js, Knex.js (Query Builder), bcryptjs (Password Hashing), jsonwebtoken (JWT)
-*   **Database:** MySQL
+*   **Backend:** Node.js, Express.js, Mongoose (Object Data Modeling)
+*   **Database:** MongoDB
 
-## Memulai
+## Getting Started
 
-Untuk menjalankan proyek ini secara penuh, Anda perlu menjalankan kedua bagian, yaitu backend dan frontend. Silakan merujuk ke file `README.md` di dalam masing-masing direktori untuk instruksi lebih lanjut.
+To run this project, you need to set up and run both the backend and frontend components. Please refer to the `README.md` file within each directory for detailed instructions.
 
-- **[Petunjuk Backend](./harmoni_sehat_backend/README.md)**
-- **[Petunjuk Frontend](./harmoni_sehat_frontend/README.md)**
+- **[Backend Instructions](./harmoni_sehat_backend/README.md)**
+- **[Frontend Instructions](./harmoni_sehat_frontend/README.md)**
