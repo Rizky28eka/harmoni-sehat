@@ -17,8 +17,10 @@ const MediaSchema = new mongoose.Schema({
     type: String,
   },
   size: {
-    type: Number,
+    type: Number, // in bytes
   },
 }, { timestamps: true });
+
+MediaSchema.index({ model_type: 1, model_id: 1 });
 
 module.exports = mongoose.model('Media', MediaSchema);

@@ -16,7 +16,7 @@ const ObatSchema = new mongoose.Schema({
     default: 0,
   },
   satuan: {
-    type: String,
+    type: String, // e.g., 'strip', 'botol', 'tablet'
   },
   harga: {
     type: Number,
@@ -25,6 +25,7 @@ const ObatSchema = new mongoose.Schema({
   kode_obat: {
     type: String,
     unique: true,
+    sparse: true,
   },
   butuh_resep: {
     type: Boolean,

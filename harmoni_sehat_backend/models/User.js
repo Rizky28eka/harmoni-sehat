@@ -5,23 +5,41 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    lowercase: true,
+    trim: true,
   },
   password: {
     type: String,
     required: true,
   },
-  created_at: {
-    type: Date,
-    default: Date.now,
+  nama_lengkap: {
+    type: String,
+    required: true,
+    trim: true,
   },
-  updated_at: {
-    type: Date,
-    default: Date.now,
+  no_hp: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+  },
+  role: {
+    type: String,
+    required: true,
+    enum: ['Pasien', 'Dokter', 'Apoteker', 'Admin'], // Define allowed roles
   },
   is_active: {
     type: Boolean,
     default: true,
   },
-});
+  is_verified: {
+    type: Boolean,
+    default: false,
+  },
+  verificationCode: String,
+  verificationCodeExpires: Date,
+  resetOtp: String,
+  resetOtpExpires: Date,
+}, { timestamps: true });
 
 module.exports = mongoose.model('User', UserSchema);

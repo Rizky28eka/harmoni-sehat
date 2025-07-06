@@ -21,6 +21,8 @@ const ResepObatSchema = new mongoose.Schema({
   aturan_pakai: {
     type: String,
   },
-}, { timestamps: true });
+});
+
+ResepObatSchema.index({ resep_id: 1, obat_id: 1 }, { unique: true });
 
 module.exports = mongoose.model('ResepObat', ResepObatSchema);

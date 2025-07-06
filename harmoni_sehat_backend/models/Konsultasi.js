@@ -39,6 +39,6 @@ const KonsultasiSchema = new mongoose.Schema({
   video_call_url: {
     type: String,
   },
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Konsultasi', KonsultasiSchema);

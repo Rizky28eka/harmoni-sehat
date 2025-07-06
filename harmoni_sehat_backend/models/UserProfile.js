@@ -7,7 +7,7 @@ const UserProfileSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  nama_lengkap: {
+  nama: {
     type: String,
     required: true,
   },
@@ -25,15 +25,11 @@ const UserProfileSchema = new mongoose.Schema({
     type: String,
   },
   foto: {
-    type: String,
+    type: String, // URL to the photo
   },
   bio: {
     type: String,
   },
-  updated_at: {
-    type: Date,
-    default: Date.now,
-  },
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('UserProfile', UserProfileSchema);

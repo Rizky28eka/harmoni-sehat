@@ -18,4 +18,6 @@ const DokterKlinikSchema = new mongoose.Schema({
   },
 });
 
+DokterKlinikSchema.index({ dokter_id: 1, klinik_id: 1 }, { unique: true });
+
 module.exports = mongoose.model('DokterKlinik', DokterKlinikSchema);

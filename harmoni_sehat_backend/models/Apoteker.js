@@ -7,14 +7,11 @@ const ApotekerSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  nama: {
-    type: String,
-    required: true,
-  },
   nomor_sipa: {
     type: String,
     unique: true,
+    sparse: true,
   },
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Apoteker', ApotekerSchema);

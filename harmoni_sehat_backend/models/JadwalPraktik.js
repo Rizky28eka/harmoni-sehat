@@ -14,19 +14,20 @@ const JadwalPraktikSchema = new mongoose.Schema({
   hari: {
     type: String,
     required: true,
+    enum: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
   },
   jam_mulai: {
-    type: String,
+    type: String, // e.g., '09:00'
     required: true,
   },
   jam_selesai: {
-    type: String,
+    type: String, // e.g., '17:00'
     required: true,
   },
   is_active: {
     type: Boolean,
     default: true,
   },
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('JadwalPraktik', JadwalPraktikSchema);

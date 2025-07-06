@@ -16,7 +16,7 @@ const NotifikasiSchema = new mongoose.Schema({
   },
   tipe: {
     type: String,
-    enum: ['info', 'warning', 'error', 'success'],
+    enum: ['info', 'warning', 'error', 'success', 'appointment', 'order'],
     default: 'info',
   },
   is_read: {

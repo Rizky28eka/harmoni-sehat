@@ -13,4 +13,7 @@ const PeranPenggunaSchema = new mongoose.Schema({
   },
 });
 
+// Compound index to ensure a user has a role only once
+PeranPenggunaSchema.index({ user_id: 1, peran_id: 1 }, { unique: true });
+
 module.exports = mongoose.model('PeranPengguna', PeranPenggunaSchema);

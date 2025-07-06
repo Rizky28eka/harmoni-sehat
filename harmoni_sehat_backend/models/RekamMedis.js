@@ -16,6 +16,6 @@ const RekamMedisSchema = new mongoose.Schema({
   riwayat_vaksinasi: {
     type: [String],
   },
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('RekamMedis', RekamMedisSchema);

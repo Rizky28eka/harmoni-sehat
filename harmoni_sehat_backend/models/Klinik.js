@@ -13,12 +13,14 @@ const KlinikSchema = new mongoose.Schema({
   },
   email: {
     type: String,
+    unique: true,
+    sparse: true,
   },
   status: {
     type: String,
     enum: ['active', 'inactive'],
     default: 'active',
   },
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Klinik', KlinikSchema);

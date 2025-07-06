@@ -19,7 +19,7 @@ const TransaksiSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'MetodePembayaran',
   },
-  external_id: {
+  external_id: { // For payment gateway integration
     type: String,
   },
   transaksiable_id: {
@@ -29,7 +29,7 @@ const TransaksiSchema = new mongoose.Schema({
   transaksiable_type: {
     type: String,
     required: true,
-    enum: ['Konsultasi', 'PesananObat'], // Assuming these are the only types for now
+    enum: ['Konsultasi', 'PesananObat'],
   },
 }, { timestamps: true });
 

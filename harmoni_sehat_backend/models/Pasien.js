@@ -7,27 +7,11 @@ const PasienSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  nama: {
-    type: String,
-    required: true,
-  },
   nik: {
     type: String,
     unique: true,
+    sparse: true, // Allows multiple null values
   },
-  tanggal_lahir: {
-    type: Date,
-  },
-  jenis_kelamin: {
-    type: String,
-    enum: ['Laki-laki', 'Perempuan'],
-  },
-  alamat: {
-    type: String,
-  },
-  no_telepon: {
-    type: String,
-  },
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('Pasien', PasienSchema);

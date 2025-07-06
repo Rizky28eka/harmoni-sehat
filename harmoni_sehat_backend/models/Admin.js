@@ -7,10 +7,7 @@ const AdminSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
-  nama: {
-    type: String,
-    required: true,
-  },
-});
+  // Admin-specific fields can be added here if any
+}, { timestamps: true });
 
 module.exports = mongoose.model('Admin', AdminSchema);

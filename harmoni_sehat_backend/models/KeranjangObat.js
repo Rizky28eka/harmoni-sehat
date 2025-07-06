@@ -18,4 +18,6 @@ const KeranjangObatSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
+KeranjangObatSchema.index({ pasien_id: 1, obat_id: 1 }, { unique: true });
+
 module.exports = mongoose.model('KeranjangObat', KeranjangObatSchema);
