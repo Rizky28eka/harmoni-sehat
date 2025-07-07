@@ -138,8 +138,9 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3000/api/auth';
-        let token = null;
+        const API_URL = 'http://localhost:3001/api/auth';
+        let accessToken = null;
+        let refreshToken = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             showRoleFields();
@@ -147,10 +148,19 @@
             const urlParams = new URLSearchParams(window.location.search);
             const googleToken = urlParams.get('token');
             if (googleToken) {
-                token = googleToken;
-                displayMessage(`Login with Google successful! Token: ${token}`);
+                accessToken = googleToken;
+                displayMessage(`Login with Google successful! Access Token: ${accessToken}`);
                 // Clear the token from the URL for cleaner display
                 window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            // Load tokens from localStorage if available
+            accessToken = localStorage.getItem('accessToken');
+            refreshToken = localStorage.getItem('refreshToken');
+            if (accessToken) {
+                displayMessage(`Access Token loaded: ${accessToken}`);
+            }
+            if (refreshToken) {
+                displayMessage(`Refresh Token loaded: ${refreshToken}`);
             }
         });
 
@@ -196,7 +206,7 @@
             }
 
             let userData = {
-                email, nama, noTelp, password, role
+                email, nama_lengkap: nama, no_hp: noTelp, password, role
             };
 
             if (role === 'Dokter') {
@@ -279,8 +289,11 @@
                 });
                 const data = await response.json();
                 if (data.success) {
-                    token = data.data.token; 
-                    displayMessage(`${data.message} Token: ${token}`);
+                    accessToken = data.data.accessToken; 
+                    refreshToken = data.data.refreshToken;
+                    localStorage.setItem('accessToken', accessToken);
+                    localStorage.setItem('refreshToken', refreshToken);
+                    displayMessage(`${data.message} Access Token: ${accessToken} Refresh Token: ${refreshToken}`);
                 } else {
                     displayMessage(data.message, true);
                 }
@@ -346,8 +359,8 @@
         }
 
         async function accessProtected() {
-            if (!token) {
-                displayMessage('Please login first to get a token.', true);
+            if (!accessToken) {
+                displayMessage('Please login first to get an access token.', true);
                 return;
             }
 
@@ -355,11 +368,54 @@
                 const response = await fetch(`${API_URL}/protected`, {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${accessToken}`
                     }
                 });
                 const data = await response.json();
                 if (data.success) {
+                    displayMessage(data.message);
+                } else if (response.status === 401 && data.message === 'Token kedaluwarsa. Silakan login kembali.' && refreshToken) {
+                    displayMessage('Access token expired, trying to refresh...');
+                    const refreshResponse = await fetch(`${API_URL}/refresh-token`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ refreshToken })
+                    });
+                    const refreshData = await refreshResponse.json();
+                    if (refreshData.success) {
+                        accessToken = refreshData.accessToken;
+                        localStorage.setItem('accessToken', accessToken);
+                        displayMessage('Access token refreshed. Retrying protected route...');
+                        // Retry the original request
+                        await accessProtected();
+                    } else {
+                        displayMessage(`Failed to refresh token: ${refreshData.message}`, true);
+                        logout(); // Force logout if refresh fails
+                    }
+                } else {
+                    displayMessage(data.message, true);
+                }
+            } catch (error) {
+                displayMessage('Error: ' + error.message, true);
+            }
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch(`${API_URL}/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${refreshToken}` // Send refresh token for blacklisting
+                    }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    accessToken = null;
+                    refreshToken = null;
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
                     displayMessage(data.message);
                 } else {
                     displayMessage(data.message, true);

@@ -4,10 +4,14 @@ const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
 const crypto = require('crypto');
 
+// -----------------------------------------
+
 const User = require('../models/User');
 const Pasien = require('../models/Pasien');
 const Dokter = require('../models/Dokter');
 const Apoteker = require('../models/Apoteker');
+const { sendVerificationEmail } = require('../services/emailService');
+const { generateCustomUserId, encrypt, decrypt, createHash } = require('../services/userService'); // Import from userService
 
 // In-memory user store for testing (use database in production)
 // const users = [];
@@ -20,6 +24,9 @@ const authLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
 });
+
+const OTP_MAX_ATTEMPTS = 5; // Max attempts for OTP verification
+const OTP_LOCK_TIME = 15 * 60 * 1000; // 15 minutes lockout for OTP
 
 // Validation rules
 const registerValidation = [
@@ -83,8 +90,21 @@ const generateToken = (user) => {
         nama: user.nama_lengkap
     };
     
-    return jwt.sign(payload, process.env.JWT_SECRET || 'your-secret-key', {
-        expiresIn: process.env.JWT_EXPIRES_IN || '24h',
+    return jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: '15m', // Access token expires in 15 minutes
+        issuer: 'your-app-name',
+        audience: 'your-app-users'
+    });
+};
+
+const generateRefreshToken = (user) => {
+    const payload = {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+    };
+    return jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: '7d', // Refresh token expires in 7 days
         issuer: 'your-app-name',
         audience: 'your-app-users'
     });
@@ -136,24 +156,6 @@ exports.register = [
                 });
             }
 
-            // Check if email already exists
-            let existingUser = await User.findOne({ email, role });
-            if (existingUser) {
-                return res.status(409).json({
-                    success: false,
-                    message: `Akun dengan email ${email} untuk role ${role} sudah terdaftar`
-                });
-            }
-
-            // Check if phone number already exists
-            let existingPhoneUser = await User.findOne({ no_hp });
-            if (existingPhoneUser) {
-                return res.status(409).json({
-                    success: false,
-                    message: `Nomor telepon ${no_hp} sudah terdaftar untuk akun lain.`
-                });
-            }
-
             // Hash password
             const saltRounds = 12;
             const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -162,11 +164,20 @@ exports.register = [
             const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
             const verificationCodeExpires = Date.now() + 3600000; // 1 hour from now
 
+            // Generate custom user ID
+            const customUserId = generateCustomUserId(role);
+
+            // Encrypt phone number and create hash
+            const encryptedNoHp = encrypt(no_hp);
+            const noHpHash = createHash(no_hp);
+
             // Create user object
             const newUser = new User({
                 email,
                 nama_lengkap: nama_lengkap.trim(),
-                no_hp,
+                no_hp: encryptedNoHp,
+                no_hp_hash: noHpHash,
+                customUserId,
                 password: hashedPassword,
                 role,
                 is_verified: false,
@@ -198,7 +209,8 @@ exports.register = [
             }
 
             // Log verification code to console (simulating email/SMS)
-            console.log(`Verification code for ${newUser.email}: ${verificationCode}`);
+            // console.log(`Verification code for ${newUser.email}: ${verificationCode}`);
+            await sendVerificationEmail(newUser.email, newUser.nama_lengkap, verificationCode);
 
             res.status(201).json({
                 success: true,
@@ -208,6 +220,18 @@ exports.register = [
 
         } catch (error) {
             console.error('Registration error:', error);
+            if (error.code === 11000) {
+                let message = 'Terjadi kesalahan duplikasi.';
+                if (error.keyPattern.email) {
+                    message = `Email ${email} sudah terdaftar.`;
+                } else if (error.keyPattern.no_hp_hash) {
+                    message = `Nomor telepon ${no_hp} sudah terdaftar.`;
+                }
+                return res.status(409).json({
+                    success: false,
+                    message: message
+                });
+            }
             res.status(500).json({
                 success: false,
                 message: 'Terjadi kesalahan sistem. Silakan coba lagi.'
@@ -234,6 +258,15 @@ exports.verifyAccount = [
                 });
             }
 
+            // Check if account is locked due to too many OTP attempts
+            if (user.otpLockUntil && user.otpLockUntil > Date.now()) {
+                const remainingTime = Math.ceil((user.otpLockUntil - Date.now()) / (60 * 1000));
+                return res.status(429).json({
+                    success: false,
+                    message: `Akun terkunci karena terlalu banyak percobaan OTP yang gagal. Silakan coba lagi dalam ${remainingTime} menit.`
+                });
+            }
+
             if (user.is_verified) {
                 return res.status(400).json({
                     success: false,
@@ -242,15 +275,30 @@ exports.verifyAccount = [
             }
 
             if (user.verificationCode !== code || user.verificationCodeExpires < Date.now()) {
+                // Increment OTP attempts
+                user.otpAttempts = (user.otpAttempts || 0) + 1;
+                if (user.otpAttempts >= OTP_MAX_ATTEMPTS) {
+                    user.otpLockUntil = Date.now() + OTP_LOCK_TIME;
+                    user.otpAttempts = 0; // Reset attempts after locking
+                    await user.save();
+                    return res.status(400).json({
+                        success: false,
+                        message: `Kode verifikasi tidak valid. Akun Anda telah dikunci selama ${OTP_LOCK_TIME / (60 * 1000)} menit karena terlalu banyak percobaan yang gagal.`
+                    });
+                }
+                await user.save();
                 return res.status(400).json({
                     success: false,
                     message: 'Kode verifikasi tidak valid atau sudah kedaluwarsa.'
                 });
             }
 
+            // OTP is correct, reset attempts and lock
             user.is_verified = true;
             user.verificationCode = undefined;
             user.verificationCodeExpires = undefined;
+            user.otpAttempts = 0;
+            user.otpLockUntil = undefined;
             user.updatedAt = new Date().toISOString();
             await user.save();
 
@@ -312,12 +360,13 @@ exports.login = [
                 });
             }
 
-            // Generate token
-            const token = generateToken(user);
+            // Generate tokens
+            const accessToken = generateToken(user);
+            const refreshToken = generateRefreshToken(user);
 
-            // Update last login (if you add a lastLogin field to User model)
-            // user.lastLogin = new Date().toISOString();
-            // await user.save();
+            // Store refresh token in database
+            user.refreshTokens.push(refreshToken);
+            await user.save();
 
             // Remove password from response
             const { password: _, ...userResponse } = user.toObject(); // Use toObject() for Mongoose documents
@@ -327,7 +376,8 @@ exports.login = [
                 message: 'Login berhasil! Selamat datang kembali.',
                 data: {
                     user: userResponse,
-                    token
+                    accessToken,
+                    refreshToken
                 }
             });
 
@@ -359,6 +409,15 @@ exports.forgotPassword = [
                 });
             }
 
+            // Check if account is locked due to too many OTP attempts
+            if (user.otpLockUntil && user.otpLockUntil > Date.now()) {
+                const remainingTime = Math.ceil((user.otpLockUntil - Date.now()) / (60 * 1000));
+                return res.status(429).json({
+                    success: false,
+                    message: `Akun terkunci karena terlalu banyak permintaan reset password. Silakan coba lagi dalam ${remainingTime} menit.`
+                });
+            }
+
             // Generate a 6-digit OTP
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
             const otpExpires = Date.now() + 300000; // 5 minutes from now (300,000 ms)
@@ -366,6 +425,8 @@ exports.forgotPassword = [
             // Store the OTP and its expiration in the user object
             user.resetOtp = otp;
             user.resetOtpExpires = otpExpires;
+            user.otpAttempts = 0; // Reset attempts on new OTP request
+            user.otpLockUntil = undefined; // Clear lock on new OTP request
             await user.save();
 
             // In a real application, you would send this OTP to the user's email/phone.
@@ -398,15 +459,48 @@ exports.resetPassword = [
         try {
             const { email, otp, newPassword } = req.body;
 
-            // Find user by email and check OTP and expiration
-            const user = await User.findOne({ email, resetOtp: otp, resetOtpExpires: { $gt: Date.now() } });
+            // Find user by email
+            const user = await User.findOne({ email });
 
             if (!user) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Kode verifikasi tidak valid atau sudah kedaluwarsa.'
+                    message: 'Email tidak ditemukan.'
                 });
             }
+
+            // Check if account is locked due to too many OTP attempts
+            if (user.otpLockUntil && user.otpLockUntil > Date.now()) {
+                const remainingTime = Math.ceil((user.otpLockUntil - Date.now()) / (60 * 1000));
+                return res.status(429).json({
+                    success: false,
+                    message: `Akun terkunci karena terlalu banyak percobaan OTP yang gagal. Silakan coba lagi dalam ${remainingTime} menit.`
+                });
+            }
+
+            // Check OTP and expiration
+            if (user.resetOtp !== otp || user.resetOtpExpires < Date.now()) {
+                // Increment OTP attempts
+                user.otpAttempts = (user.otpAttempts || 0) + 1;
+                if (user.otpAttempts >= OTP_MAX_ATTEMPTS) {
+                    user.otpLockUntil = Date.now() + OTP_LOCK_TIME;
+                    user.otpAttempts = 0; // Reset attempts after locking
+                    await user.save();
+                    return res.status(400).json({
+                        success: false,
+                        message: `Kode OTP tidak valid. Akun Anda telah dikunci selama ${OTP_LOCK_TIME / (60 * 1000)} menit karena terlalu banyak percobaan yang gagal.`
+                    });
+                }
+                await user.save();
+                return res.status(400).json({
+                    success: false,
+                    message: 'Kode OTP tidak valid atau sudah kedaluwarsa.'
+                });
+            }
+
+            // OTP is correct, reset attempts and lock
+            user.otpAttempts = 0;
+            user.otpLockUntil = undefined;
 
             // Hash new password
             const saltRounds = 12;
@@ -488,6 +582,9 @@ exports.getProfile = async (req, res) => {
         }
 
         const { password: _, ...userResponse } = user.toObject();
+        if (userResponse.no_hp) {
+            userResponse.no_hp = decrypt(userResponse.no_hp);
+        }
 
         res.status(200).json({
             success: true,
@@ -522,7 +619,10 @@ exports.updateProfile = [
             const updatedFields = {};
 
             if (nama_lengkap) updatedFields.nama_lengkap = nama_lengkap.trim();
-            if (no_hp) updatedFields.no_hp = no_hp;
+            if (no_hp) {
+                updatedFields.no_hp = encrypt(no_hp);
+                updatedFields.no_hp_hash = createHash(no_hp);
+            }
 
             const user = await User.findByIdAndUpdate(req.user.id, { $set: updatedFields }, { new: true, runValidators: true });
 
@@ -610,17 +710,64 @@ exports.changePassword = [
 ];
 
 // Logout (if using token blacklisting)
-exports.logout = (req, res) => {
+exports.logout = async (req, res) => {
     try {
-        // In a real app, you might want to blacklist the token
-        // For now, just return success message
-        res.status(200).json({
-            success: true,
-            message: 'Berhasil logout. Sampai jumpa!'
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+
+        if (!token) return res.status(401).json({ success: false, message: 'Token tidak ditemukan.' });
+
+        // Verify the token to get user ID
+        jwt.verify(token, process.env.JWT_SECRET, async (err, user) => {
+            if (err) return res.status(403).json({ success: false, message: 'Token tidak valid.' });
+
+            const foundUser = await User.findById(user.id);
+            if (!foundUser) return res.status(404).json({ success: false, message: 'Pengguna tidak ditemukan.' });
+
+            // Remove the refresh token from the user's record
+            foundUser.refreshTokens = foundUser.refreshTokens.filter(t => t !== token);
+            await foundUser.save();
+
+            res.status(200).json({
+                success: true,
+                message: 'Berhasil logout. Sampai jumpa!'
+            });
         });
 
     } catch (error) {
         console.error('Logout error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan sistem. Silakan coba lagi.'
+        });
+    }
+};
+
+// Refresh Token endpoint
+exports.refreshToken = async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) return res.status(401).json({ success: false, message: 'Refresh token tidak ditemukan.' });
+
+    try {
+        const foundUser = await User.findOne({ refreshTokens: refreshToken });
+        if (!foundUser) return res.status(403).json({ success: false, message: 'Refresh token tidak valid.' });
+
+        jwt.verify(refreshToken, process.env.JWT_SECRET, (err, user) => {
+            if (err) return res.status(403).json({ success: false, message: 'Refresh token tidak valid atau kedaluwarsa.' });
+
+            // Generate new access token
+            const newAccessToken = generateToken(foundUser);
+
+            res.status(200).json({
+                success: true,
+                message: 'Access token berhasil diperbarui.',
+                accessToken: newAccessToken
+            });
+        });
+
+    } catch (error) {
+        console.error('Refresh token error:', error);
         res.status(500).json({
             success: false,
             message: 'Terjadi kesalahan sistem. Silakan coba lagi.'

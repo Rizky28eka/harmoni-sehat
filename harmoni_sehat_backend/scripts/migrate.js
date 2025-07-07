@@ -34,6 +34,7 @@ const Notifikasi = require('../models/Notifikasi');
 const ArtikelKesehatan = require('../models/ArtikelKesehatan');
 
 const bcrypt = require('bcryptjs');
+const { generateCustomUserId } = require('../services/userService'); // Import generateCustomUserId
 
 const migrateDB = async () => {
   try {
@@ -63,6 +64,9 @@ const migrateDB = async () => {
       email: 'admin@harmoni.sehat',
       password: hashedPassword,
       is_active: true,
+      role: 'Admin', // Add role
+      nama_lengkap: 'Super Admin', // Add nama_lengkap
+      customUserId: generateCustomUserId('Admin'), // Generate customUserId
     });
     console.log('Admin user created.', adminUser);
 
