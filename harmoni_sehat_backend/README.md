@@ -1,21 +1,31 @@
 # Harmoni Sehat Backend
 
-Backend API for the Harmoni Sehat application, a comprehensive Indonesian health management platform.
+Backend API for the Harmoni Sehat application, a comprehensive Indonesian health management platform, now powered by **TypeScript**.
 
 ## Project Structure
 
 ```
 harmoni_sehat_backend/
-├── config/             # Database configuration
-├── controllers/        # Request handlers
-├── middlewares/        # Custom middleware (error handling, etc.)
-├── models/             # Mongoose models
-├── routes/             # API routes
-├── services/           # Business logic
-├── scripts/            # Scripts (seeding, etc.)
-├── .env.example        # Example environment variables
+├── src/                  # All source code (TypeScript files)
+│   ├── config/           # Database configuration
+│   ├── controllers/      # Request handlers
+│   ├── middlewares/      # Custom middleware (error handling, etc.)
+│   ├── models/           # Mongoose models
+│   ├── routes/           # API routes
+│   ├── services/         # Business logic
+│   ├── scripts/          # Scripts (seeding, etc.)
+│   ├── types/            # Custom TypeScript type definitions
+│   ├── utils/            # Utility functions (e.g., logger)
+│   └── server.ts         # Main application file
+├── dist/                 # Compiled JavaScript output
+├── .env.example          # Example environment variables
+├── .eslintrc.js          # ESLint configuration
+├── jest.config.ts        # Jest test configuration
 ├── package.json
-└── server.js           # Main application file
+├── package-lock.json
+├── README.md
+└── tsconfig.json         # TypeScript compiler configuration
+└── tsconfig.eslint.json  # TypeScript configuration for ESLint
 ```
 
 ## Getting Started
@@ -25,6 +35,7 @@ harmoni_sehat_backend/
 - Node.js (v18+)
 - npm (v8+)
 - MongoDB
+- **TypeScript**
 
 ### Installation
 
@@ -34,7 +45,7 @@ harmoni_sehat_backend/
    cd harmoni_sehat_project/harmoni_sehat_backend
    ```
 
-2. Install dependencies:
+2. Install dependencies (including TypeScript and its type definitions):
    ```bash
    npm install
    ```
@@ -55,12 +66,17 @@ harmoni_sehat_backend/
 
 ### Running the Server
 
-- To start the server in development mode (with hot-reloading):
+- To start the server in development mode (with hot-reloading, using `ts-node`):
   ```bash
   npm run dev
   ```
 
-- To start the server in production mode:
+- To build the project (compiles TypeScript to JavaScript):
+  ```bash
+  npm run build
+  ```
+
+- To start the server in production mode (runs compiled JavaScript):
   ```bash
   npm start
   ```
@@ -83,7 +99,7 @@ cd harmoni_sehat_backend
 npm run seed
 ```
 
-This will execute the `scripts/seed.js` file, which uses `@faker-js/faker` to generate realistic Indonesian patient data, including custom user IDs and encrypted phone numbers.
+These scripts now use `ts-node` to execute the TypeScript files directly.
 
 ## Authentication Features
 
