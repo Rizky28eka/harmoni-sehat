@@ -1,0 +1,63 @@
+import crypto from 'crypto';
+import logger from '../utils/logger';
+
+const ALGORITHM = 'aes-256-gcm';
+const IV_LENGTH = 16;
+const SALT_LENGTH = 64;
+const TAG_LENGTH = 16;
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY ? crypto.scryptSync(process.env.ENCRYPTION_KEY, 'salt', 32) : null;
+
+export const encrypt = (text: string): string => {
+    if (!ENCRYPTION_KEY) throw new Error('ENCRYPTION_KEY is not set.');
+    const iv = crypto.randomBytes(IV_LENGTH);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _salt = crypto.randomBytes(SALT_LENGTH);
+    const cipher = crypto.createCipheriv(ALGORITHM, ENCRYPTION_KEY, iv);
+    const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
+    const tag = cipher.getAuthTag();
+    return Buffer.concat([_salt, iv, tag, encrypted]).toString('hex');
+};
+
+export const decrypt = (encryptedText: string): string | null => {
+    if (!ENCRYPTION_KEY) throw new Error('ENCRYPTION_KEY is not set.');
+    try {
+        const data = Buffer.from(encryptedText, 'hex');
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const _salt = data.slice(0, SALT_LENGTH);
+        const iv = data.slice(SALT_LENGTH, SALT_LENGTH + IV_LENGTH);
+        const tag = data.slice(SALT_LENGTH + IV_LENGTH, SALT_LENGTH + IV_LENGTH + TAG_LENGTH);
+        const encrypted = data.slice(SALT_LENGTH + IV_LENGTH + TAG_LENGTH);
+        const decipher = crypto.createDecipheriv(ALGORITHM, ENCRYPTION_KEY, iv);
+        decipher.setAuthTag(tag);
+        return decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8');
+    } catch (error: any) {
+        logger.error('Decryption failed:', error.message);
+        return null; 
+    }
+};
+
+export const createHash = (data: string): string => {
+    return crypto.createHash('sha256').update(data).digest('hex');
+};
+
+export const generateCustomUserId = (role: string): string => {
+    let prefix: string;
+    switch (role) {
+        case 'Pasien':
+            prefix = '08';
+            break;
+        case 'Dokter':
+            prefix = '10';
+            break;
+        case 'Apoteker':
+            prefix = '20';
+            break;
+        case 'Admin':
+            prefix = '04';
+            break;
+        default:
+            prefix = '99'; // Fallback for unknown roles
+    }
+    const randomPart = Math.random().toString(36).substring(2, 10).toUpperCase(); // 8 random chars
+    return `${prefix}-${randomPart}`;
+};
