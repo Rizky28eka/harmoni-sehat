@@ -1,14 +1,16 @@
 import { Router } from 'express';
 import UserController from './user.controller';
-import validate from '../../middlewares/validator';
-// import { createUserSchema, updateUserSchema } from './user.validation'; // Assuming validation schemas
+import { protect } from '../../middlewares/protect';
+import { authorize } from '../../middlewares/authorize';
 
 const router = Router();
 
-router.get('/', UserController.getAllUsers);
-router.get('/:id', UserController.getUserById);
-router.post('/', validate({}), UserController.createUser); // Add actual schema here
-router.put('/:id', validate({}), UserController.updateUser); // Add actual schema here
-router.delete('/:id', UserController.deleteUser);
+// All routes below this are now protected
+router.use(protect);
+
+router.get('/', authorize('admin'), UserController.getAllUsers);
+router.get('/:id', authorize('admin'), UserController.getUserById);
+router.put('/:id', authorize('admin'), UserController.updateUser);
+router.delete('/:id', authorize('admin'), UserController.deleteUser);
 
 export default router;

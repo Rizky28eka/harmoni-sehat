@@ -1,222 +1,162 @@
 # Harmoni Sehat Backend API
 
-Aplikasi backend untuk proyek Harmoni Sehat, dibangun dengan Express.js, TypeScript, dan MongoDB. API ini dirancang untuk mendukung aplikasi frontend yang komprehensif untuk manajemen kesehatan, janji temu, rekam medis, dan e-commerce farmasi.
+This is the backend API for the Harmoni Sehat application, built to manage healthcare-related data and services.
 
-## Fitur
+## Features
 
-*   **Manajemen Pengguna & Peran:**
-    *   Manajemen pengguna (registrasi, login, profil).
-    *   Sistem peran (Pasien, Dokter, Apoteker, Admin) dengan otentikasi berbasis token.
-    *   Manajemen profil pengguna (foto, bio).
-*   **Klinik & Jadwal:**
-    *   Manajemen data klinik.
-    *   Manajemen spesialisasi dokter.
-    *   Penjadwalan praktik dokter di berbagai klinik.
-*   **Modul Konsultasi & Rekam Medis:**
-    *   Manajemen konsultasi (penjadwalan, status, keluhan, diagnosis, tindakan).
-    *   Pesan obrolan terkait konsultasi.
-    *   Ulasan dokter oleh pasien.
-    *   Manajemen rekam medis pasien (riwayat penyakit, alergi, riwayat vaksinasi).
-*   **Modul Farmasi & E-commerce:**
-    *   Manajemen data obat (nama, deskripsi, kategori, harga, stok, resep).
-    *   Keranjang obat untuk pasien.
-    *   Manajemen pesanan obat dan detailnya.
-    *   Manajemen resep dan obat-obatan yang diresepkan.
-*   **Sistem Pendukung:**
-    *   Pencatatan aktivitas pengguna.
-    *   Manajemen media (URL, tipe MIME, ukuran).
-    *   Manajemen token refresh untuk otentikasi.
-    *   Sistem notifikasi.
-    *   Manajemen artikel kesehatan (penulis, status publikasi).
-    *   Manajemen metode pembayaran.
-    *   Pencatatan transaksi dengan referensi polimorfik ke konsultasi atau pesanan obat.
+-   **User Authentication & Authorization:** Secure user registration, login, and role-based access control (RBAC) using JWT.
+    -   Roles: `admin`, `doctor`, `patient`, `pharmacist`.
+-   **Secure CRUD Operations:**
+    -   **User Management:** Secure Create, Read, Update, Delete (CRUD) operations for user profiles.
+    -   **Medical Records:** Secure and validated CRUD operations for patient medical records, including ownership-based authorization.
+    -   **Patient Profiles:** Secure and validated CRUD operations for patient profiles, including ownership-based authorization.
+    -   **Doctor Profiles:** Secure and validated CRUD operations for doctor profiles, including ownership-based authorization.
+    -   **Role Management:** Secure and validated CRUD operations for roles (admin-only).
+    -   **Specialization Management:** Secure and validated CRUD operations for medical specializations.
+    -   **Clinic Management:** Secure and validated CRUD operations for clinics.
+    -   **Drug Management:** Secure and validated CRUD operations for drugs.
+    -   **Drug Cart Management:** Secure and validated CRUD operations for patient drug carts, including ownership-based authorization.
+    -   **Drug Order Management:** Secure and validated CRUD operations for patient drug orders, including ownership-based authorization.
+-   **Data Validation:** Robust input validation using Zod.
+-   **Error Handling:** Centralized error handling for consistent API responses.
+-   **Database Seeding:** Script to populate the database with dummy data for development and testing.
 
-## Struktur Proyek
+## Technologies Used
 
-```
-harmoni_sehat_backend/
-├── src/
-│   ├── api/
-│   │   ├── medicalRecord/
-│   │   │   ├── medicalRecord.controller.ts
-│   │   │   ├── medicalRecord.interface.ts
-│   │   │   ├── medicalRecord.routes.ts
-│   │   │   └── medicalRecord.service.ts
-│   │   └── user/
-│   │       ├── user.controller.ts
-│   │       ├── user.interface.ts
-│   │       ├── user.routes.ts
-│   │       └── user.service.ts
-│   ├── config/
-│   │   ├── db.ts
-│   │   └── env.ts
-│   ├── middlewares/
-│   │   ├── errorHandler.ts
-│   │   └── validator.ts
-│   ├── models/
-│   │   ├── ActivityLog.ts
-│   │   ├── Admin.ts
-│   │   ├── ChatMessage.ts
-│   │   ├── Clinic.ts
-│   │   ├── Consultation.ts
-│   │   ├── Doctor.ts
-│   │   ├── DoctorClinic.ts
-│   │   ├── DoctorReview.ts
-│   │   ├── Drug.ts
-│   │   ├── DrugCart.ts
-│   │   ├── DrugOrder.ts
-│   │   ├── DrugOrderDetail.ts
-│   │   ├── HealthArticle.ts
-│   │   ├── Media.ts
-│   │   ├── MedicalRecord.ts
-│   │   ├── Notification.ts
-│   │   ├── Patient.ts
-│   │   ├── PaymentMethod.ts
-│   │   ├── Pharmacist.ts
-│   │   ├── PracticeSchedule.ts
-│   │   ├── Prescription.ts
-│   │   ├── PrescriptionDrug.ts
-│   │   ├── RefreshToken.ts
-│   │   ├── Role.ts
-│   │   ├── Specialization.ts
-│   │   ├── Transaction.ts
-│   │   ├── User.ts
-│   │   ├── UserProfile.ts
-│   │   └── UserRole.ts
-│   ├── utils/
-│   │   ├── ApiResponse.ts
-│   │   ├── AppError.ts
-│   │   └── seeder.ts
-│   └── index.ts
-├── .env
-├── package.json
-├── tsconfig.json
-└── README.md
-```
+-   **Node.js**
+-   **Express.js** (Web Framework)
+-   **TypeScript** (Language)
+-   **MongoDB** (Database)
+-   **Mongoose** (ODM for MongoDB)
+-   **JSON Web Tokens (JWT)** (for Authentication)
+-   **Bcrypt.js** (for Password Hashing)
+-   **Zod** (for Data Validation)
+-   **Dotenv** (for Environment Variables)
 
-## Memulai
+## Getting Started
 
-### Prasyarat
+Follow these steps to set up and run the backend API locally.
 
-*   Node.js (v18 atau lebih tinggi)
-*   npm (v8 atau lebih tinggi)
-*   MongoDB (berjalan secara lokal atau dapat diakses melalui string koneksi)
+### Prerequisites
 
-### Instalasi
+-   Node.js (v18 or higher recommended)
+-   npm (Node Package Manager)
+-   MongoDB Atlas account (or local MongoDB instance)
 
-1.  Navigasi ke direktori `harmoni_sehat_backend`:
+### Installation
+
+1.  **Clone the repository:**
     ```bash
-    cd harmoni_sehat_backend
+    git clone <repository_url>
+    cd harmoni_sehat_project/harmoni_sehat_backend
     ```
 
-2.  Instal dependensi:
+2.  **Install dependencies:**
     ```bash
     npm install
     ```
 
-### Variabel Lingkungan
+### Environment Variables
 
-Buat file `.env` di direktori `harmoni_sehat_backend` dengan konten berikut:
+Create a `.env` file in the `harmoni_sehat_backend` directory and add the following environment variables. Replace the placeholder values with your actual credentials.
 
-```
+```env
+# =========================
+#  DATABASE
+# =========================
+MONGO_URI="your_mongodb_atlas_connection_string"
 PORT=5000
-MONGO_URI=mongodb://localhost:27017/harmoni_sehat
+
+# =========================
+#  AUTHENTICATION & SECURITY
+# =========================
+JWT_SECRET="a_very_strong_and_long_secret_key_for_jwt"
+JWT_EXPIRES_IN="90d"
+SESSION_SECRET="another_strong_secret_for_sessions_if_used"
+ENCRYPTION_KEY="a_strong_key_for_encryption_if_used"
+
+# =========================
+# ☎️ TWILIO (SMS Gateway) - Optional
+# =========================
+TWILIO_ACCOUNT_SID="your_twilio_account_sid"
+TWILIO_AUTH_TOKEN="your_twilio_auth_token"
+TWILIO_PHONE_NUMBER="+1234567890"
+
+# =========================
+#  GOOGLE OAUTH - Optional
+# =========================
+GOOGLE_CLIENT_ID="your_google_client_id"
+GOOGLE_CLIENT_SECRET="your_google_client_secret"
+
+# =========================
+#  EMAIL SERVICE - Optional
+# =========================
+EMAIL_HOST="smtp.gmail.com"
+EMAIL_PORT=587
+EMAIL_USER="your_email@gmail.com"
+EMAIL_PASS="your_email_app_password"
+EMAIL_FROM="Harmoni Sehat <no-reply@harmonisehat.com>"
 ```
 
-*   `PORT`: Port di mana server akan berjalan.
-*   `MONGO_URI`: String koneksi MongoDB Anda. Jika berjalan secara lokal, pastikan MongoDB berjalan pada port default atau perbarui URI sesuai kebutuhan.
+### Database Setup
 
-### Menjalankan Aplikasi
+1.  **Build the project:**
+    ```bash
+    npm run build
+    ```
 
-#### Mode Pengembangan
+2.  **Seed the database (WARNING: This will delete all existing data in the connected database):**
+    ```bash
+    npm run seed
+    ```
 
-Untuk menjalankan server dalam mode pengembangan dengan `nodemon` (otomatis restart saat ada perubahan file):
+### Running the API
 
-```bash
-npm run dev
+1.  **Start the development server:**
+    ```bash
+    npm run dev
+    ```
+    The API will be running at `http://localhost:5000` (or your specified PORT).
+
+2.  **Start the production server (after building):**
+    ```bash
+    npm start
+    ```
+
+## API Endpoints
+
+For a detailed list of all API endpoints, their methods, and expected request/response formats, please refer to the [API Endpoints Documentation](../../docs/backend/api-endpoints.md).
+
+## Database Schema
+
+For a visual representation and detailed description of the database models and their relationships, please refer to the [Database Schema Documentation](../../docs/backend/database-schema.md).
+
+## Project Structure
+
 ```
-
-API akan dapat diakses di `http://localhost:5000` (atau PORT yang Anda tentukan).
-
-#### Membangun untuk Produksi
-
-Untuk mengkompilasi kode TypeScript ke JavaScript:
-
-```bash
-npm run build
+harmoni_sehat_backend/
+├── src/
+│   ├── api/                  # Contains modules for different API resources
+│   │   ├── auth/             # Authentication (register, login)
+│   │   ├── user/             # User CRUD
+│   │   ├── medicalRecord/    # Medical Record CRUD
+│   │   ├── patient/          # Patient CRUD
+│   │   ├── doctor/           # Doctor CRUD
+│   │   ├── role/             # Role CRUD
+│   │   ├── specialization/   # Specialization CRUD
+│   │   ├── clinic/           # Clinic CRUD
+│   │   ├── drug/             # Drug CRUD
+│   │   ├── pharmacist/       # Pharmacist CRUD
+│   │   ├── drugCart/         # Drug Cart CRUD
+│   │   ├── drugOrder/        # Drug Order CRUD
+│   │   └── ... (other models)
+│   ├── config/               # Database connection, environment variables
+│   ├── middlewares/          # Authentication, authorization, validation, error handling
+│   ├── models/               # Mongoose schemas for database entities
+│   ├── utils/                # Utility functions (AppError, ApiResponse, Seeder)
+│   └── index.ts              # Main application entry point
+├── .env.example              # Example environment variables file
+├── package.json
+├── tsconfig.json
+└── README.md
 ```
-
-Ini akan menghasilkan file JavaScript yang dikompilasi ke direktori `dist`.
-
-#### Mode Produksi
-
-Untuk memulai aplikasi yang telah dikompilasi:
-
-```bash
-npm run start
-```
-
-### Seeding Data
-
-Untuk mengisi database Anda dengan data dummy (berguna untuk pengujian):
-
-```bash
-npm run seed
-```
-
-**Peringatan:** Perintah ini akan menghapus semua data yang ada di database sebelum mengisi data baru. Gunakan dengan hati-hati di lingkungan produksi.
-
-## Endpoint API
-
-URL dasar API adalah `http://localhost:PORT/api`.
-
-*Catatan: Endpoint spesifik untuk setiap modul akan diimplementasikan di dalam folder `src/api/`.*
-
-### Manajemen Pengguna
-
-*   `/api/users`
-*   `/api/roles`
-*   `/api/user-profiles`
-*   `/api/admins`
-*   `/api/doctors`
-*   `/api/patients`
-*   `/api/pharmacists`
-
-### Klinik & Jadwal
-
-*   `/api/clinics`
-*   `/api/specializations`
-*   `/api/doctor-clinics`
-*   `/api/practice-schedules`
-
-### Konsultasi & Rekam Medis
-
-*   `/api/consultations`
-*   `/api/chat-messages`
-*   `/api/doctor-reviews`
-*   `/api/medical-records`
-
-### Farmasi & E-commerce
-
-*   `/api/drugs`
-*   `/api/drug-carts`
-*   `/api/drug-orders`
-*   `/api/prescriptions`
-
-### Sistem Pendukung
-
-*   `/api/activity-logs`
-*   `/api/media`
-*   `/api/refresh-tokens`
-*   `/api/notifications`
-*   `/api/health-articles`
-*   `/api/payment-methods`
-*   `/api/transactions`
-
-## Kontribusi
-
-Jangan ragu untuk berkontribusi pada proyek ini. Pastikan kode Anda mematuhi gaya dan konvensi yang ada.
-
-## Lisensi
-
-[Tentukan Lisensi Anda di sini, misal: MIT License]

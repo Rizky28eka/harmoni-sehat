@@ -7,8 +7,13 @@ const MedicalRecord_1 = __importDefault(require("../../models/MedicalRecord"));
 const AppError_1 = __importDefault(require("../../utils/AppError"));
 const mongoose_1 = require("mongoose");
 class MedicalRecordService {
-    async getAllMedicalRecords() {
-        return MedicalRecord_1.default.find().populate('patient_id');
+    // Get all medical records for a specific patient
+    async getMyMedicalRecord(patientId) {
+        if (!mongoose_1.Types.ObjectId.isValid(patientId)) {
+            throw new AppError_1.default('Invalid Patient ID', 400);
+        }
+        // In a real app, you might find based on a user ID reference
+        return MedicalRecord_1.default.findOne({ patient_id: patientId }).populate('patient_id');
     }
     async getMedicalRecordById(id) {
         if (!mongoose_1.Types.ObjectId.isValid(id)) {
@@ -20,11 +25,16 @@ class MedicalRecordService {
         }
         return record;
     }
-    async createMedicalRecord(recordData) {
-        if (!mongoose_1.Types.ObjectId.isValid(recordData.patient_id)) {
-            throw new AppError_1.default('Invalid Pasien ID', 400);
+    // Create a medical record for a specific patient ID (from logged-in user)
+    async createMedicalRecord(patientId, recordData) {
+        if (!mongoose_1.Types.ObjectId.isValid(patientId)) {
+            throw new AppError_1.default('Invalid Patient ID', 400);
         }
-        const newRecord = await MedicalRecord_1.default.create(recordData);
+        const existingRecord = await MedicalRecord_1.default.findOne({ patient_id: patientId });
+        if (existingRecord) {
+            throw new AppError_1.default('Medical record for this patient already exists', 409);
+        }
+        const newRecord = await MedicalRecord_1.default.create({ ...recordData, patient_id: patientId });
         return newRecord;
     }
     async updateMedicalRecord(id, recordData) {

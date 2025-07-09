@@ -16,14 +16,6 @@ class UserService {
         }
         return user;
     }
-    async createUser(userData) {
-        const existingUser = await User_1.default.findOne({ email: userData.email });
-        if (existingUser) {
-            throw new AppError_1.default('User with this email already exists', 409);
-        }
-        const newUser = await User_1.default.create(userData);
-        return newUser;
-    }
     async updateUser(id, userData) {
         const user = await User_1.default.findByIdAndUpdate(id, userData, { new: true, runValidators: true });
         if (!user) {

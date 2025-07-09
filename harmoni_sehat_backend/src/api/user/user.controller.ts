@@ -23,15 +23,7 @@ class UserController {
     }
   }
 
-  async createUser(req: Request, res: Response, next: NextFunction) {
-    try {
-      const userData: CreateUserDto = req.body;
-      const newUser = await UserService.createUser(userData);
-      res.status(201).json(new ApiResponse(201, toUserResponseDto(newUser), 'User created successfully'));
-    } catch (error) {
-      next(error);
-    }
-  }
+  
 
   async updateUser(req: Request, res: Response, next: NextFunction) {
     try {

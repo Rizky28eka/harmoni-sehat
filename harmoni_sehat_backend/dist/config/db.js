@@ -4,10 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
-const env_1 = require("./env");
+const env_1 = __importDefault(require("./env"));
 const connectDB = async () => {
     try {
-        await mongoose_1.default.connect(env_1.MONGO_URI);
+        await mongoose_1.default.connect(env_1.default.mongoUri);
         console.log('MongoDB Connected...');
     }
     catch (err) {

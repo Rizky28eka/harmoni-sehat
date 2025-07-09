@@ -5,6 +5,8 @@ export interface ISpecialization extends Document {
   nama: string;
   deskripsi?: string;
   is_active: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const specializationSchema = new Schema<ISpecialization>({

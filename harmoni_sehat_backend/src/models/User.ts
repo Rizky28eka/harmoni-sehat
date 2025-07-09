@@ -1,12 +1,15 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 export interface IUser extends Document {
   _id: Types.ObjectId;
   email: string;
-  password?: string; // Password can be optional for DTOs, but required for creation
+  password?: string;
   is_active: boolean;
   createdAt: Date;
   updatedAt: Date;
+  roles?: string[]; // Add roles property
+  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const userSchema = new Schema<IUser>({
@@ -31,6 +34,21 @@ const userSchema = new Schema<IUser>({
 {
   timestamps: true,
 });
+
+// Hash password before saving
+userSchema.pre<IUser>('save', async function (next) {
+  if (!this.isModified('password') || !this.password) {
+    return next();
+  }
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
+
+// Method to compare passwords
+userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
 
 const User = model<IUser>('User', userSchema);
 

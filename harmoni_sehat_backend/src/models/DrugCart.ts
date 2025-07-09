@@ -5,6 +5,8 @@ export interface IDrugCart extends Document {
   patient_id: Types.ObjectId;
   drug_id: Types.ObjectId;
   jumlah: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const drugCartSchema = new Schema<IDrugCart>({

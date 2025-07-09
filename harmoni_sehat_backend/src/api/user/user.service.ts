@@ -15,14 +15,7 @@ class UserService {
     return user;
   }
 
-  async createUser(userData: CreateUserDto): Promise<IUser> {
-    const existingUser = await User.findOne({ email: userData.email });
-    if (existingUser) {
-      throw new AppError('User with this email already exists', 409);
-    }
-    const newUser = await User.create(userData);
-    return newUser;
-  }
+  
 
   async updateUser(id: string, userData: UpdateUserDto): Promise<IUser | null> {
     const user = await User.findByIdAndUpdate(id, userData, { new: true, runValidators: true });

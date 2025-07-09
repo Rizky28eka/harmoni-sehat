@@ -52,40 +52,7 @@ harmoni_sehat_frontend/
 
 ## Memulai
 
-### Prasyarat
-
-*   Node.js (v18 atau lebih tinggi)
-*   npm (v8 atau lebih tinggi)
-
-### Instalasi
-
-1.  Navigasi ke direktori `harmoni_sehat_frontend`:
-    ```bash
-    cd harmoni_sehat_frontend
-    ```
-
-2.  Instal dependensi:
-    ```bash
-    npm install
-    ```
-
-### Variabel Lingkungan
-
-Jika aplikasi frontend Anda perlu terhubung ke API backend, Anda mungkin perlu membuat file `.env` di root direktori `harmoni_sehat_frontend` dengan variabel lingkungan yang sesuai, misalnya:
-
-```
-VITE_API_BASE_URL=http://localhost:5000/api
-```
-
-### Menjalankan Aplikasi
-
-Untuk menjalankan aplikasi dalam mode pengembangan:
-
-```bash
-npm run dev
-```
-
-Aplikasi akan dapat diakses di `http://localhost:5173` (atau port yang ditentukan oleh Vite).
+Untuk instruksi tentang cara mengatur dan menjalankan aplikasi frontend secara lokal, silakan lihat [Panduan Cara Menjalankan Frontend](../../docs/frontend/how-to-run.md).
 
 ## Kontribusi
 

@@ -9,6 +9,8 @@ export interface IPatient extends Document {
   jenis_kelamin: 'Laki-laki' | 'Perempuan';
   alamat: string;
   no_telepon: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const patientSchema = new Schema<IPatient>({

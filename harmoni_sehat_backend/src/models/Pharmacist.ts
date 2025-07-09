@@ -5,6 +5,8 @@ export interface IPharmacist extends Document {
   user_id: Types.ObjectId;
   nama: string;
   nomor_sipa: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const pharmacistSchema = new Schema<IPharmacist>({

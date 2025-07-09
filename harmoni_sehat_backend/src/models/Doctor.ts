@@ -10,6 +10,8 @@ export interface IDoctor extends Document {
   foto?: string; // URL to photo
   bio?: string;
   status: 'active' | 'inactive' | 'pending';
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const doctorSchema = new Schema<IDoctor>({

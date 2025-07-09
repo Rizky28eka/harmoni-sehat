@@ -7,6 +7,8 @@ export interface IClinic extends Document {
   no_telepon: string;
   email: string;
   status: 'active' | 'inactive';
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const clinicSchema = new Schema<IClinic>({

@@ -10,6 +10,8 @@ export interface IDrug extends Document {
   satuan: string; // e.g., 'tablet', 'botol', 'strip'
   butuh_resep: boolean;
   tgl_kadaluarsa: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const drugSchema = new Schema<IDrug>({

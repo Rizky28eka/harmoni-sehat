@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { Faker, id_ID, en } from '@faker-js/faker';
 import connectDB from '../config/db';
-import { MONGO_URI } from '../config/env';
+import env from '../config/env';
 
 // Import all models
 import User from '../models/User';
@@ -38,7 +38,7 @@ const faker = new Faker({ locale: [id_ID, en] });
 
 const seedData = async () => {
   try {
-    await connectDB();
+    mongoose.connect(env.mongoUri);
 
     console.log('Dropping customUserId_1 index from users collection...');
     try {

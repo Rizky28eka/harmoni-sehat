@@ -7,6 +7,8 @@ export interface IDrugOrder extends Document {
   total_harga: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   alamat_pengiriman: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const drugOrderSchema = new Schema<IDrugOrder>({

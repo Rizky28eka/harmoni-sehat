@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const faker_1 = require("@faker-js/faker");
-const db_1 = __importDefault(require("../config/db"));
+const env_1 = __importDefault(require("../config/env"));
 // Import all models
 const User_1 = __importDefault(require("../models/User"));
 const Role_1 = __importDefault(require("../models/Role"));
@@ -39,7 +39,7 @@ const HealthArticle_1 = __importDefault(require("../models/HealthArticle"));
 const faker = new faker_1.Faker({ locale: [faker_1.id_ID, faker_1.en] });
 const seedData = async () => {
     try {
-        await (0, db_1.default)();
+        mongoose_1.default.connect(env_1.default.mongoUri);
         console.log('Dropping customUserId_1 index from users collection...');
         try {
             await mongoose_1.default.connection.collection('users').dropIndex('customUserId_1');
@@ -429,6 +429,22 @@ const seedData = async () => {
             }));
         }
         console.log(`${activityLogs.length} activity logs created.`);
+        // Seed HealthArticles
+        const healthArticles = [];
+        const authors = [...admins, ...doctors];
+        for (let i = 0; i < 15; i++) {
+            const author = faker.helpers.arrayElement(authors);
+            const authorType = author instanceof Admin_1.default ? 'Admin' : 'Doctor';
+            healthArticles.push(await HealthArticle_1.default.create({
+                judul: faker.lorem.sentence(5),
+                slug: faker.lorem.slug(),
+                konten: faker.lorem.paragraphs(3),
+                author_id: author._id,
+                author_type: authorType,
+                status_publikasi: faker.helpers.arrayElement(['draft', 'published', 'archived']),
+            }));
+        }
+        console.log(`${healthArticles.length} health articles created.`);
         // Seed Media
         const mediaItems = [];
         for (let i = 0; i < 20; i++) {
@@ -438,8 +454,8 @@ const seedData = async () => {
             if (modelType === 'User') {
                 modelId = faker.helpers.arrayElement(users)._id;
             }
-            else if (modelType === 'HealthArticle' && HealthArticle_1.default.length > 0) {
-                modelId = faker.helpers.arrayElement(await HealthArticle_1.default.find())._id;
+            else if (modelType === 'HealthArticle' && healthArticles.length > 0) { // Use healthArticles array directly
+                modelId = faker.helpers.arrayElement(healthArticles)._id;
             }
             else {
                 continue;
@@ -477,22 +493,6 @@ const seedData = async () => {
             }));
         }
         console.log(`${notifications.length} notifications created.`);
-        // Seed HealthArticles
-        const healthArticles = [];
-        const authors = [...admins, ...doctors];
-        for (let i = 0; i < 15; i++) {
-            const author = faker.helpers.arrayElement(authors);
-            const authorType = author instanceof Admin_1.default ? 'Admin' : 'Doctor';
-            healthArticles.push(await HealthArticle_1.default.create({
-                judul: faker.lorem.sentence(5),
-                slug: faker.lorem.slug(),
-                konten: faker.lorem.paragraphs(3),
-                author_id: author._id,
-                author_type: authorType,
-                status_publikasi: faker.helpers.arrayElement(['draft', 'published', 'archived']),
-            }));
-        }
-        console.log(`${healthArticles.length} health articles created.`);
         console.log('Data seeding complete!');
         process.exit();
     }
