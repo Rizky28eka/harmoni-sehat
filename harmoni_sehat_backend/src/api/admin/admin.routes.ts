@@ -16,9 +16,6 @@ router.post('/', authorize('admin'), validate(createAdminSchema), AdminControlle
 // Route for a logged-in admin to get their own admin profile
 router.get('/me', authorize('admin'), AdminController.getMyAdminProfile);
 
-// Routes for admin to get all admin profiles
-router.get('/', authorize('admin'), AdminController.getAllAdmins);
-
 // Routes for specific admin by ID
 router.get('/:id', authorize('admin'), AdminController.getAdminById);
 router.put('/:id', authorize('admin'), validate(updateAdminSchema), AdminController.updateAdmin);

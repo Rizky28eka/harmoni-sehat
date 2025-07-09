@@ -103,6 +103,16 @@ app.use('/api/practiceschedules', practiceScheduleRoutes);
 app.use('/api/doctorclinics', doctorClinicRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/prescriptiondrugs', prescriptionDrugRoutes);
+app.use('/api/healtharticles', healthArticleRoutes);
+app.use('/api/media', mediaRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/paymentmethods', paymentMethodRoutes);
+app.use('/api/transactions', transactionRoutes);
+app.use('/api/userprofiles', userProfileRoutes);
+app.use('/api/userroles', userRoleRoutes);
+app.use('/api/admins', adminRoutes);
+app.use('/api/activitylogs', activityLogRoutes);
+app.use('/api/refreshtokens', refreshTokenRoutes);
 
 // Handle undefined routes
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
