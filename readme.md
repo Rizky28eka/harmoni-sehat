@@ -26,7 +26,23 @@ This project aims to provide a comprehensive healthcare management system with f
 -   Medical Record Management
 -   Drug Management
 -   Drug Cart and Order Management
--   Clinic and Specialization Management
+-   Consultation Management
+-   Chat Message Management
+-   Doctor Review Management
+-   Practice Schedule Management
+-   Doctor-Clinic Association Management
+-   Prescription Management
+-   Prescription Drug Management
+-   Health Article Management
+-   Media Management
+-   Notification Management
+-   Payment Method Management
+-   Transaction Management
+-   User Profile Management
+-   User Role Management
+-   Admin Management
+-   Activity Log Management
+-   Refresh Token Management
 -   And many more healthcare-related functionalities.
 
 ## Contribution

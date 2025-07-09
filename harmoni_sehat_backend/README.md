@@ -17,6 +17,24 @@ This is the backend API for the Harmoni Sehat application, built to manage healt
     -   **Drug Management:** Secure and validated CRUD operations for drugs.
     -   **Drug Cart Management:** Secure and validated CRUD operations for patient drug carts, including ownership-based authorization.
     -   **Drug Order Management:** Secure and validated CRUD operations for patient drug orders, including ownership-based authorization.
+    -   **Drug Order Detail Management:** Secure and validated CRUD operations for drug order details.
+    -   **Consultation Management:** Secure and validated CRUD operations for consultations, including ownership-based authorization.
+    -   **Chat Message Management:** Secure and validated CRUD operations for chat messages, including ownership-based authorization.
+    -   **Doctor Review Management:** Secure and validated CRUD operations for doctor reviews, including ownership-based authorization.
+    -   **Practice Schedule Management:** Secure and validated CRUD operations for practice schedules, including ownership-based authorization.
+    -   **Doctor-Clinic Association Management:** Secure and validated CRUD operations for doctor-clinic associations, including ownership-based authorization.
+    -   **Prescription Management:** Secure and validated CRUD operations for prescriptions, including ownership-based authorization.
+    -   **Prescription Drug Management:** Secure and validated CRUD operations for prescription drugs, including ownership-based authorization.
+    -   **Health Article Management:** Secure and validated CRUD operations for health articles, including ownership-based authorization.
+    -   **Media Management:** Secure and validated CRUD operations for media, including ownership-based authorization.
+    -   **Notification Management:** Secure and validated CRUD operations for notifications, including ownership-based authorization.
+    -   **Payment Method Management:** Secure and validated CRUD operations for payment methods.
+    -   **Transaction Management:** Secure and validated CRUD operations for transactions, including ownership-based authorization.
+    -   **User Profile Management:** Secure and validated CRUD operations for user profiles, including ownership-based authorization.
+    -   **User Role Management:** Secure and validated CRUD operations for user role associations.
+    -   **Admin Management:** Secure and validated CRUD operations for admin profiles.
+    -   **Activity Log Management:** Secure and validated CRUD operations for activity logs.
+    -   **Refresh Token Management:** Secure and validated CRUD operations for refresh tokens.
 -   **Data Validation:** Robust input validation using Zod.
 -   **Error Handling:** Centralized error handling for consistent API responses.
 -   **Database Seeding:** Script to populate the database with dummy data for development and testing.
@@ -149,7 +167,24 @@ harmoni_sehat_backend/
 │   │   ├── pharmacist/       # Pharmacist CRUD
 │   │   ├── drugCart/         # Drug Cart CRUD
 │   │   ├── drugOrder/        # Drug Order CRUD
-│   │   └── ... (other models)
+│   │   ├── drugOrderDetail/  # Drug Order Detail CRUD
+│   │   ├── consultation/     # Consultation CRUD
+│   │   ├── chatMessage/      # Chat Message CRUD
+│   │   ├── doctorReview/     # Doctor Review CRUD
+│   │   ├── practiceSchedule/ # Practice Schedule CRUD
+│   │   ├── doctorClinic/     # Doctor Clinic CRUD
+│   │   ├── prescription/     # Prescription CRUD
+│   │   ├── prescriptionDrug/ # Prescription Drug CRUD
+│   │   ├── healthArticle/    # Health Article CRUD
+│   │   ├── media/            # Media CRUD
+│   │   ├── notification/     # Notification CRUD
+│   │   ├── paymentMethod/    # Payment Method CRUD
+│   │   ├── transaction/      # Transaction CRUD
+│   │   ├── userProfile/      # User Profile CRUD
+│   │   ├── userRole/         # User Role CRUD
+│   │   ├── admin/            # Admin CRUD
+│   │   ├── activityLog/      # Activity Log CRUD
+│   │   └── refreshToken/     # Refresh Token CRUD
 │   ├── config/               # Database connection, environment variables
 │   ├── middlewares/          # Authentication, authorization, validation, error handling
 │   ├── models/               # Mongoose schemas for database entities
