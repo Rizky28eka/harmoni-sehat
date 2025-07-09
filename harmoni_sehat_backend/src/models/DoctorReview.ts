@@ -7,6 +7,8 @@ export interface IDoctorReview extends Document {
   consultation_id: Types.ObjectId;
   rating: number;
   komentar?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const doctorReviewSchema = new Schema<IDoctorReview>({

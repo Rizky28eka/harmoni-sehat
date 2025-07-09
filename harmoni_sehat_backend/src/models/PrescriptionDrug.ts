@@ -7,6 +7,8 @@ export interface IPrescriptionDrug extends Document {
   dosis: string;
   jumlah: number;
   aturan_pakai: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const prescriptionDrugSchema = new Schema<IPrescriptionDrug>({

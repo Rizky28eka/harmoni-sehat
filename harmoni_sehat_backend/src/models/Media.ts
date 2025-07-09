@@ -7,6 +7,8 @@ export interface IMedia extends Document {
   url: string;
   mime_type?: string;
   size?: number; // in bytes
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const mediaSchema = new Schema<IMedia>({

@@ -7,6 +7,8 @@ export interface IDrugOrderDetail extends Document {
   harga_satuan: number;
   jumlah: number;
   subtotal: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const drugOrderDetailSchema = new Schema<IDrugOrderDetail>({

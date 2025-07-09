@@ -5,6 +5,8 @@ export interface IDoctorClinic extends Document {
   doctor_id: Types.ObjectId;
   clinic_id: Types.ObjectId;
   status: 'active' | 'inactive';
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const doctorClinicSchema = new Schema<IDoctorClinic>({

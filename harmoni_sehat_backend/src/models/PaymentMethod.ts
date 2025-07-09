@@ -6,6 +6,8 @@ export interface IPaymentMethod extends Document {
   kode: string;
   deskripsi?: string;
   is_active: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const paymentMethodSchema = new Schema<IPaymentMethod>({

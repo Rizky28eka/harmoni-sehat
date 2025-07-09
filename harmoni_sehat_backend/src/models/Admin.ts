@@ -4,6 +4,8 @@ export interface IAdmin extends Document {
   _id: Types.ObjectId;
   user_id: Types.ObjectId;
   nama: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const adminSchema = new Schema<IAdmin>({

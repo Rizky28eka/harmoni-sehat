@@ -12,6 +12,8 @@ export interface IConsultation extends Document {
   tindakan?: string;
   catatan_dokter?: string;
   video_call_url?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const consultationSchema = new Schema<IConsultation>({

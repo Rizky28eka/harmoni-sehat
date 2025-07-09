@@ -8,6 +8,8 @@ export interface IPracticeSchedule extends Document {
   jam_mulai: string; // e.g., "09:00"
   jam_selesai: string; // e.g., "17:00"
   is_active: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const practiceScheduleSchema = new Schema<IPracticeSchedule>({

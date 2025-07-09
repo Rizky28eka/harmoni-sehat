@@ -9,6 +9,8 @@ export interface ITransaction extends Document {
   external_id?: string; // ID from payment gateway
   transaksiable_id: Types.ObjectId; // Polymorphic reference
   transaksiable_type: string; // e.g., 'Consultation', 'DrugOrder'
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const transactionSchema = new Schema<ITransaction>({

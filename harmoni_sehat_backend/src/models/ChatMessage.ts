@@ -8,6 +8,8 @@ export interface IChatMessage extends Document {
   tipe: 'text' | 'image' | 'document';
   file_url?: string;
   is_read: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const chatMessageSchema = new Schema<IChatMessage>({

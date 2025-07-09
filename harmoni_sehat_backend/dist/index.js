@@ -23,6 +23,14 @@ const drug_routes_1 = __importDefault(require("./api/drug/drug.routes"));
 const pharmacist_routes_1 = __importDefault(require("./api/pharmacist/pharmacist.routes"));
 const drugCart_routes_1 = __importDefault(require("./api/drugCart/drugCart.routes"));
 const drugOrder_routes_1 = __importDefault(require("./api/drugOrder/drugOrder.routes"));
+const drugOrderDetail_routes_1 = __importDefault(require("./api/drugOrderDetail/drugOrderDetail.routes"));
+const consultation_routes_1 = __importDefault(require("./api/consultation/consultation.routes"));
+const chatMessage_routes_1 = __importDefault(require("./api/chatMessage/chatMessage.routes"));
+const doctorReview_routes_1 = __importDefault(require("./api/doctorReview/doctorReview.routes"));
+const practiceSchedule_routes_1 = __importDefault(require("./api/practiceSchedule/practiceSchedule.routes"));
+const doctorClinic_routes_1 = __importDefault(require("./api/doctorClinic/doctorClinic.routes"));
+const prescription_routes_1 = __importDefault(require("./api/prescription/prescription.routes"));
+const prescriptionDrug_routes_1 = __importDefault(require("./api/prescriptionDrug/prescriptionDrug.routes"));
 // Import models to ensure they are registered with Mongoose
 require("./models/Role");
 require("./models/UserRole");
@@ -75,6 +83,14 @@ app.use('/api/drugs', drug_routes_1.default);
 app.use('/api/pharmacists', pharmacist_routes_1.default);
 app.use('/api/drugcarts', drugCart_routes_1.default);
 app.use('/api/drugorders', drugOrder_routes_1.default);
+app.use('/api/drugorderdetails', drugOrderDetail_routes_1.default);
+app.use('/api/consultations', consultation_routes_1.default);
+app.use('/api/chatmessages', chatMessage_routes_1.default);
+app.use('/api/doctorreviews', doctorReview_routes_1.default);
+app.use('/api/practiceschedules', practiceSchedule_routes_1.default);
+app.use('/api/doctorclinics', doctorClinic_routes_1.default);
+app.use('/api/prescriptions', prescription_routes_1.default);
+app.use('/api/prescriptiondrugs', prescriptionDrug_routes_1.default);
 // Handle undefined routes
 app.all('*', (req, res, next) => {
     next(new AppError_1.default(`Can't find ${req.originalUrl} on this server!`, 404));

@@ -4,6 +4,8 @@ export interface IUserRole extends Document {
   _id: Types.ObjectId;
   user_id: Types.ObjectId;
   role_id: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const userRoleSchema = new Schema<IUserRole>({

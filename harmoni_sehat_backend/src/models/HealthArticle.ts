@@ -8,6 +8,8 @@ export interface IHealthArticle extends Document {
   author_id: Types.ObjectId; // Can be Admin or Doctor
   author_type: 'Admin' | 'Doctor';
   status_publikasi: 'draft' | 'published' | 'archived';
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const healthArticleSchema = new Schema<IHealthArticle>({

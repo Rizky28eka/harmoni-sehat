@@ -6,6 +6,8 @@ export interface IPrescription extends Document {
   catatan?: string;
   status: 'active' | 'inactive' | 'expired';
   expired_at: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const prescriptionSchema = new Schema<IPrescription>({
