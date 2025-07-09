@@ -1,0 +1,528 @@
+import mongoose from 'mongoose';
+import { Faker, id_ID, en } from '@faker-js/faker';
+import connectDB from '../config/db';
+import { MONGO_URI } from '../config/env';
+
+// Import all models
+import User from '../models/User';
+import Role from '../models/Role';
+import UserRole from '../models/UserRole';
+import UserProfile from '../models/UserProfile';
+import Doctor from '../models/Doctor';
+import Patient from '../models/Patient';
+import Pharmacist from '../models/Pharmacist';
+import Admin from '../models/Admin';
+import Specialization from '../models/Specialization';
+import Clinic from '../models/Clinic';
+import DoctorClinic from '../models/DoctorClinic';
+import PracticeSchedule from '../models/PracticeSchedule';
+import Consultation from '../models/Consultation';
+import MedicalRecord from '../models/MedicalRecord';
+import ChatMessage from '../models/ChatMessage';
+import DoctorReview from '../models/DoctorReview';
+import Drug from '../models/Drug';
+import DrugCart from '../models/DrugCart';
+import DrugOrder from '../models/DrugOrder';
+import DrugOrderDetail from '../models/DrugOrderDetail';
+import Prescription from '../models/Prescription';
+import PrescriptionDrug from '../models/PrescriptionDrug';
+import PaymentMethod from '../models/PaymentMethod';
+import Transaction from '../models/Transaction';
+import ActivityLog from '../models/ActivityLog';
+import Media from '../models/Media';
+import RefreshToken from '../models/RefreshToken';
+import Notification from '../models/Notification';
+import HealthArticle from '../models/HealthArticle';
+
+const faker = new Faker({ locale: [id_ID, en] });
+
+const seedData = async () => {
+  try {
+    await connectDB();
+
+    console.log('Dropping customUserId_1 index from users collection...');
+    try {
+      await mongoose.connection.collection('users').dropIndex('customUserId_1');
+      console.log('customUserId_1 index dropped successfully.');
+    } catch (error: any) {
+      if (error.code === 27) {
+        console.log('customUserId_1 index does not exist, skipping drop.');
+      } else {
+        console.error('Error dropping customUserId_1 index:', error);
+      }
+    }
+
+    console.log('Clearing existing data...');
+    await User.deleteMany({});
+    await Role.deleteMany({});
+    await UserRole.deleteMany({});
+    await UserProfile.deleteMany({});
+    await Doctor.deleteMany({});
+    await Patient.deleteMany({});
+    await Pharmacist.deleteMany({});
+    await Admin.deleteMany({});
+    await Specialization.deleteMany({});
+    await Clinic.deleteMany({});
+    await DoctorClinic.deleteMany({});
+    await PracticeSchedule.deleteMany({});
+    await Consultation.deleteMany({});
+    await MedicalRecord.deleteMany({});
+    await ChatMessage.deleteMany({});
+    await DoctorReview.deleteMany({});
+    await Drug.deleteMany({});
+    await DrugCart.deleteMany({});
+    await DrugOrder.deleteMany({});
+    await DrugOrderDetail.deleteMany({});
+    await Prescription.deleteMany({});
+    await PrescriptionDrug.deleteMany({});
+    await PaymentMethod.deleteMany({});
+    await Transaction.deleteMany({});
+    await ActivityLog.deleteMany({});
+    await Media.deleteMany({});
+    await RefreshToken.deleteMany({});
+    await Notification.deleteMany({});
+    await HealthArticle.deleteMany({});
+    console.log('Data cleared.');
+
+    // Seed Roles
+    const roles = await Role.insertMany([
+      { nama_peran: 'patient' },
+      { nama_peran: 'doctor' },
+      { nama_peran: 'pharmacist' },
+      { nama_peran: 'admin' },
+    ]);
+    const patientRole = roles.find(r => r.nama_peran === 'patient');
+    const doctorRole = roles.find(r => r.nama_peran === 'doctor');
+    const pharmacistRole = roles.find(r => r.nama_peran === 'pharmacist');
+    const adminRole = roles.find(r => r.nama_peran === 'admin');
+    console.log(`${roles.length} roles created.`);
+
+    // Seed Users, UserProfiles, and assign roles
+    const users = [];
+    const userProfiles = [];
+    const userRoles = [];
+    const doctors = [];
+    const patients = [];
+    const pharmacists = [];
+    const admins = [];
+
+    for (let i = 0; i < 50; i++) {
+      const user = await User.create({
+        email: faker.internet.email(),
+        password: 'password123', // In a real app, hash this!
+        is_active: true,
+      });
+      users.push(user);
+
+      userProfiles.push({
+        user_id: user._id,
+        foto: faker.image.avatar(),
+        bio: faker.lorem.sentence(),
+      });
+
+      let assignedRole;
+      if (i < 5) { // 5 Admins
+        assignedRole = adminRole;
+        admins.push(await Admin.create({ user_id: user._id, nama: faker.person.fullName() }));
+      } else if (i < 15) { // 10 Doctors
+        assignedRole = doctorRole;
+        doctors.push(await Doctor.create({
+          user_id: user._id,
+          nama: faker.person.fullName(),
+          nomor_str: faker.string.alphanumeric(10),
+          specialization_id: new mongoose.Types.ObjectId(), // Placeholder, will update after specializations are seeded
+          biaya_konsultasi: faker.number.int({ min: 50000, max: 200000 }),
+          foto: faker.image.avatar(),
+          bio: faker.lorem.paragraph(),
+          status: faker.helpers.arrayElement(['active', 'inactive', 'pending']),
+        }));
+      } else if (i < 20) { // 5 Pharmacists
+        assignedRole = pharmacistRole;
+        pharmacists.push(await Pharmacist.create({
+          user_id: user._id,
+          nama: faker.person.fullName(),
+          nomor_sipa: faker.string.alphanumeric(10),
+        }));
+      } else { // Remaining are Patients
+        assignedRole = patientRole;
+        patients.push(await Patient.create({
+          user_id: user._id,
+          nama: faker.person.fullName(),
+          nik: faker.string.numeric(16),
+          tanggal_lahir: faker.date.past({ years: 30 }),
+          jenis_kelamin: faker.helpers.arrayElement(['Laki-laki', 'Perempuan']),
+          alamat: `${faker.location.streetAddress()}, ${faker.location.city()}, ${faker.location.state()}, Indonesia`,
+          no_telepon: `08${faker.string.numeric(9)}`,
+        }));
+      }
+      userRoles.push({ user_id: user._id, role_id: assignedRole!._id });
+    }
+    await UserProfile.insertMany(userProfiles);
+    await UserRole.insertMany(userRoles);
+    console.log(`${users.length} users, ${userProfiles.length} user profiles, ${userRoles.length} user roles created.`);
+    console.log(`${doctors.length} doctors, ${patients.length} patients, ${pharmacists.length} pharmacists, ${admins.length} admins created.`);
+
+    // Seed Specializations
+    const specializations = await Specialization.insertMany([
+      { nama: 'Umum', deskripsi: 'Dokter umum', is_active: true },
+      { nama: 'Anak', deskripsi: 'Spesialis anak', is_active: true },
+      { nama: 'Gigi', deskripsi: 'Dokter gigi', is_active: true },
+      { nama: 'Jantung', deskripsi: 'Spesialis jantung', is_active: true },
+      { nama: 'Kulit', deskripsi: 'Spesialis kulit', is_active: true },
+    ]);
+    console.log(`${specializations.length} specializations created.`);
+
+    // Update Doctors with actual specialization_ids
+    for (const doctor of doctors) {
+      doctor.specialization_id = faker.helpers.arrayElement(specializations)._id;
+      await doctor.save();
+    }
+    console.log('Doctors updated with specializations.');
+
+    // Seed Clinics
+    const clinics = [];
+    for (let i = 0; i < 10; i++) {
+      clinics.push(await Clinic.create({
+        nama: faker.company.name() + ' Clinic',
+        alamat: `${faker.location.streetAddress()}, ${faker.location.city()}, ${faker.location.state()}, Indonesia`,
+        no_telepon: `021${faker.string.numeric(8)}`,
+        email: faker.internet.email(),
+        status: faker.helpers.arrayElement(['active', 'inactive']),
+      }));
+    }
+    console.log(`${clinics.length} clinics created.`);
+
+    // Seed DoctorClinics
+    const doctorClinics = [];
+    for (const doctor of doctors) {
+      const numClinics = faker.number.int({ min: 1, max: 3 });
+      for (let i = 0; i < numClinics; i++) {
+        doctorClinics.push(await DoctorClinic.create({
+          doctor_id: doctor._id,
+          clinic_id: faker.helpers.arrayElement(clinics)._id,
+          status: faker.helpers.arrayElement(['active', 'inactive']),
+        }));
+      }
+    }
+    console.log(`${doctorClinics.length} doctor clinics created.`);
+
+    // Seed PracticeSchedules
+    const practiceSchedules = [];
+    const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+    for (const doctor of doctors) {
+      for (const clinic of clinics) {
+        if (faker.datatype.boolean()) { // Randomly assign schedules
+          practiceSchedules.push(await PracticeSchedule.create({
+            doctor_id: doctor._id,
+            clinic_id: clinic._id,
+            hari: faker.helpers.arrayElement(days),
+            jam_mulai: '09:00',
+            jam_selesai: '17:00',
+            is_active: true,
+          }));
+        }
+      }
+    }
+    console.log(`${practiceSchedules.length} practice schedules created.`);
+
+    // Seed MedicalRecords
+    const medicalRecords = [];
+    for (const patient of patients) {
+      medicalRecords.push(await MedicalRecord.create({
+        patient_id: patient._id,
+        riwayat_penyakit: faker.helpers.arrayElements([faker.lorem.word(), faker.lorem.word()], { min: 0, max: 3 }),
+        alergi: faker.helpers.arrayElements([faker.lorem.word(), faker.lorem.word()], { min: 0, max: 2 }),
+        riwayat_vaksinasi: faker.helpers.arrayElements([faker.lorem.word(), faker.lorem.word()], { min: 0, max: 2 }),
+      }));
+    }
+    console.log(`${medicalRecords.length} medical records created.`);
+
+    // Seed Drugs
+    const drugs = [];
+    for (let i = 0; i < 30; i++) {
+      drugs.push(await Drug.create({
+        nama: faker.commerce.productName() + ' ' + faker.helpers.arrayElement(['Tablet', 'Sirup', 'Kapsul']),
+        deskripsi: faker.lorem.sentence(),
+        kategori: faker.commerce.department(),
+        harga: faker.number.int({ min: 5000, max: 100000 }),
+        stok: faker.number.int({ min: 10, max: 500 }),
+        satuan: faker.helpers.arrayElement(['strip', 'botol', 'tablet', 'kapsul']),
+        butuh_resep: faker.datatype.boolean(),
+        tgl_kadaluarsa: faker.date.future({ years: 2 }),
+      }));
+    }
+    console.log(`${drugs.length} drugs created.`);
+
+    // Seed Consultations, ChatMessages, DoctorReviews, Prescriptions, PrescriptionDrugs
+    const consultations = [];
+    const chatMessages = [];
+    const doctorReviews = [];
+    const prescriptions = [];
+    const prescriptionDrugs = [];
+
+    for (let i = 0; i < 30; i++) {
+      const patient = faker.helpers.arrayElement(patients);
+      const doctor = faker.helpers.arrayElement(doctors);
+      const schedule = faker.helpers.arrayElement(practiceSchedules.filter(s => s.doctor_id.equals(doctor._id)));
+
+      if (!schedule) continue; // Skip if no schedule found for doctor
+
+      const consultation = await Consultation.create({
+        patient_id: patient._id,
+        doctor_id: doctor._id,
+        schedule_id: schedule._id,
+        tanggal: faker.date.recent({ days: 30 }),
+        status: faker.helpers.arrayElement(['scheduled', 'completed', 'cancelled']),
+        keluhan: faker.lorem.sentence(),
+        diagnosa: faker.datatype.boolean() ? faker.lorem.sentence() : undefined,
+        tindakan: faker.datatype.boolean() ? faker.lorem.sentence() : undefined,
+        catatan_dokter: faker.datatype.boolean() ? faker.lorem.paragraph() : undefined,
+        video_call_url: faker.datatype.boolean() ? faker.internet.url() : undefined,
+      });
+      consultations.push(consultation);
+
+      // Chat Messages for consultation
+      for (let j = 0; j < faker.number.int({ min: 1, max: 5 }); j++) {
+        chatMessages.push(await ChatMessage.create({
+          consultation_id: consultation._id,
+          sender_id: faker.helpers.arrayElement([patient.user_id, doctor.user_id]),
+          isi: faker.lorem.sentence(),
+          tipe: 'text',
+          is_read: faker.datatype.boolean(),
+        }));
+      }
+
+      // Doctor Review for completed consultations
+      if (consultation.status === 'completed') {
+        doctorReviews.push(await DoctorReview.create({
+          patient_id: patient._id,
+          doctor_id: doctor._id,
+          consultation_id: consultation._id,
+          rating: faker.number.int({ min: 1, max: 5 }),
+          komentar: faker.lorem.sentence(),
+        }));
+      }
+
+      // Prescription for some completed consultations
+      if (consultation.status === 'completed' && faker.datatype.boolean()) {
+        const prescription = await Prescription.create({
+          consultation_id: consultation._id,
+          catatan: faker.lorem.sentence(),
+          status: faker.helpers.arrayElement(['active', 'inactive', 'expired']),
+          expired_at: faker.date.future({ years: 1 }),
+        });
+        prescriptions.push(prescription);
+
+        // Prescription Drugs
+        const numDrugs = faker.number.int({ min: 1, max: 3 });
+        for (let k = 0; k < numDrugs; k++) {
+          const drug = faker.helpers.arrayElement(drugs);
+          prescriptionDrugs.push(await PrescriptionDrug.create({
+            prescription_id: prescription._id,
+            drug_id: drug._id,
+            dosis: faker.lorem.word(),
+            jumlah: faker.number.int({ min: 1, max: 10 }),
+            aturan_pakai: faker.lorem.sentence(),
+          }));
+        }
+      }
+    }
+    console.log(`${consultations.length} consultations created.`);
+    console.log(`${chatMessages.length} chat messages created.`);
+    console.log(`${doctorReviews.length} doctor reviews created.`);
+    console.log(`${prescriptions.length} prescriptions created.`);
+    console.log(`${prescriptionDrugs.length} prescription drugs created.`);
+
+    // Seed DrugCarts
+    const drugCarts = [];
+    for (const patient of patients) {
+      const numItems = faker.number.int({ min: 0, max: 5 });
+      for (let i = 0; i < numItems; i++) {
+        const drug = faker.helpers.arrayElement(drugs);
+        try {
+          drugCarts.push(await DrugCart.create({
+            patient_id: patient._id,
+            drug_id: drug._id,
+            jumlah: faker.number.int({ min: 1, max: 5 }),
+          }));
+        } catch (error: any) {
+          if (error.code === 11000) { // Duplicate key error for unique compound index
+            // console.log('Duplicate drug in cart for patient, skipping.');
+          } else {
+            console.error('Error creating drug cart item:', error);
+          }
+        }
+      }
+    }
+    console.log(`${drugCarts.length} drug carts created.`);
+
+    // Seed DrugOrders and DrugOrderDetails
+    const drugOrders = [];
+    const drugOrderDetails = [];
+    for (let i = 0; i < 20; i++) {
+      const patient = faker.helpers.arrayElement(patients);
+      const order = await DrugOrder.create({
+        patient_id: patient._id,
+        kode_pesanan: faker.string.alphanumeric(12).toUpperCase(),
+        total_harga: 0, // Will be calculated from details
+        status: faker.helpers.arrayElement(['pending', 'processing', 'shipped', 'delivered', 'cancelled']),
+        alamat_pengiriman: `${faker.location.streetAddress()}, ${faker.location.city()}, ${faker.location.state()}, Indonesia`,
+      });
+      drugOrders.push(order);
+
+      let currentTotalHarga = 0;
+      const numOrderItems = faker.number.int({ min: 1, max: 5 });
+      for (let j = 0; j < numOrderItems; j++) {
+        const drug = faker.helpers.arrayElement(drugs);
+        const jumlah = faker.number.int({ min: 1, max: 3 });
+        const harga_satuan = drug.harga;
+        const subtotal = harga_satuan * jumlah;
+        drugOrderDetails.push(await DrugOrderDetail.create({
+          order_id: order._id,
+          drug_id: drug._id,
+          harga_satuan: harga_satuan,
+          jumlah: jumlah,
+          subtotal: subtotal,
+        }));
+        currentTotalHarga += subtotal;
+      }
+      order.total_harga = currentTotalHarga;
+      await order.save();
+    }
+    console.log(`${drugOrders.length} drug orders created.`);
+    console.log(`${drugOrderDetails.length} drug order details created.`);
+
+    // Seed PaymentMethods
+    const paymentMethods = await PaymentMethod.insertMany([
+      { nama: 'Transfer Bank', kode: 'BANK_TRANSFER', deskripsi: 'Pembayaran melalui transfer bank', is_active: true },
+      { nama: 'Kartu Kredit', kode: 'CREDIT_CARD', deskripsi: 'Pembayaran menggunakan kartu kredit', is_active: true },
+      { nama: 'E-Wallet', kode: 'E_WALLET', deskripsi: 'Pembayaran melalui dompet digital', is_active: true },
+    ]);
+    console.log(`${paymentMethods.length} payment methods created.`);
+
+    // Seed Transactions
+    const transactions = [];
+    for (let i = 0; i < 20; i++) {
+      const user = faker.helpers.arrayElement(users);
+      const paymentMethod = faker.helpers.arrayElement(paymentMethods);
+      const isDrugOrder = faker.datatype.boolean();
+      let transaksiable_id;
+      let transaksiable_type;
+      let total_biaya;
+
+      if (isDrugOrder && drugOrders.length > 0) {
+        const drugOrder = faker.helpers.arrayElement(drugOrders);
+        transaksiable_id = drugOrder._id;
+        transaksiable_type = 'DrugOrder';
+        total_biaya = drugOrder.total_harga;
+      } else if (consultations.length > 0) {
+        const consultation = faker.helpers.arrayElement(consultations);
+        transaksiable_id = consultation._id;
+        transaksiable_type = 'Consultation';
+        const doctorForConsultation = doctors.find(doc => doc._id.equals(consultation.doctor_id));
+        total_biaya = doctorForConsultation ? doctorForConsultation.biaya_konsultasi : 0; // Get consultation cost from doctor
+      } else {
+        continue; // Skip if no valid transaction source
+      }
+
+      transactions.push(await Transaction.create({
+        user_id: user._id,
+        total_biaya: total_biaya,
+        status: faker.helpers.arrayElement(['pending', 'completed', 'failed']),
+        payment_method_id: paymentMethod._id,
+        external_id: faker.string.uuid(),
+        transaksiable_id: transaksiable_id,
+        transaksiable_type: transaksiable_type,
+      }));
+    }
+    console.log(`${transactions.length} transactions created.`);
+
+    // Seed ActivityLogs
+    const activityLogs = [];
+    for (let i = 0; i < 50; i++) {
+      activityLogs.push(await ActivityLog.create({
+        user_id: faker.helpers.arrayElement(users)._id,
+        aksi: faker.lorem.word(),
+        deskripsi: faker.lorem.sentence(),
+        timestamp: faker.date.recent({ days: 30 }),
+      }));
+    }
+    console.log(`${activityLogs.length} activity logs created.`);
+
+    // Seed HealthArticles
+    const healthArticles = [];
+    const authors = [...admins, ...doctors];
+    for (let i = 0; i < 15; i++) {
+      const author = faker.helpers.arrayElement(authors);
+      const authorType = author instanceof Admin ? 'Admin' : 'Doctor';
+      healthArticles.push(await HealthArticle.create({
+        judul: faker.lorem.sentence(5),
+        slug: faker.lorem.slug(),
+        konten: faker.lorem.paragraphs(3),
+        author_id: author._id,
+        author_type: authorType,
+        status_publikasi: faker.helpers.arrayElement(['draft', 'published', 'archived']),
+      }));
+    }
+    console.log(`${healthArticles.length} health articles created.`);
+
+    // Seed Media
+    const mediaItems = [];
+    for (let i = 0; i < 20; i++) {
+      const modelTypes = ['User', 'HealthArticle']; // Add other models that might have media
+      const modelType = faker.helpers.arrayElement(modelTypes);
+      let modelId;
+      if (modelType === 'User') {
+        modelId = faker.helpers.arrayElement(users)._id;
+      } else if (modelType === 'HealthArticle' && healthArticles.length > 0) { // Use healthArticles array directly
+        modelId = faker.helpers.arrayElement(healthArticles)._id;
+      } else {
+        continue;
+      }
+
+      mediaItems.push(await Media.create({
+        model_type: modelType,
+        model_id: modelId,
+        url: faker.image.url(),
+        mime_type: faker.helpers.arrayElement(['image/jpeg', 'image/png', 'application/pdf']),
+        size: faker.number.int({ min: 10000, max: 5000000 }),
+      }));
+    }
+    console.log(`${mediaItems.length} media items created.`);
+
+    // Seed RefreshTokens
+    const refreshTokens = [];
+    for (const user of users) {
+      if (faker.datatype.boolean()) { // Some users might have refresh tokens
+        refreshTokens.push(await RefreshToken.create({
+          user_id: user._id,
+          token: faker.string.uuid(),
+          expired_at: faker.date.future({ years: 1 }),
+        }));
+      }
+    }
+    console.log(`${refreshTokens.length} refresh tokens created.`);
+
+    // Seed Notifications
+    const notifications = [];
+    for (let i = 0; i < 50; i++) {
+      notifications.push(await Notification.create({
+        user_id: faker.helpers.arrayElement(users)._id,
+        judul: faker.lorem.sentence(3),
+        isi: faker.lorem.paragraph(),
+        tipe: faker.helpers.arrayElement(['info', 'warning', 'error', 'success']),
+        is_read: faker.datatype.boolean(),
+      }));
+    }
+    console.log(`${notifications.length} notifications created.`);
+
+
+    console.log('Data seeding complete!');
+    process.exit();
+  } catch (error) {
+    console.error('Error seeding data:', error);
+    process.exit(1);
+  }
+};
+
+seedData();

@@ -1,35 +1,47 @@
-import mongoose, { Schema } from 'mongoose';
-import { IChatMessage, IChatMessageModel } from '../types';
+import { Schema, model, Document, Types } from 'mongoose';
 
-const ChatMessageSchema = new Schema<IChatMessage, IChatMessageModel>({
-    konsultasi_id: {
-        type: Schema.Types.ObjectId,
-        ref: 'Konsultasi',
-        required: true,
-    },
-    pengirim_id: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
-    },
-    isi: {
-        type: String,
-        required: true,
-    },
-    tipe: {
-        type: String,
-        enum: ['text', 'image', 'file'],
-        default: 'text',
-    },
-    file_url: {
-        type: String,
-    },
-    is_read: {
-        type: Boolean,
-        default: false,
-    },
-}, { timestamps: true });
+export interface IChatMessage extends Document {
+  _id: Types.ObjectId;
+  consultation_id: Types.ObjectId;
+  sender_id: Types.ObjectId; // User ID of sender
+  isi: string;
+  tipe: 'text' | 'image' | 'document';
+  file_url?: string;
+  is_read: boolean;
+}
 
-const ChatMessage = mongoose.model<IChatMessage, IChatMessageModel>('ChatMessage', ChatMessageSchema);
+const chatMessageSchema = new Schema<IChatMessage>({
+  consultation_id: {
+    type: Schema.Types.ObjectId,
+    ref: 'Consultation',
+    required: true,
+  },
+  sender_id: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  isi: {
+    type: String,
+    required: true,
+  },
+  tipe: {
+    type: String,
+    enum: ['text', 'image', 'document'],
+    required: true,
+  },
+  file_url: {
+    type: String,
+  },
+  is_read: {
+    type: Boolean,
+    default: false,
+  },
+},
+{
+  timestamps: true,
+});
+
+const ChatMessage = model<IChatMessage>('ChatMessage', chatMessageSchema);
 
 export default ChatMessage;

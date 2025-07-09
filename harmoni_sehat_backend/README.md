@@ -1,263 +1,222 @@
-# Harmoni Sehat Backend
+# Harmoni Sehat Backend API
 
-Backend API for the Harmoni Sehat application, a comprehensive Indonesian health management platform, now powered by **TypeScript**.
+Aplikasi backend untuk proyek Harmoni Sehat, dibangun dengan Express.js, TypeScript, dan MongoDB. API ini dirancang untuk mendukung aplikasi frontend yang komprehensif untuk manajemen kesehatan, janji temu, rekam medis, dan e-commerce farmasi.
 
-## Project Structure
+## Fitur
+
+*   **Manajemen Pengguna & Peran:**
+    *   Manajemen pengguna (registrasi, login, profil).
+    *   Sistem peran (Pasien, Dokter, Apoteker, Admin) dengan otentikasi berbasis token.
+    *   Manajemen profil pengguna (foto, bio).
+*   **Klinik & Jadwal:**
+    *   Manajemen data klinik.
+    *   Manajemen spesialisasi dokter.
+    *   Penjadwalan praktik dokter di berbagai klinik.
+*   **Modul Konsultasi & Rekam Medis:**
+    *   Manajemen konsultasi (penjadwalan, status, keluhan, diagnosis, tindakan).
+    *   Pesan obrolan terkait konsultasi.
+    *   Ulasan dokter oleh pasien.
+    *   Manajemen rekam medis pasien (riwayat penyakit, alergi, riwayat vaksinasi).
+*   **Modul Farmasi & E-commerce:**
+    *   Manajemen data obat (nama, deskripsi, kategori, harga, stok, resep).
+    *   Keranjang obat untuk pasien.
+    *   Manajemen pesanan obat dan detailnya.
+    *   Manajemen resep dan obat-obatan yang diresepkan.
+*   **Sistem Pendukung:**
+    *   Pencatatan aktivitas pengguna.
+    *   Manajemen media (URL, tipe MIME, ukuran).
+    *   Manajemen token refresh untuk otentikasi.
+    *   Sistem notifikasi.
+    *   Manajemen artikel kesehatan (penulis, status publikasi).
+    *   Manajemen metode pembayaran.
+    *   Pencatatan transaksi dengan referensi polimorfik ke konsultasi atau pesanan obat.
+
+## Struktur Proyek
 
 ```
 harmoni_sehat_backend/
-├── src/                  # All source code (TypeScript files)
-│   ├── config/           # Database configuration
-│   ├── controllers/      # Request handlers
-│   ├── middlewares/      # Custom middleware (error handling, etc.)
-│   ├── models/           # Mongoose models
-│   ├── routes/           # API routes
-│   ├── services/         # Business logic
-│   ├── scripts/          # Scripts (seeding, etc.)
-│   ├── types/            # Custom TypeScript type definitions
-│   ├── utils/            # Utility functions (e.g., logger)
-│   └── server.ts         # Main application file
-├── dist/                 # Compiled JavaScript output
-├── .env.example          # Example environment variables
-├── .eslintrc.js          # ESLint configuration
-├── jest.config.ts        # Jest test configuration
+├── src/
+│   ├── api/
+│   │   ├── medicalRecord/
+│   │   │   ├── medicalRecord.controller.ts
+│   │   │   ├── medicalRecord.interface.ts
+│   │   │   ├── medicalRecord.routes.ts
+│   │   │   └── medicalRecord.service.ts
+│   │   └── user/
+│   │       ├── user.controller.ts
+│   │       ├── user.interface.ts
+│   │       ├── user.routes.ts
+│   │       └── user.service.ts
+│   ├── config/
+│   │   ├── db.ts
+│   │   └── env.ts
+│   ├── middlewares/
+│   │   ├── errorHandler.ts
+│   │   └── validator.ts
+│   ├── models/
+│   │   ├── ActivityLog.ts
+│   │   ├── Admin.ts
+│   │   ├── ChatMessage.ts
+│   │   ├── Clinic.ts
+│   │   ├── Consultation.ts
+│   │   ├── Doctor.ts
+│   │   ├── DoctorClinic.ts
+│   │   ├── DoctorReview.ts
+│   │   ├── Drug.ts
+│   │   ├── DrugCart.ts
+│   │   ├── DrugOrder.ts
+│   │   ├── DrugOrderDetail.ts
+│   │   ├── HealthArticle.ts
+│   │   ├── Media.ts
+│   │   ├── MedicalRecord.ts
+│   │   ├── Notification.ts
+│   │   ├── Patient.ts
+│   │   ├── PaymentMethod.ts
+│   │   ├── Pharmacist.ts
+│   │   ├── PracticeSchedule.ts
+│   │   ├── Prescription.ts
+│   │   ├── PrescriptionDrug.ts
+│   │   ├── RefreshToken.ts
+│   │   ├── Role.ts
+│   │   ├── Specialization.ts
+│   │   ├── Transaction.ts
+│   │   ├── User.ts
+│   │   ├── UserProfile.ts
+│   │   └── UserRole.ts
+│   ├── utils/
+│   │   ├── ApiResponse.ts
+│   │   ├── AppError.ts
+│   │   └── seeder.ts
+│   └── index.ts
+├── .env
 ├── package.json
-├── package-lock.json
-├── README.md
-└── tsconfig.json         # TypeScript compiler configuration
-└── tsconfig.eslint.json  # TypeScript configuration for ESLint
+├── tsconfig.json
+└── README.md
 ```
 
-## Getting Started
+## Memulai
 
-### Prerequisites
+### Prasyarat
 
-- Node.js (v18+)
-- npm (v8+)
-- MongoDB
-- **TypeScript**
+*   Node.js (v18 atau lebih tinggi)
+*   npm (v8 atau lebih tinggi)
+*   MongoDB (berjalan secara lokal atau dapat diakses melalui string koneksi)
 
-### Installation
+### Instalasi
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/harmoni_sehat_project.git
-   cd harmoni_sehat_project/harmoni_sehat_backend
-   ```
+1.  Navigasi ke direktori `harmoni_sehat_backend`:
+    ```bash
+    cd harmoni_sehat_backend
+    ```
 
-2. Install dependencies (including TypeScript and its type definitions):
-   ```bash
-   npm install
-   ```
+2.  Instal dependensi:
+    ```bash
+    npm install
+    ```
 
-3. Create a `.env` file in the `harmoni_sehat_backend` directory and add the following environment variables:
-   ```
-   MONGO_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret_key_for_token_signing
-   ENCRYPTION_KEY=your_32_byte_hex_encryption_key_for_phone_numbers
-   EMAIL_HOST=smtp.gmail.com
-   EMAIL_PORT=587
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASS=your_google_app_password
-   EMAIL_FROM="Harmoni Sehat <no-reply@harmonisehat.com>"
-   GOOGLE_CLIENT_ID=your_google_oauth_client_id
-   GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
-   ```
+### Variabel Lingkungan
 
-### Running the Server
+Buat file `.env` di direktori `harmoni_sehat_backend` dengan konten berikut:
 
-- To start the server in development mode (with hot-reloading, using `ts-node`):
-  ```bash
-  npm run dev
-  ```
-
-- To build the project (compiles TypeScript to JavaScript):
-  ```bash
-  npm run build
-  ```
-
-- To start the server in production mode (runs compiled JavaScript):
-  ```bash
-  npm start
-  ```
-
-The server will be running at `http://localhost:3001`.
-
-### Database Migration & Seeding
-
-Before running the application for the first time or after significant schema changes, you should run database migrations. This will drop existing collections and create new ones based on your Mongoose models, ensuring your database schema is up-to-date.
-
-To run migrations (this will clear your database data):
-```bash
-cd harmoni_sehat_backend
-npm run migrate -- --rollback && npm run migrate
+```
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/harmoni_sehat
 ```
 
-To populate the database with dummy data (after migration):
+*   `PORT`: Port di mana server akan berjalan.
+*   `MONGO_URI`: String koneksi MongoDB Anda. Jika berjalan secara lokal, pastikan MongoDB berjalan pada port default atau perbarui URI sesuai kebutuhan.
+
+### Menjalankan Aplikasi
+
+#### Mode Pengembangan
+
+Untuk menjalankan server dalam mode pengembangan dengan `nodemon` (otomatis restart saat ada perubahan file):
+
 ```bash
-cd harmoni_sehat_backend
+npm run dev
+```
+
+API akan dapat diakses di `http://localhost:5000` (atau PORT yang Anda tentukan).
+
+#### Membangun untuk Produksi
+
+Untuk mengkompilasi kode TypeScript ke JavaScript:
+
+```bash
+npm run build
+```
+
+Ini akan menghasilkan file JavaScript yang dikompilasi ke direktori `dist`.
+
+#### Mode Produksi
+
+Untuk memulai aplikasi yang telah dikompilasi:
+
+```bash
+npm run start
+```
+
+### Seeding Data
+
+Untuk mengisi database Anda dengan data dummy (berguna untuk pengujian):
+
+```bash
 npm run seed
 ```
 
-These scripts now use `ts-node` to execute the TypeScript files directly.
+**Peringatan:** Perintah ini akan menghapus semua data yang ada di database sebelum mengisi data baru. Gunakan dengan hati-hati di lingkungan produksi.
 
-## Authentication Features
+## Endpoint API
 
-This backend implements a robust authentication system with the following features:
+URL dasar API adalah `http://localhost:PORT/api`.
 
-- **Email/Password Registration & Login:** Standard user registration and login with secure password hashing (bcrypt).
-- **Email Verification:** New user accounts require email verification using a one-time code sent via Nodemailer.
-- **Google OAuth 2.0 Integration:** Users can register and log in using their Google accounts. Google users are automatically verified.
-- **Encrypted Phone Numbers:** Sensitive phone number data is encrypted at rest using AES-256-GCM, ensuring privacy.
-- **Unique Phone Number Check:** Despite encryption, the system can still check for unique phone numbers during registration using a secure hashing mechanism.
-- **Custom User IDs:** Each user is assigned a unique, role-based custom ID (e.g., `08-XXXXXXX` for Pasien, `10-XXXXXXX` for Dokter, `20-XXXXXXX` for Apoteker, `04-XXXXXXX` for Admin).
-- **Password Reset:** Secure password reset functionality using OTP (One-Time Password) sent to the user's email.
-- **Protected Routes:** API endpoints are protected using JWT (JSON Web Tokens) for secure access control.
+*Catatan: Endpoint spesifik untuk setiap modul akan diimplementasikan di dalam folder `src/api/`.*
 
-## API Documentation
+### Manajemen Pengguna
 
-### Auth API
-- **POST /api/auth/register**
-  - Description: Register a new user.
-  - Request Body:
-    ```json
-    {
-      "email": "user@example.com",
-      "nama_lengkap": "Nama Lengkap",
-      "no_hp": "081234567890",
-      "password": "StrongPassword123!",
-      "confirmPassword": "StrongPassword123!",
-      "role": "Pasien" // or "Dokter", "Apoteker"
-      // Additional fields for Dokter/Apoteker roles
-      // "spesialisasi": "Umum",
-      // "noIzinPraktik": "SIP12345",
-      // "alamatKlinik": "Jl. Contoh No. 1",
-      // "noSTRA": "STRA12345",
-      // "alamatApotek": "Jl. Apotek No. 1"
-    }
-    ```
-  - Response: Success message and email for verification.
+*   `/api/users`
+*   `/api/roles`
+*   `/api/user-profiles`
+*   `/api/admins`
+*   `/api/doctors`
+*   `/api/patients`
+*   `/api/pharmacists`
 
-- **POST /api/auth/verify-account**
-  - Description: Verify user account with code.
-  - Request Body:
-    ```json
-    {
-      "email": "user@example.com",
-      "code": "123456"
-    }
-    ```
-  - Response: Success message.
+### Klinik & Jadwal
 
-- **POST /api/auth/login**
-  - Description: Log in a user.
-  - Request Body:
-    ```json
-    {
-      "username": "user@example.com",
-      "password": "StrongPassword123!",
-      "role": "Pasien" // or "Dokter", "Apoteker"
-    }
-    ```
-  - Response: User data and JWT token.
+*   `/api/clinics`
+*   `/api/specializations`
+*   `/api/doctor-clinics`
+*   `/api/practice-schedules`
 
-- **GET /api/auth/google**
-  - Description: Initiate Google OAuth login. Redirects to Google consent screen.
+### Konsultasi & Rekam Medis
 
-- **GET /api/auth/google/callback**
-  - Description: Google OAuth callback URL. Handles successful Google login/registration.
+*   `/api/consultations`
+*   `/api/chat-messages`
+*   `/api/doctor-reviews`
+*   `/api/medical-records`
 
-- **POST /api/auth/forgot-password**
-  - Description: Request OTP for password reset.
-  - Request Body:
-    ```json
-    {
-      "email": "user@example.com"
-    }
-    ```
-  - Response: Success message (OTP sent to email).
+### Farmasi & E-commerce
 
-- **POST /api/auth/reset-password**
-  - Description: Reset password using OTP.
-  - Request Body:
-    ```json
-    {
-      "email": "user@example.com",
-      "otp": "123456",
-      "newPassword": "NewStrongPassword123!"
-    }
-    ```
-  - Response: Success message.
+*   `/api/drugs`
+*   `/api/drug-carts`
+*   `/api/drug-orders`
+*   `/api/prescriptions`
 
-- **GET /api/auth/protected**
-  - Description: Example of a protected route. Requires JWT in Authorization header.
-  - Headers: `Authorization: Bearer <token>`
-  - Response: Protected data.
+### Sistem Pendukung
 
-- **GET /api/auth/profile**
-  - Description: Get authenticated user's profile. Requires JWT.
-  - Headers: `Authorization: Bearer <token>`
-  - Response: User profile data.
+*   `/api/activity-logs`
+*   `/api/media`
+*   `/api/refresh-tokens`
+*   `/api/notifications`
+*   `/api/health-articles`
+*   `/api/payment-methods`
+*   `/api/transactions`
 
-- **PUT /api/auth/profile**
-  - Description: Update authenticated user's profile. Requires JWT.
-  - Headers: `Authorization: Bearer <token>`
-  - Request Body:
-    ```json
-    {
-      "nama_lengkap": "Updated Name",
-      "no_hp": "089876543210"
-    }
-    ```
-  - Response: Updated user profile data.
+## Kontribusi
 
-- **PUT /api/auth/change-password**
-  - Description: Change authenticated user's password. Requires JWT.
-  - Headers: `Authorization: Bearer <token>`
-  - Request Body:
-    ```json
-    {
-      "currentPassword": "OldStrongPassword123!",
-      "newPassword": "NewStrongPassword123!"
-    }
-    ```
-  - Response: Success message.
+Jangan ragu untuk berkontribusi pada proyek ini. Pastikan kode Anda mematuhi gaya dan konvensi yang ada.
 
-- **POST /api/auth/logout**
-  - Description: Log out a user. Requires JWT.
-  - Headers: `Authorization: Bearer <token>`
-  - Response: Success message.
+## Lisensi
 
-### Pasien API
-
-- **GET /api/pasiens**
-  - Description: Get all pasiens.
-  - Response: An array of pasien objects.
-
-- **GET /api/pasiens/:id**
-  - Description: Get a single pasien by ID.
-  - Response: A single pasien object.
-
-- **POST /api/pasiens**
-  - Description: Create a new pasien.
-  - Request Body:
-    ```json
-    {
-      "nama": "John Doe",
-      "nik": "1234567890123456",
-      "tanggal_lahir": "1990-01-01",
-      "jenis_kelamin": "Laki-laki",
-      "alamat": "Jl. Jend. Sudirman No. 1, Jakarta",
-      "no_telepon": "081234567890"
-    }
-    ```
-  - Response: The newly created pasien object.
-
-- **PUT /api/pasiens/:id**
-  - Description: Update an existing pasien.
-  - Request Body: Same as POST request.
-  - Response: The updated pasien object.
-
-- **DELETE /api/pasiens/:id**
-  - Description: Delete a pasien.
-  - Response: The deleted pasien object.
+[Tentukan Lisensi Anda di sini, misal: MIT License]

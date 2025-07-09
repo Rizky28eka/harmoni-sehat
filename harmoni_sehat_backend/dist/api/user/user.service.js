@@ -1,0 +1,41 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const User_1 = __importDefault(require("../../models/User"));
+const AppError_1 = __importDefault(require("../../utils/AppError"));
+class UserService {
+    async getAllUsers() {
+        return User_1.default.find();
+    }
+    async getUserById(id) {
+        const user = await User_1.default.findById(id);
+        if (!user) {
+            throw new AppError_1.default('User not found', 404);
+        }
+        return user;
+    }
+    async createUser(userData) {
+        const existingUser = await User_1.default.findOne({ email: userData.email });
+        if (existingUser) {
+            throw new AppError_1.default('User with this email already exists', 409);
+        }
+        const newUser = await User_1.default.create(userData);
+        return newUser;
+    }
+    async updateUser(id, userData) {
+        const user = await User_1.default.findByIdAndUpdate(id, userData, { new: true, runValidators: true });
+        if (!user) {
+            throw new AppError_1.default('User not found', 404);
+        }
+        return user;
+    }
+    async deleteUser(id) {
+        const user = await User_1.default.findByIdAndDelete(id);
+        if (!user) {
+            throw new AppError_1.default('User not found', 404);
+        }
+    }
+}
+exports.default = new UserService();

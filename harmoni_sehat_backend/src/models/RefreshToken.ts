@@ -1,23 +1,33 @@
-import mongoose, { Schema } from 'mongoose';
-import { IRefreshToken, IRefreshTokenModel } from '../types';
+import { Schema, model, Document, Types } from 'mongoose';
 
-const RefreshTokenSchema = new Schema<IRefreshToken, IRefreshTokenModel>({
-    user_id: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
-    },
-    token: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    expired_at: {
-        type: Date,
-        required: true,
-    },
-}, { timestamps: true });
+export interface IRefreshToken extends Document {
+  _id: Types.ObjectId;
+  user_id: Types.ObjectId;
+  token: string;
+  expired_at: Date;
+}
 
-const RefreshToken = mongoose.model<IRefreshToken, IRefreshTokenModel>('RefreshToken', RefreshTokenSchema);
+const refreshTokenSchema = new Schema<IRefreshToken>({
+  user_id: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  token: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+  },
+  expired_at: {
+    type: Date,
+    required: true,
+  },
+},
+{
+  timestamps: true,
+});
+
+const RefreshToken = model<IRefreshToken>('RefreshToken', refreshTokenSchema);
 
 export default RefreshToken;
