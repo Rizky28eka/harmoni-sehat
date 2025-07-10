@@ -163,7 +163,7 @@ const seedData = async () => {
       nik: faker.number.int({ min: 1000000000000000, max: 9999999999999999 }).toString(),
       tanggal_lahir: faker.date.past({ years: 30, refDate: '2000-01-01' }),
       jenis_kelamin: faker.helpers.arrayElement(['Laki-laki', 'Perempuan']),
-      alamat: faker.location.streetAddress(true) + ', ' + faker.location.city() + ', Jawa Tengah',
+      alamat: faker.location.streetAddress({ useFullAddress: true }) + ', ' + faker.location.city() + ', Jawa Tengah',
       no_telepon: faker.phone.number(),
     });
     console.log('Pasien created.');
@@ -340,7 +340,7 @@ const seedData = async () => {
       kode_pesanan: faker.number.int({ min: 10000000, max: 99999999 }).toString(),
       total_harga: faker.number.int({ min: 50000, max: 500000 }),
       status: 'processing',
-      alamat_pengiriman: faker.address.streetAddress(true) + ', ' + faker.address.city() + ', Jawa Timur',
+      alamat_pengiriman: faker.location.streetAddress({ useFullAddress: true }) + ', ' + faker.location.city() + ', Jawa Timur',
     });
     console.log('DrugOrder created.');
 
