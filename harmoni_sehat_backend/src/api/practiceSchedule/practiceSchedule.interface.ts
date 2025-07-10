@@ -2,8 +2,8 @@ import { Types } from 'mongoose';
 import { IPracticeSchedule } from '../../models/PracticeSchedule';
 
 export interface CreatePracticeScheduleDto {
-  doctor_id: string; // Will be ObjectId in service
-  clinic_id: string; // Will be ObjectId in service
+  dokter_id: string; // Will be ObjectId in service
+  klinik_id: string; // Will be ObjectId in service
   hari: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat' | 'Sabtu' | 'Minggu';
   jam_mulai: string;
   jam_selesai: string;
@@ -11,8 +11,8 @@ export interface CreatePracticeScheduleDto {
 }
 
 export interface UpdatePracticeScheduleDto {
-  doctor_id?: string;
-  clinic_id?: string;
+  dokter_id?: string;
+  klinik_id?: string;
   hari?: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat' | 'Sabtu' | 'Minggu';
   jam_mulai?: string;
   jam_selesai?: string;
@@ -21,8 +21,8 @@ export interface UpdatePracticeScheduleDto {
 
 export interface IPracticeScheduleResponseDto {
   id: string;
-  doctor_id: string;
-  clinic_id: string;
+  dokter_id: string;
+  klinik_id: string;
   hari: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat' | 'Sabtu' | 'Minggu';
   jam_mulai: string;
   jam_selesai: string;
@@ -31,11 +31,11 @@ export interface IPracticeScheduleResponseDto {
   updatedAt: Date;
 }
 
-export const toPracticeScheduleResponseDto = (schedule: IPracticeSchedule): IPracticeScheduleResponseDto => {
+export const toPracticeScheduleResponseDto = (schedule: any): IPracticeScheduleResponseDto => {
   return {
     id: schedule._id.toString(),
-    doctor_id: schedule.doctor_id.toString(),
-    clinic_id: schedule.clinic_id.toString(),
+    dokter_id: schedule.dokter_id.toString(),
+    klinik_id: schedule.klinik_id.toString(),
     hari: schedule.hari,
     jam_mulai: schedule.jam_mulai,
     jam_selesai: schedule.jam_selesai,

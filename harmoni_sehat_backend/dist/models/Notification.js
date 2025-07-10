@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const notificationSchema = new mongoose_1.Schema({
+const NotificationSchema = new mongoose_1.Schema({
     user_id: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'User',
@@ -15,6 +15,7 @@ const notificationSchema = new mongoose_1.Schema({
     isi: {
         type: String,
         required: true,
+        trim: true,
     },
     tipe: {
         type: String,
@@ -26,8 +27,6 @@ const notificationSchema = new mongoose_1.Schema({
         type: Boolean,
         default: false,
     },
-}, {
-    timestamps: true,
-});
-const Notification = (0, mongoose_1.model)('Notification', notificationSchema);
+}, { timestamps: true });
+const Notification = (0, mongoose_1.model)('Notification', NotificationSchema);
 exports.default = Notification;

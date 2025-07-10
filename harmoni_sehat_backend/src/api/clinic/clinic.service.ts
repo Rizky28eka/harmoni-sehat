@@ -1,51 +1,41 @@
 import Clinic, { IClinic } from '../../models/Clinic';
-import AppError from '../../utils/AppError';
-import { Types } from 'mongoose';
-import { CreateClinicInput, UpdateClinicInput } from './clinic.validation';
+import { AppError } from '../../utils/AppError';
 
 class ClinicService {
-  async createClinic(clinicData: CreateClinicInput): Promise<IClinic> {
-    const existingClinic = await Clinic.findOne({ email: clinicData.email });
+  async createClinic(data: Partial<IClinic>): Promise<IClinic> {
+    const existingClinic = await Clinic.findOne({ nama: data.nama });
     if (existingClinic) {
-      throw new AppError('Clinic with this email already exists', 409);
+      throw new AppError('Klinik dengan nama tersebut sudah ada', 409);
     }
-    const newClinic = await Clinic.create(clinicData);
-    return newClinic;
+    const clinic = await Clinic.create(data);
+    return clinic;
   }
 
   async getAllClinics(): Promise<IClinic[]> {
-    return Clinic.find();
+    const clinics = await Clinic.find();
+    return clinics;
   }
 
-  async getClinicById(clinicId: string): Promise<IClinic | null> {
-    if (!Types.ObjectId.isValid(clinicId)) {
-      throw new AppError('Invalid Clinic ID', 400);
-    }
-    const clinic = await Clinic.findById(clinicId);
+  async getClinicById(id: string): Promise<IClinic> {
+    const clinic = await Clinic.findById(id);
     if (!clinic) {
-      throw new AppError('Clinic not found', 404);
+      throw new AppError('Klinik tidak ditemukan', 404);
     }
     return clinic;
   }
 
-  async updateClinic(clinicId: string, clinicData: UpdateClinicInput): Promise<IClinic | null> {
-    if (!Types.ObjectId.isValid(clinicId)) {
-      throw new AppError('Invalid Clinic ID', 400);
-    }
-    const clinic = await Clinic.findByIdAndUpdate(clinicId, clinicData, { new: true, runValidators: true });
+  async updateClinic(id: string, data: Partial<IClinic>): Promise<IClinic> {
+    const clinic = await Clinic.findByIdAndUpdate(id, data, { new: true, runValidators: true });
     if (!clinic) {
-      throw new AppError('Clinic not found', 404);
+      throw new AppError('Klinik tidak ditemukan', 404);
     }
     return clinic;
   }
 
-  async deleteClinic(clinicId: string): Promise<void> {
-    if (!Types.ObjectId.isValid(clinicId)) {
-      throw new AppError('Invalid Clinic ID', 400);
-    }
-    const clinic = await Clinic.findByIdAndDelete(clinicId);
+  async deleteClinic(id: string): Promise<void> {
+    const clinic = await Clinic.findByIdAndDelete(id);
     if (!clinic) {
-      throw new AppError('Clinic not found', 404);
+      throw new AppError('Klinik tidak ditemukan', 404);
     }
   }
 }

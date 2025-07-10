@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import AppError from '../../utils/AppError';
+import { AppError } from '../../utils/AppError';
 import { createUserInput, loginUserInput } from './auth.service';
 
 export const registerUser = async (req: Request, res: Response, next: NextFunction) => {

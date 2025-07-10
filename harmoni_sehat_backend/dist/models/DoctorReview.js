@@ -1,22 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const doctorReviewSchema = new mongoose_1.Schema({
-    patient_id: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: 'Patient',
+const DoctorReviewSchema = new mongoose_1.Schema({
+    pasien_id: {
+        type: String,
+        ref: 'Pasien',
         required: true,
     },
-    doctor_id: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: 'Doctor',
+    dokter_id: {
+        type: String,
+        ref: 'Dokter',
         required: true,
     },
-    consultation_id: {
+    konsultasi_id: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Consultation',
         required: true,
-        unique: true, // One review per consultation
+        unique: true,
     },
     rating: {
         type: Number,
@@ -26,9 +26,8 @@ const doctorReviewSchema = new mongoose_1.Schema({
     },
     komentar: {
         type: String,
+        trim: true,
     },
-}, {
-    timestamps: true,
-});
-const DoctorReview = (0, mongoose_1.model)('DoctorReview', doctorReviewSchema);
+}, { timestamps: true });
+const DoctorReview = (0, mongoose_1.model)('DoctorReview', DoctorReviewSchema);
 exports.default = DoctorReview;

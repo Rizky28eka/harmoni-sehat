@@ -1,8 +1,7 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IMedicalRecord extends Document {
-  _id: Types.ObjectId;
-  patient_id: Types.ObjectId;
+  pasien_id: string; // Refers to Pasien's custom _id
   riwayat_penyakit?: string[];
   alergi?: string[];
   riwayat_vaksinasi?: string[];
@@ -10,10 +9,10 @@ export interface IMedicalRecord extends Document {
   updatedAt: Date;
 }
 
-const medicalRecordSchema = new Schema<IMedicalRecord>({
-  patient_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Patient',
+const MedicalRecordSchema = new Schema<IMedicalRecord>({
+  pasien_id: {
+    type: String,
+    ref: 'Pasien',
     required: true,
     unique: true,
   },
@@ -26,11 +25,8 @@ const medicalRecordSchema = new Schema<IMedicalRecord>({
   riwayat_vaksinasi: {
     type: [String],
   },
-},
-{
-  timestamps: true,
-});
+}, { timestamps: true });
 
-const MedicalRecord = model<IMedicalRecord>('MedicalRecord', medicalRecordSchema);
+const MedicalRecord = model<IMedicalRecord>('MedicalRecord', MedicalRecordSchema);
 
 export default MedicalRecord;

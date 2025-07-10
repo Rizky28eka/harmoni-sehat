@@ -1,14 +1,13 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IActivityLog extends Document {
-  _id: Types.ObjectId;
   user_id: Types.ObjectId;
   aksi: string;
   deskripsi?: string;
   timestamp: Date;
 }
 
-const activityLogSchema = new Schema<IActivityLog>({
+const ActivityLogSchema = new Schema<IActivityLog>({
   user_id: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -21,16 +20,14 @@ const activityLogSchema = new Schema<IActivityLog>({
   },
   deskripsi: {
     type: String,
+    trim: true,
   },
   timestamp: {
     type: Date,
     default: Date.now,
   },
-},
-{
-  timestamps: false, // Using custom timestamp field
 });
 
-const ActivityLog = model<IActivityLog>('ActivityLog', activityLogSchema);
+const ActivityLog = model<IActivityLog>('ActivityLog', ActivityLogSchema);
 
 export default ActivityLog;

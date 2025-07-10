@@ -1,32 +1,17 @@
 import { z } from 'zod';
-import { Types } from 'mongoose';
-
-const objectIdValidation = z.string().refine((val) => Types.ObjectId.isValid(val), {
-  message: 'Invalid ObjectId',
-});
 
 export const createChatMessageSchema = z.object({
-  body: z.object({
-    consultation_id: objectIdValidation,
-    // sender_id will come from req.user
-    isi: z.string().min(1, 'Isi pesan is required').trim(),
-    tipe: z.enum(['text', 'image', 'document']),
-    file_url: z.string().url('File URL must be a valid URL').optional(),
-    is_read: z.boolean().optional(),
-  }),
+  konsultasi_id: z.string().min(1, 'Konsultasi ID tidak boleh kosong'),
+  pengirim_id: z.string().min(1, 'Pengirim ID tidak boleh kosong'),
+  isi: z.string().min(1, 'Isi pesan tidak boleh kosong').trim(),
+  tipe: z.enum(['text', 'image', 'file'], { message: 'Tipe pesan tidak valid' }),
+  file_url: z.string().optional(),
+  is_read: z.boolean().optional(),
 });
 
 export const updateChatMessageSchema = z.object({
-  body: z.object({
-    isi: z.string().min(1, 'Isi pesan is required').trim().optional(),
-    tipe: z.enum(['text', 'image', 'document']).optional(),
-    file_url: z.string().url('File URL must be a valid URL').optional(),
-    is_read: z.boolean().optional(),
-  }).partial(),
-  params: z.object({
-    id: objectIdValidation,
-  }),
+  isi: z.string().min(1, 'Isi pesan tidak boleh kosong').trim().optional(),
+  tipe: z.enum(['text', 'image', 'file'], { message: 'Tipe pesan tidak valid' }).optional(),
+  file_url: z.string().optional(),
+  is_read: z.boolean().optional(),
 });
-
-export type CreateChatMessageInput = z.infer<typeof createChatMessageSchema>['body'];
-export type UpdateChatMessageInput = z.infer<typeof updateChatMessageSchema>['body'];

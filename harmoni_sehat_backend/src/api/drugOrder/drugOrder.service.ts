@@ -1,61 +1,41 @@
 import DrugOrder, { IDrugOrder } from '../../models/DrugOrder';
-import AppError from '../../utils/AppError';
-import { Types } from 'mongoose';
-import { CreateDrugOrderInput, UpdateDrugOrderInput } from './drugOrder.validation';
-import Patient from '../../models/Patient';
+import { AppError } from '../../utils/AppError';
 
 class DrugOrderService {
-  async createDrugOrder(userId: string, drugOrderData: CreateDrugOrderInput): Promise<IDrugOrder> {
-    const patient = await Patient.findOne({ user_id: userId });
-    if (!patient) {
-      throw new AppError('Patient profile not found for this user', 404);
+  async createDrugOrder(data: Partial<IDrugOrder>): Promise<IDrugOrder> {
+    const existingOrder = await DrugOrder.findOne({ kode_pesanan: data.kode_pesanan });
+    if (existingOrder) {
+      throw new AppError('Pesanan obat dengan kode tersebut sudah ada', 409);
     }
-
-    const newDrugOrder = await DrugOrder.create({ ...drugOrderData, patient_id: patient._id });
-    return newDrugOrder;
+    const drugOrder = await DrugOrder.create(data);
+    return drugOrder;
   }
 
   async getAllDrugOrders(): Promise<IDrugOrder[]> {
-    return DrugOrder.find().populate('patient_id');
+    const drugOrders = await DrugOrder.find().populate('pasien_id');
+    return drugOrders;
   }
 
-  async getDrugOrderById(drugOrderId: string): Promise<IDrugOrder | null> {
-    if (!Types.ObjectId.isValid(drugOrderId)) {
-      throw new AppError('Invalid Drug Order ID', 400);
-    }
-    const drugOrder = await DrugOrder.findById(drugOrderId).populate('patient_id');
+  async getDrugOrderById(id: string): Promise<IDrugOrder> {
+    const drugOrder = await DrugOrder.findById(id).populate('pasien_id');
     if (!drugOrder) {
-      throw new AppError('Drug Order not found', 404);
+      throw new AppError('Pesanan obat tidak ditemukan', 404);
     }
     return drugOrder;
   }
 
-  async getMyDrugOrders(userId: string): Promise<IDrugOrder[]> {
-    const patient = await Patient.findOne({ user_id: userId });
-    if (!patient) {
-      throw new AppError('Patient profile not found for this user', 404);
-    }
-    return DrugOrder.find({ patient_id: patient._id }).populate('patient_id');
-  }
-
-  async updateDrugOrder(drugOrderId: string, drugOrderData: UpdateDrugOrderInput): Promise<IDrugOrder | null> {
-    if (!Types.ObjectId.isValid(drugOrderId)) {
-      throw new AppError('Invalid Drug Order ID', 400);
-    }
-    const drugOrder = await DrugOrder.findByIdAndUpdate(drugOrderId, drugOrderData, { new: true, runValidators: true });
+  async updateDrugOrder(id: string, data: Partial<IDrugOrder>): Promise<IDrugOrder> {
+    const drugOrder = await DrugOrder.findByIdAndUpdate(id, data, { new: true, runValidators: true });
     if (!drugOrder) {
-      throw new AppError('Drug Order not found', 404);
+      throw new AppError('Pesanan obat tidak ditemukan', 404);
     }
     return drugOrder;
   }
 
-  async deleteDrugOrder(drugOrderId: string): Promise<void> {
-    if (!Types.ObjectId.isValid(drugOrderId)) {
-      throw new AppError('Invalid Drug Order ID', 400);
-    }
-    const drugOrder = await DrugOrder.findByIdAndDelete(drugOrderId);
+  async deleteDrugOrder(id: string): Promise<void> {
+    const drugOrder = await DrugOrder.findByIdAndDelete(id);
     if (!drugOrder) {
-      throw new AppError('Drug Order not found', 404);
+      throw new AppError('Pesanan obat tidak ditemukan', 404);
     }
   }
 }

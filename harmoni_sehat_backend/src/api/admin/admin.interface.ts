@@ -18,7 +18,7 @@ export interface IAdminResponseDto {
   updatedAt: Date;
 }
 
-export const toAdminResponseDto = (admin: IAdmin): IAdminResponseDto => {
+export const toAdminResponseDto = (admin: any): IAdminResponseDto => {
   return {
     id: admin._id.toString(),
     user_id: admin.user_id.toString(),

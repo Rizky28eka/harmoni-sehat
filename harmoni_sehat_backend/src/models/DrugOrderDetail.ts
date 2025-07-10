@@ -1,47 +1,43 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IDrugOrderDetail extends Document {
-  _id: Types.ObjectId;
-  order_id: Types.ObjectId;
-  drug_id: Types.ObjectId;
-  harga_satuan: number;
+  pesanan_id: Types.ObjectId;
+  obat_id: Types.ObjectId;
   jumlah: number;
+  harga_satuan: number;
   subtotal: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const drugOrderDetailSchema = new Schema<IDrugOrderDetail>({
-  order_id: {
+const DrugOrderDetailSchema = new Schema<IDrugOrderDetail>({
+  pesanan_id: {
     type: Schema.Types.ObjectId,
     ref: 'DrugOrder',
     required: true,
   },
-  drug_id: {
+  obat_id: {
     type: Schema.Types.ObjectId,
     ref: 'Drug',
     required: true,
-  },
-  harga_satuan: {
-    type: Number,
-    required: true,
-    min: 0,
   },
   jumlah: {
     type: Number,
     required: true,
     min: 1,
   },
+  harga_satuan: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
   subtotal: {
     type: Number,
     required: true,
     min: 0,
   },
-},
-{
-  timestamps: true,
-});
+}, { timestamps: true });
 
-const DrugOrderDetail = model<IDrugOrderDetail>('DrugOrderDetail', drugOrderDetailSchema);
+const DrugOrderDetail = model<IDrugOrderDetail>('DrugOrderDetail', DrugOrderDetailSchema);
 
 export default DrugOrderDetail;

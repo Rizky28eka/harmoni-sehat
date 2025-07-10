@@ -1,7 +1,6 @@
-import { Schema, model, Document, Types } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 
 export interface IPaymentMethod extends Document {
-  _id: Types.ObjectId;
   nama: string;
   kode: string;
   deskripsi?: string;
@@ -10,10 +9,11 @@ export interface IPaymentMethod extends Document {
   updatedAt: Date;
 }
 
-const paymentMethodSchema = new Schema<IPaymentMethod>({
+const PaymentMethodSchema = new Schema<IPaymentMethod>({
   nama: {
     type: String,
     required: true,
+    unique: true,
     trim: true,
   },
   kode: {
@@ -24,16 +24,14 @@ const paymentMethodSchema = new Schema<IPaymentMethod>({
   },
   deskripsi: {
     type: String,
+    trim: true,
   },
   is_active: {
     type: Boolean,
     default: true,
   },
-},
-{
-  timestamps: true,
-});
+}, { timestamps: true });
 
-const PaymentMethod = model<IPaymentMethod>('PaymentMethod', paymentMethodSchema);
+const PaymentMethod = model<IPaymentMethod>('PaymentMethod', PaymentMethodSchema);
 
 export default PaymentMethod;

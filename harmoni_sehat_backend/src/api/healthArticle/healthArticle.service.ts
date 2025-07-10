@@ -1,102 +1,41 @@
 import HealthArticle, { IHealthArticle } from '../../models/HealthArticle';
-import AppError from '../../utils/AppError';
-import { Types } from 'mongoose';
-import { CreateHealthArticleInput, UpdateHealthArticleInput } from './healthArticle.validation';
-import Admin from '../../models/Admin';
-import Doctor from '../../models/Doctor';
+import { AppError } from '../../utils/AppError';
 
 class HealthArticleService {
-  async createHealthArticle(userId: string, articleData: CreateHealthArticleInput): Promise<IHealthArticle> {
-    // Check if author_id matches the logged-in user's admin/doctor profile
-    let authorProfile;
-    if (articleData.author_type === 'Admin') {
-      authorProfile = await Admin.findOne({ user_id: userId });
-    } else if (articleData.author_type === 'Doctor') {
-      authorProfile = await Doctor.findOne({ user_id: userId });
-    }
-
-    if (!authorProfile || authorProfile._id.toString() !== articleData.author_id) {
-      throw new AppError('Unauthorized to create article for this author ID', 403);
-    }
-
-    const existingArticle = await HealthArticle.findOne({ slug: articleData.slug });
+  async createHealthArticle(data: Partial<IHealthArticle>): Promise<IHealthArticle> {
+    const existingArticle = await HealthArticle.findOne({ slug: data.slug });
     if (existingArticle) {
-      throw new AppError('Article with this slug already exists', 409);
+      throw new AppError('Artikel dengan slug tersebut sudah ada', 409);
     }
-
-    const newArticle = await HealthArticle.create(articleData);
-    return newArticle;
+    const healthArticle = await HealthArticle.create(data);
+    return healthArticle;
   }
 
   async getAllHealthArticles(): Promise<IHealthArticle[]> {
-    return HealthArticle.find().populate('author_id');
+    const healthArticles = await HealthArticle.find().populate('penulis_id');
+    return healthArticles;
   }
 
-  async getHealthArticleById(articleId: string): Promise<IHealthArticle | null> {
-    if (!Types.ObjectId.isValid(articleId)) {
-      throw new AppError('Invalid Health Article ID', 400);
+  async getHealthArticleById(id: string): Promise<IHealthArticle> {
+    const healthArticle = await HealthArticle.findById(id).populate('penulis_id');
+    if (!healthArticle) {
+      throw new AppError('Artikel kesehatan tidak ditemukan', 404);
     }
-    const article = await HealthArticle.findById(articleId).populate('author_id');
-    if (!article) {
-      throw new AppError('Health Article not found', 404);
-    }
-    return article;
+    return healthArticle;
   }
 
-  async updateHealthArticle(userId: string, articleId: string, articleData: UpdateHealthArticleInput): Promise<IHealthArticle | null> {
-    if (!Types.ObjectId.isValid(articleId)) {
-      throw new AppError('Invalid Health Article ID', 400);
+  async updateHealthArticle(id: string, data: Partial<IHealthArticle>): Promise<IHealthArticle> {
+    const healthArticle = await HealthArticle.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+    if (!healthArticle) {
+      throw new AppError('Artikel kesehatan tidak ditemukan', 404);
     }
-
-    const existingArticle = await HealthArticle.findById(articleId);
-    if (!existingArticle) {
-      throw new AppError('Health Article not found', 404);
-    }
-
-    // Ownership authorization: Only the author or admin can update
-    let authorProfile;
-    if (existingArticle.author_type === 'Admin') {
-      authorProfile = await Admin.findOne({ user_id: userId });
-    } else if (existingArticle.author_type === 'Doctor') {
-      authorProfile = await Doctor.findOne({ user_id: userId });
-    }
-
-    if (!authorProfile || authorProfile._id.toString() !== existingArticle.author_id.toString()) {
-      throw new AppError('You are not authorized to update this article.', 403);
-    }
-
-    const updatedArticle = await HealthArticle.findByIdAndUpdate(articleId, articleData, { new: true, runValidators: true });
-    if (!updatedArticle) {
-      throw new AppError('Health Article not found', 404);
-    }
-    return updatedArticle;
+    return healthArticle;
   }
 
-  async deleteHealthArticle(userId: string, articleId: string): Promise<void> {
-    if (!Types.ObjectId.isValid(articleId)) {
-      throw new AppError('Invalid Health Article ID', 400);
-    }
-
-    const existingArticle = await HealthArticle.findById(articleId);
-    if (!existingArticle) {
-      throw new AppError('Health Article not found', 404);
-    }
-
-    // Ownership authorization: Only the author or admin can delete
-    let authorProfile;
-    if (existingArticle.author_type === 'Admin') {
-      authorProfile = await Admin.findOne({ user_id: userId });
-    } else if (existingArticle.author_type === 'Doctor') {
-      authorProfile = await Doctor.findOne({ user_id: userId });
-    }
-
-    if (!authorProfile || authorProfile._id.toString() !== existingArticle.author_id.toString()) {
-      throw new AppError('You are not authorized to delete this article.', 403);
-    }
-
-    const article = await HealthArticle.findByIdAndDelete(articleId);
-    if (!article) {
-      throw new AppError('Health Article not found', 404);
+  async deleteHealthArticle(id: string): Promise<void> {
+    const healthArticle = await HealthArticle.findByIdAndDelete(id);
+    if (!healthArticle) {
+      throw new AppError('Artikel kesehatan tidak ditemukan', 404);
     }
   }
 }

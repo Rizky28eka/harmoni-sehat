@@ -1,51 +1,41 @@
 import Drug, { IDrug } from '../../models/Drug';
-import AppError from '../../utils/AppError';
-import { Types } from 'mongoose';
-import { CreateDrugInput, UpdateDrugInput } from './drug.validation';
+import { AppError } from '../../utils/AppError';
 
 class DrugService {
-  async createDrug(drugData: CreateDrugInput): Promise<IDrug> {
-    const existingDrug = await Drug.findOne({ nama: drugData.nama });
+  async createDrug(data: Partial<IDrug>): Promise<IDrug> {
+    const existingDrug = await Drug.findOne({ kode_obat: data.kode_obat });
     if (existingDrug) {
-      throw new AppError('Drug with this name already exists', 409);
+      throw new AppError('Obat dengan kode tersebut sudah ada', 409);
     }
-    const newDrug = await Drug.create(drugData);
-    return newDrug;
+    const drug = await Drug.create(data);
+    return drug;
   }
 
   async getAllDrugs(): Promise<IDrug[]> {
-    return Drug.find();
+    const drugs = await Drug.find();
+    return drugs;
   }
 
-  async getDrugById(drugId: string): Promise<IDrug | null> {
-    if (!Types.ObjectId.isValid(drugId)) {
-      throw new AppError('Invalid Drug ID', 400);
-    }
-    const drug = await Drug.findById(drugId);
+  async getDrugById(id: string): Promise<IDrug> {
+    const drug = await Drug.findById(id);
     if (!drug) {
-      throw new AppError('Drug not found', 404);
+      throw new AppError('Obat tidak ditemukan', 404);
     }
     return drug;
   }
 
-  async updateDrug(drugId: string, drugData: UpdateDrugInput): Promise<IDrug | null> {
-    if (!Types.ObjectId.isValid(drugId)) {
-      throw new AppError('Invalid Drug ID', 400);
-    }
-    const drug = await Drug.findByIdAndUpdate(drugId, drugData, { new: true, runValidators: true });
+  async updateDrug(id: string, data: Partial<IDrug>): Promise<IDrug> {
+    const drug = await Drug.findByIdAndUpdate(id, data, { new: true, runValidators: true });
     if (!drug) {
-      throw new AppError('Drug not found', 404);
+      throw new AppError('Obat tidak ditemukan', 404);
     }
     return drug;
   }
 
-  async deleteDrug(drugId: string): Promise<void> {
-    if (!Types.ObjectId.isValid(drugId)) {
-      throw new AppError('Invalid Drug ID', 400);
-    }
-    const drug = await Drug.findByIdAndDelete(drugId);
+  async deleteDrug(id: string): Promise<void> {
+    const drug = await Drug.findByIdAndDelete(id);
     if (!drug) {
-      throw new AppError('Drug not found', 404);
+      throw new AppError('Obat tidak ditemukan', 404);
     }
   }
 }

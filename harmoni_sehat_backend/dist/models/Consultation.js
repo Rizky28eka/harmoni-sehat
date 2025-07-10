@@ -1,18 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const consultationSchema = new mongoose_1.Schema({
-    patient_id: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: 'Patient',
+const ConsultationSchema = new mongoose_1.Schema({
+    pasien_id: {
+        type: String,
+        ref: 'Pasien',
         required: true,
     },
-    doctor_id: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: 'Doctor',
+    dokter_id: {
+        type: String,
+        ref: 'Dokter',
         required: true,
     },
-    schedule_id: {
+    jadwal_id: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'PracticeSchedule',
         required: true,
@@ -23,27 +23,30 @@ const consultationSchema = new mongoose_1.Schema({
     },
     status: {
         type: String,
-        enum: ['scheduled', 'completed', 'cancelled', 'pending'],
+        enum: ['pending', 'scheduled', 'completed', 'cancelled'],
         default: 'pending',
     },
     keluhan: {
         type: String,
         required: true,
+        trim: true,
     },
     diagnosa: {
         type: String,
+        trim: true,
     },
     tindakan: {
         type: String,
+        trim: true,
     },
     catatan_dokter: {
         type: String,
+        trim: true,
     },
     video_call_url: {
         type: String,
+        trim: true,
     },
-}, {
-    timestamps: true,
-});
-const Consultation = (0, mongoose_1.model)('Consultation', consultationSchema);
+}, { timestamps: true });
+const Consultation = (0, mongoose_1.model)('Consultation', ConsultationSchema);
 exports.default = Consultation;

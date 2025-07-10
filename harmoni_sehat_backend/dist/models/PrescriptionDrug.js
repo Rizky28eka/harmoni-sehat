@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const prescriptionDrugSchema = new mongoose_1.Schema({
-    prescription_id: {
+const PrescriptionDrugSchema = new mongoose_1.Schema({
+    resep_id: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Prescription',
         required: true,
     },
-    drug_id: {
+    obat_id: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Drug',
         required: true,
@@ -25,9 +25,8 @@ const prescriptionDrugSchema = new mongoose_1.Schema({
     aturan_pakai: {
         type: String,
         required: true,
+        trim: true,
     },
-}, {
-    timestamps: true,
-});
-const PrescriptionDrug = (0, mongoose_1.model)('PrescriptionDrug', prescriptionDrugSchema);
+}, { timestamps: true });
+const PrescriptionDrug = (0, mongoose_1.model)('PrescriptionDrug', PrescriptionDrugSchema);
 exports.default = PrescriptionDrug;

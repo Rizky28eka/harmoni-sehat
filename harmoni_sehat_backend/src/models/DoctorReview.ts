@@ -1,32 +1,31 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IDoctorReview extends Document {
-  _id: Types.ObjectId;
-  patient_id: Types.ObjectId;
-  doctor_id: Types.ObjectId;
-  consultation_id: Types.ObjectId;
+  pasien_id: string; // Refers to Pasien's custom _id
+  dokter_id: string; // Refers to Dokter's custom _id
+  konsultasi_id: Types.ObjectId;
   rating: number;
   komentar?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const doctorReviewSchema = new Schema<IDoctorReview>({
-  patient_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Patient',
+const DoctorReviewSchema = new Schema<IDoctorReview>({
+  pasien_id: {
+    type: String,
+    ref: 'Pasien',
     required: true,
   },
-  doctor_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Doctor',
+  dokter_id: {
+    type: String,
+    ref: 'Dokter',
     required: true,
   },
-  consultation_id: {
+  konsultasi_id: {
     type: Schema.Types.ObjectId,
     ref: 'Consultation',
     required: true,
-    unique: true, // One review per consultation
+    unique: true,
   },
   rating: {
     type: Number,
@@ -36,12 +35,11 @@ const doctorReviewSchema = new Schema<IDoctorReview>({
   },
   komentar: {
     type: String,
+    trim: true,
   },
-},
-{
-  timestamps: true,
-});
+  
+}, { timestamps: true });
 
-const DoctorReview = model<IDoctorReview>('DoctorReview', doctorReviewSchema);
+const DoctorReview = model<IDoctorReview>('DoctorReview', DoctorReviewSchema);
 
 export default DoctorReview;

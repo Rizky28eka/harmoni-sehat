@@ -1,57 +1,51 @@
 import { Request, Response, NextFunction } from 'express';
-import ClinicService from './clinic.service';
-import ApiResponse from '../../utils/ApiResponse';
-import AppError from '../../utils/AppError';
-import { toClinicResponseDto } from './clinic.interface';
-import { CreateClinicInput, UpdateClinicInput } from './clinic.validation';
+import clinicService from './clinic.service';
+import { ApiResponse } from '../../utils/ApiResponse';
+import { AppError } from '../../utils/AppError';
 
 class ClinicController {
   async createClinic(req: Request, res: Response, next: NextFunction) {
     try {
-      const clinicData: CreateClinicInput = req.body;
-      const newClinic = await ClinicService.createClinic(clinicData);
-      res.status(201).json(new ApiResponse(201, toClinicResponseDto(newClinic), 'Clinic created successfully'));
-    } catch (error) {
-      next(error);
+      const clinic = await clinicService.createClinic(req.body);
+      res.status(201).json(new ApiResponse(201, clinic, 'Klinik berhasil ditambahkan'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async getAllClinics(req: Request, res: Response, next: NextFunction) {
     try {
-      const clinics = await ClinicService.getAllClinics();
-      res.status(200).json(new ApiResponse(200, clinics.map(toClinicResponseDto), 'Clinics fetched successfully'));
-    } catch (error) {
-      next(error);
+      const clinics = await clinicService.getAllClinics();
+      res.status(200).json(new ApiResponse(200, clinics, 'Daftar klinik berhasil diambil'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async getClinicById(req: Request, res: Response, next: NextFunction) {
     try {
-      const clinic = await ClinicService.getClinicById(req.params.id);
-      res.status(200).json(new ApiResponse(200, toClinicResponseDto(clinic!), 'Clinic fetched successfully'));
-    } catch (error) {
-      next(error);
+      const clinic = await clinicService.getClinicById(req.params.id);
+      res.status(200).json(new ApiResponse(200, clinic, 'Klinik berhasil ditemukan'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async updateClinic(req: Request, res: Response, next: NextFunction) {
     try {
-      const clinicData: UpdateClinicInput = req.body;
-      const clinicId = req.params.id;
-      const updatedClinic = await ClinicService.updateClinic(clinicId, clinicData);
-      res.status(200).json(new ApiResponse(200, toClinicResponseDto(updatedClinic!), 'Clinic updated successfully'));
-    } catch (error) {
-      next(error);
+      const clinic = await clinicService.updateClinic(req.params.id, req.body);
+      res.status(200).json(new ApiResponse(200, clinic, 'Data klinik berhasil diperbarui'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async deleteClinic(req: Request, res: Response, next: NextFunction) {
     try {
-      const clinicId = req.params.id;
-      await ClinicService.deleteClinic(clinicId);
-      res.status(204).json(new ApiResponse(204, null, 'Clinic deleted successfully'));
-    } catch (error) {
-      next(error);
+      await clinicService.deleteClinic(req.params.id);
+      res.status(200).json(new ApiResponse(200, null, 'Klinik berhasil dihapus'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 }

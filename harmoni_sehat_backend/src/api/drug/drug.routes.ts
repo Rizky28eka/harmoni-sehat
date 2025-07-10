@@ -1,21 +1,17 @@
 import { Router } from 'express';
-import DrugController from './drug.controller';
-import validate from '../../middlewares/validator';
-import { protect } from '../../middlewares/protect';
-import { authorize } from '../../middlewares/authorize';
+import drugController from './drug.controller';
+import { validate } from '../../middlewares/validator';
 import { createDrugSchema, updateDrugSchema } from './drug.validation';
 
 const router = Router();
 
-// Routes that can be accessed by any authenticated user
-router.use(protect);
-router.get('/', DrugController.getAllDrugs);
-router.get('/:id', DrugController.getDrugById);
+router.route('/')
+  .post(validate(createDrugSchema), drugController.createDrug)
+  .get(drugController.getAllDrugs);
 
-// Routes restricted to admin or pharmacist
-router.use(authorize('admin', 'pharmacist'));
-router.post('/', validate(createDrugSchema), DrugController.createDrug);
-router.put('/:id', validate(updateDrugSchema), DrugController.updateDrug);
-router.delete('/:id', DrugController.deleteDrug);
+router.route('/:id')
+  .get(drugController.getDrugById)
+  .put(validate(updateDrugSchema), drugController.updateDrug)
+  .delete(drugController.deleteDrug);
 
 export default router;

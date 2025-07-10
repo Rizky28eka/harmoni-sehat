@@ -37,7 +37,7 @@ export interface IDrugResponseDto {
   updatedAt: Date;
 }
 
-export const toDrugResponseDto = (drug: IDrug): IDrugResponseDto => {
+export const toDrugResponseDto = (drug: any): IDrugResponseDto => {
   return {
     id: drug._id.toString(),
     nama: drug.nama,

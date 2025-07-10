@@ -1,26 +1,33 @@
 import User, { IUser } from '../../models/User';
-import { CreateUserDto, UpdateUserDto } from './user.interface';
-import AppError from '../../utils/AppError';
+import { AppError } from '../../utils/AppError';
 
 class UserService {
-  async getAllUsers(): Promise<IUser[]> {
-    return User.find();
+  async createUser(email: string, password: string): Promise<IUser> {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      throw new AppError('User dengan email tersebut sudah ada', 409);
+    }
+    const user = await User.create({ email, password });
+    return user;
   }
 
-  async getUserById(id: string): Promise<IUser | null> {
+  async getAllUsers(): Promise<IUser[]> {
+    const users = await User.find();
+    return users;
+  }
+
+  async getUserById(id: string): Promise<IUser> {
     const user = await User.findById(id);
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new AppError('User tidak ditemukan', 404);
     }
     return user;
   }
 
-  
-
-  async updateUser(id: string, userData: UpdateUserDto): Promise<IUser | null> {
-    const user = await User.findByIdAndUpdate(id, userData, { new: true, runValidators: true });
+  async updateUser(id: string, data: Partial<IUser>): Promise<IUser> {
+    const user = await User.findByIdAndUpdate(id, data, { new: true, runValidators: true });
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new AppError('User tidak ditemukan', 404);
     }
     return user;
   }
@@ -28,7 +35,7 @@ class UserService {
   async deleteUser(id: string): Promise<void> {
     const user = await User.findByIdAndDelete(id);
     if (!user) {
-      throw new AppError('User not found', 404);
+      throw new AppError('User tidak ditemukan', 404);
     }
   }
 }

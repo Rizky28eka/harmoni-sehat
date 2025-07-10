@@ -1,21 +1,20 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IDoctorClinic extends Document {
-  _id: Types.ObjectId;
-  doctor_id: Types.ObjectId;
-  clinic_id: Types.ObjectId;
+  dokter_id: string; // Refers to Dokter's custom _id
+  klinik_id: Types.ObjectId;
   status: 'active' | 'inactive';
   createdAt: Date;
   updatedAt: Date;
 }
 
-const doctorClinicSchema = new Schema<IDoctorClinic>({
-  doctor_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Doctor',
+const DoctorClinicSchema = new Schema<IDoctorClinic>({
+  dokter_id: {
+    type: String,
+    ref: 'Dokter',
     required: true,
   },
-  clinic_id: {
+  klinik_id: {
     type: Schema.Types.ObjectId,
     ref: 'Clinic',
     required: true,
@@ -25,11 +24,8 @@ const doctorClinicSchema = new Schema<IDoctorClinic>({
     enum: ['active', 'inactive'],
     default: 'active',
   },
-},
-{
-  timestamps: true,
-});
+}, { timestamps: true });
 
-const DoctorClinic = model<IDoctorClinic>('DoctorClinic', doctorClinicSchema);
+const DoctorClinic = model<IDoctorClinic>('DoctorClinic', DoctorClinicSchema);
 
 export default DoctorClinic;

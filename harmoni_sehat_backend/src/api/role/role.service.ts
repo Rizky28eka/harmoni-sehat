@@ -1,51 +1,41 @@
 import Role, { IRole } from '../../models/Role';
-import AppError from '../../utils/AppError';
-import { Types } from 'mongoose';
-import { CreateRoleInput, UpdateRoleInput } from './role.validation';
+import { AppError } from '../../utils/AppError';
 
 class RoleService {
-  async createRole(roleData: CreateRoleInput): Promise<IRole> {
-    const existingRole = await Role.findOne({ nama_peran: roleData.nama_peran });
+  async createRole(nama_peran: string): Promise<IRole> {
+    const existingRole = await Role.findOne({ nama_peran });
     if (existingRole) {
-      throw new AppError('Role with this name already exists', 409);
+      throw new AppError('Role dengan nama tersebut sudah ada', 409);
     }
-    const newRole = await Role.create(roleData);
-    return newRole;
+    const role = await Role.create({ nama_peran });
+    return role;
   }
 
   async getAllRoles(): Promise<IRole[]> {
-    return Role.find();
+    const roles = await Role.find();
+    return roles;
   }
 
-  async getRoleById(roleId: string): Promise<IRole | null> {
-    if (!Types.ObjectId.isValid(roleId)) {
-      throw new AppError('Invalid Role ID', 400);
-    }
-    const role = await Role.findById(roleId);
+  async getRoleById(id: string): Promise<IRole> {
+    const role = await Role.findById(id);
     if (!role) {
-      throw new AppError('Role not found', 404);
+      throw new AppError('Role tidak ditemukan', 404);
     }
     return role;
   }
 
-  async updateRole(roleId: string, roleData: UpdateRoleInput): Promise<IRole | null> {
-    if (!Types.ObjectId.isValid(roleId)) {
-      throw new AppError('Invalid Role ID', 400);
-    }
-    const role = await Role.findByIdAndUpdate(roleId, roleData, { new: true, runValidators: true });
+  async updateRole(id: string, nama_peran: string): Promise<IRole> {
+    const role = await Role.findByIdAndUpdate(id, { nama_peran }, { new: true, runValidators: true });
     if (!role) {
-      throw new AppError('Role not found', 404);
+      throw new AppError('Role tidak ditemukan', 404);
     }
     return role;
   }
 
-  async deleteRole(roleId: string): Promise<void> {
-    if (!Types.ObjectId.isValid(roleId)) {
-      throw new AppError('Invalid Role ID', 400);
-    }
-    const role = await Role.findByIdAndDelete(roleId);
+  async deleteRole(id: string): Promise<void> {
+    const role = await Role.findByIdAndDelete(id);
     if (!role) {
-      throw new AppError('Role not found', 404);
+      throw new AppError('Role tidak ditemukan', 404);
     }
   }
 }

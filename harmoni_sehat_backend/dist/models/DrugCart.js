@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const drugCartSchema = new mongoose_1.Schema({
-    patient_id: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: 'Patient',
+const DrugCartSchema = new mongoose_1.Schema({
+    pasien_id: {
+        type: String,
+        ref: 'Pasien',
         required: true,
     },
-    drug_id: {
+    obat_id: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Drug',
         required: true,
@@ -17,9 +17,6 @@ const drugCartSchema = new mongoose_1.Schema({
         required: true,
         min: 1,
     },
-}, {
-    timestamps: true,
-});
-drugCartSchema.index({ patient_id: 1, drug_id: 1 }, { unique: true });
-const DrugCart = (0, mongoose_1.model)('DrugCart', drugCartSchema);
+}, { timestamps: true });
+const DrugCart = (0, mongoose_1.model)('DrugCart', DrugCartSchema);
 exports.default = DrugCart;

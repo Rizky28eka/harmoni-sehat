@@ -22,7 +22,7 @@ export interface ISpecializationResponseDto {
   updatedAt: Date;
 }
 
-export const toSpecializationResponseDto = (specialization: ISpecialization): ISpecializationResponseDto => {
+export const toSpecializationResponseDto = (specialization: any): ISpecializationResponseDto => {
   return {
     id: specialization._id.toString(),
     nama: specialization.nama,

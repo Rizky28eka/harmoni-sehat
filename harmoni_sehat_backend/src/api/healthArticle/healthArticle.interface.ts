@@ -5,8 +5,7 @@ export interface CreateHealthArticleDto {
   judul: string;
   slug: string;
   konten: string;
-  author_id: string; // Will be ObjectId in service
-  author_type: 'Admin' | 'Doctor';
+  penulis_id: string; // Will be ObjectId in service
   status_publikasi?: 'draft' | 'published' | 'archived';
 }
 
@@ -14,8 +13,7 @@ export interface UpdateHealthArticleDto {
   judul?: string;
   slug?: string;
   konten?: string;
-  author_id?: string;
-  author_type?: 'Admin' | 'Doctor';
+  penulis_id?: string;
   status_publikasi?: 'draft' | 'published' | 'archived';
 }
 
@@ -24,21 +22,19 @@ export interface IHealthArticleResponseDto {
   judul: string;
   slug: string;
   konten: string;
-  author_id: string;
-  author_type: 'Admin' | 'Doctor';
+  penulis_id: string;
   status_publikasi: 'draft' | 'published' | 'archived';
   createdAt: Date;
   updatedAt: Date;
 }
 
-export const toHealthArticleResponseDto = (article: IHealthArticle): IHealthArticleResponseDto => {
+export const toHealthArticleResponseDto = (article: any): IHealthArticleResponseDto => {
   return {
     id: article._id.toString(),
     judul: article.judul,
     slug: article.slug,
     konten: article.konten,
-    author_id: article.author_id.toString(),
-    author_type: article.author_type,
+    penulis_id: article.penulis_id.toString(),
     status_publikasi: article.status_publikasi,
     createdAt: article.createdAt,
     updatedAt: article.updatedAt,

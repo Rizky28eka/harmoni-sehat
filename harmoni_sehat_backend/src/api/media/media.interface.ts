@@ -28,7 +28,7 @@ export interface IMediaResponseDto {
   updatedAt: Date;
 }
 
-export const toMediaResponseDto = (media: IMedia): IMediaResponseDto => {
+export const toMediaResponseDto = (media: any): IMediaResponseDto => {
   return {
     id: media._id.toString(),
     model_type: media.model_type,

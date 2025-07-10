@@ -27,7 +27,7 @@ export interface INotificationResponseDto {
   updatedAt: Date;
 }
 
-export const toNotificationResponseDto = (notification: INotification): INotificationResponseDto => {
+export const toNotificationResponseDto = (notification: any): INotificationResponseDto => {
   return {
     id: notification._id.toString(),
     user_id: notification.user_id.toString(),

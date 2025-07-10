@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const transactionSchema = new mongoose_1.Schema({
+const TransactionSchema = new mongoose_1.Schema({
     user_id: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'User',
@@ -17,15 +17,14 @@ const transactionSchema = new mongoose_1.Schema({
         enum: ['pending', 'completed', 'failed', 'refunded'],
         default: 'pending',
     },
-    payment_method_id: {
+    metode_pembayaran_id: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'PaymentMethod',
         required: true,
     },
     external_id: {
         type: String,
-        unique: true,
-        sparse: true, // Allows null values to not violate unique constraint
+        trim: true,
     },
     transaksiable_id: {
         type: mongoose_1.Schema.Types.ObjectId,
@@ -34,10 +33,8 @@ const transactionSchema = new mongoose_1.Schema({
     transaksiable_type: {
         type: String,
         required: true,
-        enum: ['Consultation', 'DrugOrder'], // Add other types as needed
+        trim: true,
     },
-}, {
-    timestamps: true,
-});
-const Transaction = (0, mongoose_1.model)('Transaction', transactionSchema);
+}, { timestamps: true });
+const Transaction = (0, mongoose_1.model)('Transaction', TransactionSchema);
 exports.default = Transaction;

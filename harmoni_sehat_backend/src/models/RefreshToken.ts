@@ -1,7 +1,6 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IRefreshToken extends Document {
-  _id: Types.ObjectId;
   user_id: Types.ObjectId;
   token: string;
   expired_at: Date;
@@ -9,7 +8,7 @@ export interface IRefreshToken extends Document {
   updatedAt: Date;
 }
 
-const refreshTokenSchema = new Schema<IRefreshToken>({
+const RefreshTokenSchema = new Schema<IRefreshToken>({
   user_id: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -19,17 +18,14 @@ const refreshTokenSchema = new Schema<IRefreshToken>({
     type: String,
     required: true,
     unique: true,
-    trim: true,
   },
   expired_at: {
     type: Date,
     required: true,
   },
-},
-{
-  timestamps: true,
-});
+  
+}, { timestamps: true });
 
-const RefreshToken = model<IRefreshToken>('RefreshToken', refreshTokenSchema);
+const RefreshToken = model<IRefreshToken>('RefreshToken', RefreshTokenSchema);
 
 export default RefreshToken;

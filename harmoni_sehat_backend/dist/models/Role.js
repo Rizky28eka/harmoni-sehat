@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const roleSchema = new mongoose_1.Schema({
+const RoleSchema = new mongoose_1.Schema({
     nama_peran: {
         type: String,
         required: true,
@@ -9,5 +9,5 @@ const roleSchema = new mongoose_1.Schema({
         trim: true,
     },
 });
-const Role = (0, mongoose_1.model)('Role', roleSchema);
+const Role = (0, mongoose_1.model)('Role', RoleSchema);
 exports.default = Role;

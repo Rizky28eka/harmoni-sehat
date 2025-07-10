@@ -1,7 +1,6 @@
-import { Schema, model, Document, Types } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 
 export interface ISpecialization extends Document {
-  _id: Types.ObjectId;
   nama: string;
   deskripsi?: string;
   is_active: boolean;
@@ -9,7 +8,7 @@ export interface ISpecialization extends Document {
   updatedAt: Date;
 }
 
-const specializationSchema = new Schema<ISpecialization>({
+const SpecializationSchema = new Schema<ISpecialization>({
   nama: {
     type: String,
     required: true,
@@ -23,11 +22,8 @@ const specializationSchema = new Schema<ISpecialization>({
     type: Boolean,
     default: true,
   },
-},
-{
-  timestamps: true,
-});
+}, { timestamps: true });
 
-const Specialization = model<ISpecialization>('Specialization', specializationSchema);
+const Specialization = model<ISpecialization>('Specialization', SpecializationSchema);
 
 export default Specialization;

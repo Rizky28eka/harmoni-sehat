@@ -1,57 +1,51 @@
 import { Request, Response, NextFunction } from 'express';
-import RefreshTokenService from './refreshToken.service';
-import ApiResponse from '../../utils/ApiResponse';
-import AppError from '../../utils/AppError';
-import { toRefreshTokenResponseDto } from './refreshToken.interface';
-import { CreateRefreshTokenInput, UpdateRefreshTokenInput } from './refreshToken.validation';
+import refreshTokenService from './refreshToken.service';
+import { ApiResponse } from '../../utils/ApiResponse';
+import { AppError } from '../../utils/AppError';
 
 class RefreshTokenController {
   async createRefreshToken(req: Request, res: Response, next: NextFunction) {
     try {
-      const refreshTokenData: CreateRefreshTokenInput = req.body;
-      const newRefreshToken = await RefreshTokenService.createRefreshToken(refreshTokenData);
-      res.status(201).json(new ApiResponse(201, toRefreshTokenResponseDto(newRefreshToken), 'Refresh token created successfully'));
-    } catch (error) {
-      next(error);
+      const refreshToken = await refreshTokenService.createRefreshToken(req.body);
+      res.status(201).json(new ApiResponse(201, refreshToken, 'Refresh Token berhasil ditambahkan'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async getAllRefreshTokens(req: Request, res: Response, next: NextFunction) {
     try {
-      const refreshTokens = await RefreshTokenService.getAllRefreshTokens();
-      res.status(200).json(new ApiResponse(200, refreshTokens.map(toRefreshTokenResponseDto), 'Refresh tokens fetched successfully'));
-    } catch (error) {
-      next(error);
+      const refreshTokens = await refreshTokenService.getAllRefreshTokens();
+      res.status(200).json(new ApiResponse(200, refreshTokens, 'Daftar Refresh Token berhasil diambil'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async getRefreshTokenById(req: Request, res: Response, next: NextFunction) {
     try {
-      const refreshToken = await RefreshTokenService.getRefreshTokenById(req.params.id);
-      res.status(200).json(new ApiResponse(200, toRefreshTokenResponseDto(refreshToken!), 'Refresh token fetched successfully'));
-    } catch (error) {
-      next(error);
+      const refreshToken = await refreshTokenService.getRefreshTokenById(req.params.id);
+      res.status(200).json(new ApiResponse(200, refreshToken, 'Refresh Token berhasil ditemukan'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async updateRefreshToken(req: Request, res: Response, next: NextFunction) {
     try {
-      const refreshTokenData: UpdateRefreshTokenInput = req.body;
-      const refreshTokenId = req.params.id;
-      const updatedRefreshToken = await RefreshTokenService.updateRefreshToken(refreshTokenId, refreshTokenData);
-      res.status(200).json(new ApiResponse(200, toRefreshTokenResponseDto(updatedRefreshToken!), 'Refresh token updated successfully'));
-    } catch (error) {
-      next(error);
+      const refreshToken = await refreshTokenService.updateRefreshToken(req.params.id, req.body);
+      res.status(200).json(new ApiResponse(200, refreshToken, 'Refresh Token berhasil diperbarui'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async deleteRefreshToken(req: Request, res: Response, next: NextFunction) {
     try {
-      const refreshTokenId = req.params.id;
-      await RefreshTokenService.deleteRefreshToken(refreshTokenId);
-      res.status(204).json(new ApiResponse(204, null, 'Refresh token deleted successfully'));
-    } catch (error) {
-      next(error);
+      await refreshTokenService.deleteRefreshToken(req.params.id);
+      res.status(200).json(new ApiResponse(200, null, 'Refresh Token berhasil dihapus'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 }

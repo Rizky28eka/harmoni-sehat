@@ -1,20 +1,20 @@
-import { Schema, model, Document, Types } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 
 export interface IDrug extends Document {
-  _id: Types.ObjectId;
   nama: string;
   deskripsi?: string;
   kategori: string;
-  harga: number;
   stok: number;
-  satuan: string; // e.g., 'tablet', 'botol', 'strip'
+  satuan: string;
+  harga: number;
+  kode_obat: string;
   butuh_resep: boolean;
   tgl_kadaluarsa: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const drugSchema = new Schema<IDrug>({
+const DrugSchema = new Schema<IDrug>({
   nama: {
     type: String,
     required: true,
@@ -23,23 +23,32 @@ const drugSchema = new Schema<IDrug>({
   },
   deskripsi: {
     type: String,
+    trim: true,
   },
   kategori: {
     type: String,
     required: true,
-  },
-  harga: {
-    type: Number,
-    required: true,
+    trim: true,
   },
   stok: {
     type: Number,
     required: true,
-    default: 0,
+    min: 0,
   },
   satuan: {
     type: String,
     required: true,
+    trim: true,
+  },
+  harga: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+  kode_obat: {
+    type: String,
+    required: true,
+    unique: true,
     trim: true,
   },
   butuh_resep: {
@@ -50,11 +59,8 @@ const drugSchema = new Schema<IDrug>({
     type: Date,
     required: true,
   },
-},
-{
-  timestamps: true,
-});
+}, { timestamps: true });
 
-const Drug = model<IDrug>('Drug', drugSchema);
+const Drug = model<IDrug>('Drug', DrugSchema);
 
 export default Drug;

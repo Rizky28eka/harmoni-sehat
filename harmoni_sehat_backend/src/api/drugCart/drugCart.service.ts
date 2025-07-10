@@ -1,74 +1,38 @@
 import DrugCart, { IDrugCart } from '../../models/DrugCart';
-import AppError from '../../utils/AppError';
-import { Types } from 'mongoose';
-import { CreateDrugCartInput, UpdateDrugCartInput } from './drugCart.validation';
-import Patient from '../../models/Patient';
+import { AppError } from '../../utils/AppError';
 
 class DrugCartService {
-  async createDrugCart(userId: string, drugCartData: CreateDrugCartInput): Promise<IDrugCart> {
-    const patient = await Patient.findOne({ user_id: userId });
-    if (!patient) {
-      throw new AppError('Patient profile not found for this user', 404);
-    }
-
-    // Check if item already exists in cart for this patient
-    const existingCartItem = await DrugCart.findOne({ patient_id: patient._id, drug_id: drugCartData.drug_id });
-    if (existingCartItem) {
-      // If exists, update quantity instead of creating new
-      existingCartItem.jumlah += drugCartData.jumlah;
-      return existingCartItem.save();
-    }
-
-    const newDrugCart = await DrugCart.create({ ...drugCartData, patient_id: patient._id });
-    return newDrugCart;
+  async createDrugCart(data: Partial<IDrugCart>): Promise<IDrugCart> {
+    const drugCart = await DrugCart.create(data);
+    return drugCart;
   }
 
-  async getMyDrugCart(userId: string): Promise<IDrugCart[]> {
-    const patient = await Patient.findOne({ user_id: userId });
-    if (!patient) {
-      throw new AppError('Patient profile not found for this user', 404);
-    }
-    return DrugCart.find({ patient_id: patient._id }).populate('drug_id');
+  async getAllDrugCarts(): Promise<IDrugCart[]> {
+    const drugCarts = await DrugCart.find().populate('pasien_id').populate('obat_id');
+    return drugCarts;
   }
 
-  async getDrugCartById(drugCartId: string): Promise<IDrugCart | null> {
-    if (!Types.ObjectId.isValid(drugCartId)) {
-      throw new AppError('Invalid Drug Cart ID', 400);
-    }
-    const drugCart = await DrugCart.findById(drugCartId).populate('drug_id').populate('patient_id');
+  async getDrugCartById(id: string): Promise<IDrugCart> {
+    const drugCart = await DrugCart.findById(id).populate('pasien_id').populate('obat_id');
     if (!drugCart) {
-      throw new AppError('Drug Cart item not found', 404);
+      throw new AppError('Keranjang obat tidak ditemukan', 404);
     }
     return drugCart;
   }
 
-  async updateDrugCart(drugCartId: string, drugCartData: UpdateDrugCartInput): Promise<IDrugCart | null> {
-    if (!Types.ObjectId.isValid(drugCartId)) {
-      throw new AppError('Invalid Drug Cart ID', 400);
-    }
-    const drugCart = await DrugCart.findByIdAndUpdate(drugCartId, drugCartData, { new: true, runValidators: true });
+  async updateDrugCart(id: string, data: Partial<IDrugCart>): Promise<IDrugCart> {
+    const drugCart = await DrugCart.findByIdAndUpdate(id, data, { new: true, runValidators: true });
     if (!drugCart) {
-      throw new AppError('Drug Cart item not found', 404);
+      throw new AppError('Keranjang obat tidak ditemukan', 404);
     }
     return drugCart;
   }
 
-  async deleteDrugCart(drugCartId: string): Promise<void> {
-    if (!Types.ObjectId.isValid(drugCartId)) {
-      throw new AppError('Invalid Drug Cart ID', 400);
-    }
-    const drugCart = await DrugCart.findByIdAndDelete(drugCartId);
+  async deleteDrugCart(id: string): Promise<void> {
+    const drugCart = await DrugCart.findByIdAndDelete(id);
     if (!drugCart) {
-      throw new AppError('Drug Cart item not found', 404);
+      throw new AppError('Keranjang obat tidak ditemukan', 404);
     }
-  }
-
-  async clearMyDrugCart(userId: string): Promise<void> {
-    const patient = await Patient.findOne({ user_id: userId });
-    if (!patient) {
-      throw new AppError('Patient profile not found for this user', 404);
-    }
-    await DrugCart.deleteMany({ patient_id: patient._id });
   }
 }
 

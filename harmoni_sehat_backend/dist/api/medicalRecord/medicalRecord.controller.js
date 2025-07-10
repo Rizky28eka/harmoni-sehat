@@ -4,88 +4,52 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const medicalRecord_service_1 = __importDefault(require("./medicalRecord.service"));
-const ApiResponse_1 = __importDefault(require("../../utils/ApiResponse"));
-const AppError_1 = __importDefault(require("../../utils/AppError"));
-const medicalRecord_interface_1 = require("./medicalRecord.interface");
+const ApiResponse_1 = require("../../utils/ApiResponse");
+const AppError_1 = require("../../utils/AppError");
 class MedicalRecordController {
-    // Renamed from getAllMedicalRecords to getMyMedicalRecord
-    async getMyMedicalRecord(req, res, next) {
+    async createMedicalRecord(req, res, next) {
         try {
-            // The user ID should come from the protect middleware
-            const patientId = req.user?._id;
-            const record = await medicalRecord_service_1.default.getMyMedicalRecord(patientId.toString());
-            res.status(200).json(new ApiResponse_1.default(200, record ? (0, medicalRecord_interface_1.toMedicalRecordResponseDto)(record) : null, 'Medical record fetched successfully'));
+            const medicalRecord = await medicalRecord_service_1.default.createMedicalRecord(req.body);
+            res.status(201).json(new ApiResponse_1.ApiResponse(201, medicalRecord, 'Rekam medis berhasil ditambahkan'));
         }
         catch (error) {
-            next(error);
+            next(new AppError_1.AppError(error.message, error.statusCode || 500));
+        }
+    }
+    async getAllMedicalRecords(req, res, next) {
+        try {
+            const medicalRecords = await medicalRecord_service_1.default.getAllMedicalRecords();
+            res.status(200).json(new ApiResponse_1.ApiResponse(200, medicalRecords, 'Daftar rekam medis berhasil diambil'));
+        }
+        catch (error) {
+            next(new AppError_1.AppError(error.message, error.statusCode || 500));
         }
     }
     async getMedicalRecordById(req, res, next) {
         try {
-            const record = await medicalRecord_service_1.default.getMedicalRecordById(req.params.id);
-            // Ownership authorization: Patient can only access their own record
-            if (req.user?.roles?.includes('patient') && record?.patient_id.toString() !== req.user._id.toString()) {
-                return next(new AppError_1.default('You are not authorized to access this medical record.', 403));
-            }
-            res.status(200).json(new ApiResponse_1.default(200, (0, medicalRecord_interface_1.toMedicalRecordResponseDto)(record), 'Medical record fetched successfully'));
+            const medicalRecord = await medicalRecord_service_1.default.getMedicalRecordById(req.params.id);
+            res.status(200).json(new ApiResponse_1.ApiResponse(200, medicalRecord, 'Rekam medis berhasil ditemukan'));
         }
         catch (error) {
-            next(error);
-        }
-    }
-    async createMedicalRecord(req, res, next) {
-        try {
-            const recordData = req.body;
-            const patientId = req.user?._id; // Get patient ID from logged in user
-            if (!patientId) {
-                return next(new AppError_1.default('User not authenticated', 401));
-            }
-            // Ensure patient role can only create for themselves
-            if (req.user?.roles?.includes('patient') && patientId.toString() !== req.user._id.toString()) {
-                return next(new AppError_1.default('Patients can only create medical records for themselves.', 403));
-            }
-            const newRecord = await medicalRecord_service_1.default.createMedicalRecord(patientId.toString(), recordData);
-            res.status(201).json(new ApiResponse_1.default(201, (0, medicalRecord_interface_1.toMedicalRecordResponseDto)(newRecord), 'Medical record created successfully'));
-        }
-        catch (error) {
-            next(error);
+            next(new AppError_1.AppError(error.message, error.statusCode || 500));
         }
     }
     async updateMedicalRecord(req, res, next) {
         try {
-            const recordData = req.body;
-            // Get the record first to check ownership
-            const existingRecord = await medicalRecord_service_1.default.getMedicalRecordById(req.params.id);
-            if (!existingRecord) {
-                return next(new AppError_1.default('Medical Record not found', 404));
-            }
-            // Ownership authorization: Patient can only update their own record
-            if (req.user?.roles?.includes('patient') && existingRecord.patient_id.toString() !== req.user._id.toString()) {
-                return next(new AppError_1.default('You are not authorized to update this medical record.', 403));
-            }
-            const updatedRecord = await medicalRecord_service_1.default.updateMedicalRecord(req.params.id, recordData);
-            res.status(200).json(new ApiResponse_1.default(200, (0, medicalRecord_interface_1.toMedicalRecordResponseDto)(updatedRecord), 'Medical record updated successfully'));
+            const medicalRecord = await medicalRecord_service_1.default.updateMedicalRecord(req.params.id, req.body);
+            res.status(200).json(new ApiResponse_1.ApiResponse(200, medicalRecord, 'Rekam medis berhasil diperbarui'));
         }
         catch (error) {
-            next(error);
+            next(new AppError_1.AppError(error.message, error.statusCode || 500));
         }
     }
     async deleteMedicalRecord(req, res, next) {
         try {
-            // Get the record first to check ownership
-            const existingRecord = await medicalRecord_service_1.default.getMedicalRecordById(req.params.id);
-            if (!existingRecord) {
-                return next(new AppError_1.default('Medical Record not found', 404));
-            }
-            // Ownership authorization: Patient can only delete their own record
-            if (req.user?.roles?.includes('patient') && existingRecord.patient_id.toString() !== req.user._id.toString()) {
-                return next(new AppError_1.default('You are not authorized to delete this medical record.', 403));
-            }
             await medicalRecord_service_1.default.deleteMedicalRecord(req.params.id);
-            res.status(204).json(new ApiResponse_1.default(204, null, 'Medical record deleted successfully'));
+            res.status(200).json(new ApiResponse_1.ApiResponse(200, null, 'Rekam medis berhasil dihapus'));
         }
         catch (error) {
-            next(error);
+            next(new AppError_1.AppError(error.message, error.statusCode || 500));
         }
     }
 }

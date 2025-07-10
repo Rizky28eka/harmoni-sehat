@@ -1,8 +1,7 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IPrescription extends Document {
-  _id: Types.ObjectId;
-  consultation_id: Types.ObjectId;
+  konsultasi_id: Types.ObjectId;
   catatan?: string;
   status: 'active' | 'inactive' | 'expired';
   expired_at: Date;
@@ -10,15 +9,16 @@ export interface IPrescription extends Document {
   updatedAt: Date;
 }
 
-const prescriptionSchema = new Schema<IPrescription>({
-  consultation_id: {
+const PrescriptionSchema = new Schema<IPrescription>({
+  konsultasi_id: {
     type: Schema.Types.ObjectId,
     ref: 'Consultation',
     required: true,
-    unique: true, // One prescription per consultation
+    unique: true,
   },
   catatan: {
     type: String,
+    trim: true,
   },
   status: {
     type: String,
@@ -29,11 +29,8 @@ const prescriptionSchema = new Schema<IPrescription>({
     type: Date,
     required: true,
   },
-},
-{
-  timestamps: true,
-});
+}, { timestamps: true });
 
-const Prescription = model<IPrescription>('Prescription', prescriptionSchema);
+const Prescription = model<IPrescription>('Prescription', PrescriptionSchema);
 
 export default Prescription;

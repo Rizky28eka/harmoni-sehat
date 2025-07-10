@@ -22,13 +22,13 @@ export interface IClinicResponseDto {
   nama: string;
   alamat: string;
   no_telepon: string;
-  email: string;
+  email?: string;
   status: 'active' | 'inactive';
   createdAt: Date;
   updatedAt: Date;
 }
 
-export const toClinicResponseDto = (clinic: IClinic): IClinicResponseDto => {
+export const toClinicResponseDto = (clinic: any): IClinicResponseDto => {
   return {
     id: clinic._id.toString(),
     nama: clinic.nama,

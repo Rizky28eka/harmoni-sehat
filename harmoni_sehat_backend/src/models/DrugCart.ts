@@ -1,21 +1,20 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IDrugCart extends Document {
-  _id: Types.ObjectId;
-  patient_id: Types.ObjectId;
-  drug_id: Types.ObjectId;
+  pasien_id: string; // Refers to Pasien's custom _id
+  obat_id: Types.ObjectId;
   jumlah: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const drugCartSchema = new Schema<IDrugCart>({
-  patient_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Patient',
+const DrugCartSchema = new Schema<IDrugCart>({
+  pasien_id: {
+    type: String,
+    ref: 'Pasien',
     required: true,
   },
-  drug_id: {
+  obat_id: {
     type: Schema.Types.ObjectId,
     ref: 'Drug',
     required: true,
@@ -25,13 +24,8 @@ const drugCartSchema = new Schema<IDrugCart>({
     required: true,
     min: 1,
   },
-},
-{
-  timestamps: true,
-});
+}, { timestamps: true });
 
-drugCartSchema.index({ patient_id: 1, drug_id: 1 }, { unique: true });
-
-const DrugCart = model<IDrugCart>('DrugCart', drugCartSchema);
+const DrugCart = model<IDrugCart>('DrugCart', DrugCartSchema);
 
 export default DrugCart;

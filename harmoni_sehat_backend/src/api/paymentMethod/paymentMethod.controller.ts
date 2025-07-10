@@ -1,57 +1,51 @@
 import { Request, Response, NextFunction } from 'express';
-import PaymentMethodService from './paymentMethod.service';
-import ApiResponse from '../../utils/ApiResponse';
-import AppError from '../../utils/AppError';
-import { toPaymentMethodResponseDto } from './paymentMethod.interface';
-import { CreatePaymentMethodInput, UpdatePaymentMethodInput } from './paymentMethod.validation';
+import paymentMethodService from './paymentMethod.service';
+import { ApiResponse } from '../../utils/ApiResponse';
+import { AppError } from '../../utils/AppError';
 
 class PaymentMethodController {
   async createPaymentMethod(req: Request, res: Response, next: NextFunction) {
     try {
-      const paymentMethodData: CreatePaymentMethodInput = req.body;
-      const newPaymentMethod = await PaymentMethodService.createPaymentMethod(paymentMethodData);
-      res.status(201).json(new ApiResponse(201, toPaymentMethodResponseDto(newPaymentMethod), 'Payment method created successfully'));
-    } catch (error) {
-      next(error);
+      const paymentMethod = await paymentMethodService.createPaymentMethod(req.body);
+      res.status(201).json(new ApiResponse(201, paymentMethod, 'Metode pembayaran berhasil ditambahkan'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async getAllPaymentMethods(req: Request, res: Response, next: NextFunction) {
     try {
-      const paymentMethods = await PaymentMethodService.getAllPaymentMethods();
-      res.status(200).json(new ApiResponse(200, paymentMethods.map(toPaymentMethodResponseDto), 'Payment methods fetched successfully'));
-    } catch (error) {
-      next(error);
+      const paymentMethods = await paymentMethodService.getAllPaymentMethods();
+      res.status(200).json(new ApiResponse(200, paymentMethods, 'Daftar metode pembayaran berhasil diambil'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async getPaymentMethodById(req: Request, res: Response, next: NextFunction) {
     try {
-      const paymentMethod = await PaymentMethodService.getPaymentMethodById(req.params.id);
-      res.status(200).json(new ApiResponse(200, toPaymentMethodResponseDto(paymentMethod!), 'Payment method fetched successfully'));
-    } catch (error) {
-      next(error);
+      const paymentMethod = await paymentMethodService.getPaymentMethodById(req.params.id);
+      res.status(200).json(new ApiResponse(200, paymentMethod, 'Metode pembayaran berhasil ditemukan'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async updatePaymentMethod(req: Request, res: Response, next: NextFunction) {
     try {
-      const paymentMethodData: UpdatePaymentMethodInput = req.body;
-      const paymentMethodId = req.params.id;
-      const updatedPaymentMethod = await PaymentMethodService.updatePaymentMethod(paymentMethodId, paymentMethodData);
-      res.status(200).json(new ApiResponse(200, toPaymentMethodResponseDto(updatedPaymentMethod!), 'Payment method updated successfully'));
-    } catch (error) {
-      next(error);
+      const paymentMethod = await paymentMethodService.updatePaymentMethod(req.params.id, req.body);
+      res.status(200).json(new ApiResponse(200, paymentMethod, 'Metode pembayaran berhasil diperbarui'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async deletePaymentMethod(req: Request, res: Response, next: NextFunction) {
     try {
-      const paymentMethodId = req.params.id;
-      await PaymentMethodService.deletePaymentMethod(paymentMethodId);
-      res.status(204).json(new ApiResponse(204, null, 'Payment method deleted successfully'));
-    } catch (error) {
-      next(error);
+      await paymentMethodService.deletePaymentMethod(req.params.id);
+      res.status(200).json(new ApiResponse(200, null, 'Metode pembayaran berhasil dihapus'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 }

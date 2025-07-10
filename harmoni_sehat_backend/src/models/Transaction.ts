@@ -1,19 +1,18 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface ITransaction extends Document {
-  _id: Types.ObjectId;
   user_id: Types.ObjectId;
   total_biaya: number;
   status: 'pending' | 'completed' | 'failed' | 'refunded';
-  payment_method_id: Types.ObjectId;
-  external_id?: string; // ID from payment gateway
-  transaksiable_id: Types.ObjectId; // Polymorphic reference
-  transaksiable_type: string; // e.g., 'Consultation', 'DrugOrder'
+  metode_pembayaran_id: Types.ObjectId;
+  external_id?: string; // Transaction ID from payment gateway
+  transaksiable_id: Types.ObjectId; // ID of the related entity (e.g., Consultation, DrugOrder)
+  transaksiable_type: string; // Type of the related entity (e.g., 'Consultation', 'DrugOrder')
   createdAt: Date;
   updatedAt: Date;
 }
 
-const transactionSchema = new Schema<ITransaction>({
+const TransactionSchema = new Schema<ITransaction>({
   user_id: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -29,15 +28,14 @@ const transactionSchema = new Schema<ITransaction>({
     enum: ['pending', 'completed', 'failed', 'refunded'],
     default: 'pending',
   },
-  payment_method_id: {
+  metode_pembayaran_id: {
     type: Schema.Types.ObjectId,
     ref: 'PaymentMethod',
     required: true,
   },
   external_id: {
     type: String,
-    unique: true,
-    sparse: true, // Allows null values to not violate unique constraint
+    trim: true,
   },
   transaksiable_id: {
     type: Schema.Types.ObjectId,
@@ -46,13 +44,10 @@ const transactionSchema = new Schema<ITransaction>({
   transaksiable_type: {
     type: String,
     required: true,
-    enum: ['Consultation', 'DrugOrder'], // Add other types as needed
+    trim: true,
   },
-},
-{
-  timestamps: true,
-});
+}, { timestamps: true });
 
-const Transaction = model<ITransaction>('Transaction', transactionSchema);
+const Transaction = model<ITransaction>('Transaction', TransactionSchema);
 
 export default Transaction;

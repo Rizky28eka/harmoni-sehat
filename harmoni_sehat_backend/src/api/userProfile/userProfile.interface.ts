@@ -17,15 +17,17 @@ export interface IUserProfileResponseDto {
   user_id: string;
   foto?: string;
   bio?: string;
+  createdAt: Date;
   updatedAt: Date;
 }
 
-export const toUserProfileResponseDto = (userProfile: IUserProfile): IUserProfileResponseDto => {
+export const toUserProfileResponseDto = (userProfile: any): IUserProfileResponseDto => {
   return {
     id: userProfile._id.toString(),
     user_id: userProfile.user_id.toString(),
     foto: userProfile.foto,
     bio: userProfile.bio,
+    createdAt: userProfile.createdAt,
     updatedAt: userProfile.updatedAt,
   };
 };

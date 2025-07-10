@@ -1,16 +1,13 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import User, { IUser } from '../../models/User';
-import AppError from '../../utils/AppError';
-import env from '../../config/env';
+import { AppError } from '../../utils/AppError';
+import { JWT_SECRET, JWT_EXPIRES_IN } from '../../config/env';
 
 const signToken = (id: string) => {
   const jwtOptions: SignOptions = {
-    // Using `as any` here is a pragmatic workaround for a known issue with
-    // @types/jsonwebtoken where a generic string is not assignable to the
-    // more specific StringValue type for `expiresIn`.
-    expiresIn: env.jwtExpiresIn as any,
+    expiresIn: JWT_EXPIRES_IN as any,
   };
-  return jwt.sign({ id }, env.jwtSecret, jwtOptions);
+  return jwt.sign({ id }, JWT_SECRET, jwtOptions);
 };
 
 export const createUserInput = async (input: Partial<IUser>) => {
@@ -25,7 +22,7 @@ export const createUserInput = async (input: Partial<IUser>) => {
   const userObject = user.toObject();
   delete userObject.password;
 
-  const token = signToken(user._id.toString());
+  const token = signToken((user as any)._id.toString());
   return { user: userObject, token };
 };
 
@@ -40,6 +37,6 @@ export const loginUserInput = async (email: string, password: string) => {
   const userObject = user.toObject();
   delete userObject.password;
 
-  const token = signToken(user._id.toString());
+  const token = signToken((user as any)._id.toString());
   return { user: userObject, token };
 };

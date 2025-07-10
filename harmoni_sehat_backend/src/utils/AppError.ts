@@ -1,4 +1,4 @@
-class AppError extends Error {
+export class AppError extends Error {
   statusCode: number;
   status: string;
   isOperational: boolean;
@@ -12,5 +12,3 @@ class AppError extends Error {
     Object.setPrototypeOf(this, AppError.prototype);
   }
 }
-
-export default AppError;

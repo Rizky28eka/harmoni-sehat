@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const mediaSchema = new mongoose_1.Schema({
+const MediaSchema = new mongoose_1.Schema({
     model_type: {
         type: String,
         required: true,
@@ -18,12 +18,14 @@ const mediaSchema = new mongoose_1.Schema({
     },
     mime_type: {
         type: String,
+        required: true,
+        trim: true,
     },
     size: {
         type: Number,
+        required: true,
+        min: 0,
     },
-}, {
-    timestamps: true,
-});
-const Media = (0, mongoose_1.model)('Media', mediaSchema);
+}, { timestamps: true });
+const Media = (0, mongoose_1.model)('Media', MediaSchema);
 exports.default = Media;

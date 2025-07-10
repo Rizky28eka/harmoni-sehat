@@ -1,57 +1,51 @@
 import { Request, Response, NextFunction } from 'express';
-import DrugService from './drug.service';
-import ApiResponse from '../../utils/ApiResponse';
-import AppError from '../../utils/AppError';
-import { toDrugResponseDto } from './drug.interface';
-import { CreateDrugInput, UpdateDrugInput } from './drug.validation';
+import drugService from './drug.service';
+import { ApiResponse } from '../../utils/ApiResponse';
+import { AppError } from '../../utils/AppError';
 
 class DrugController {
   async createDrug(req: Request, res: Response, next: NextFunction) {
     try {
-      const drugData: CreateDrugInput = req.body;
-      const newDrug = await DrugService.createDrug(drugData);
-      res.status(201).json(new ApiResponse(201, toDrugResponseDto(newDrug), 'Drug created successfully'));
-    } catch (error) {
-      next(error);
+      const drug = await drugService.createDrug(req.body);
+      res.status(201).json(new ApiResponse(201, drug, 'Obat berhasil ditambahkan'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async getAllDrugs(req: Request, res: Response, next: NextFunction) {
     try {
-      const drugs = await DrugService.getAllDrugs();
-      res.status(200).json(new ApiResponse(200, drugs.map(toDrugResponseDto), 'Drugs fetched successfully'));
-    } catch (error) {
-      next(error);
+      const drugs = await drugService.getAllDrugs();
+      res.status(200).json(new ApiResponse(200, drugs, 'Daftar obat berhasil diambil'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async getDrugById(req: Request, res: Response, next: NextFunction) {
     try {
-      const drug = await DrugService.getDrugById(req.params.id);
-      res.status(200).json(new ApiResponse(200, toDrugResponseDto(drug!), 'Drug fetched successfully'));
-    } catch (error) {
-      next(error);
+      const drug = await drugService.getDrugById(req.params.id);
+      res.status(200).json(new ApiResponse(200, drug, 'Obat berhasil ditemukan'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async updateDrug(req: Request, res: Response, next: NextFunction) {
     try {
-      const drugData: UpdateDrugInput = req.body;
-      const drugId = req.params.id;
-      const updatedDrug = await DrugService.updateDrug(drugId, drugData);
-      res.status(200).json(new ApiResponse(200, toDrugResponseDto(updatedDrug!), 'Drug updated successfully'));
-    } catch (error) {
-      next(error);
+      const drug = await drugService.updateDrug(req.params.id, req.body);
+      res.status(200).json(new ApiResponse(200, drug, 'Obat berhasil diperbarui'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async deleteDrug(req: Request, res: Response, next: NextFunction) {
     try {
-      const drugId = req.params.id;
-      await DrugService.deleteDrug(drugId);
-      res.status(204).json(new ApiResponse(204, null, 'Drug deleted successfully'));
-    } catch (error) {
-      next(error);
+      await drugService.deleteDrug(req.params.id);
+      res.status(200).json(new ApiResponse(200, null, 'Obat berhasil dihapus'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 }

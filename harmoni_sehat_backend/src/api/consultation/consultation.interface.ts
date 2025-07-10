@@ -2,9 +2,9 @@ import { Types } from 'mongoose';
 import { IConsultation } from '../../models/Consultation';
 
 export interface CreateConsultationDto {
-  patient_id: string; // Will be ObjectId in service
-  doctor_id: string; // Will be ObjectId in service
-  schedule_id: string; // Will be ObjectId in service
+  pasien_id: string; // Will be ObjectId in service
+  dokter_id: string; // Will be ObjectId in service
+  jadwal_id: string; // Will be ObjectId in service
   tanggal: Date;
   status?: 'scheduled' | 'completed' | 'cancelled' | 'pending';
   keluhan: string;
@@ -15,9 +15,9 @@ export interface CreateConsultationDto {
 }
 
 export interface UpdateConsultationDto {
-  patient_id?: string;
-  doctor_id?: string;
-  schedule_id?: string;
+  pasien_id?: string;
+  dokter_id?: string;
+  jadwal_id?: string;
   tanggal?: Date;
   status?: 'scheduled' | 'completed' | 'cancelled' | 'pending';
   keluhan?: string;
@@ -29,9 +29,9 @@ export interface UpdateConsultationDto {
 
 export interface IConsultationResponseDto {
   id: string;
-  patient_id: string;
-  doctor_id: string;
-  schedule_id: string;
+  pasien_id: string;
+  dokter_id: string;
+  jadwal_id: string;
   tanggal: Date;
   status: 'scheduled' | 'completed' | 'cancelled' | 'pending';
   keluhan: string;
@@ -43,12 +43,12 @@ export interface IConsultationResponseDto {
   updatedAt: Date;
 }
 
-export const toConsultationResponseDto = (consultation: IConsultation): IConsultationResponseDto => {
+export const toConsultationResponseDto = (consultation: any): IConsultationResponseDto => {
   return {
     id: consultation._id.toString(),
-    patient_id: consultation.patient_id.toString(),
-    doctor_id: consultation.doctor_id.toString(),
-    schedule_id: consultation.schedule_id.toString(),
+    pasien_id: consultation.pasien_id.toString(),
+    dokter_id: consultation.dokter_id.toString(),
+    jadwal_id: consultation.jadwal_id.toString(),
     tanggal: consultation.tanggal,
     status: consultation.status,
     keluhan: consultation.keluhan,

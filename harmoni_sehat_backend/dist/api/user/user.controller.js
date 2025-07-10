@@ -4,44 +4,53 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const user_service_1 = __importDefault(require("./user.service"));
-const user_interface_1 = require("./user.interface");
-const ApiResponse_1 = __importDefault(require("../../utils/ApiResponse"));
+const ApiResponse_1 = require("../../utils/ApiResponse");
+const AppError_1 = require("../../utils/AppError");
 class UserController {
+    async createUser(req, res, next) {
+        try {
+            const { email, password } = req.body;
+            const user = await user_service_1.default.createUser(email, password);
+            res.status(201).json(new ApiResponse_1.ApiResponse(201, user, 'User berhasil ditambahkan'));
+        }
+        catch (error) {
+            next(new AppError_1.AppError(error.message, error.statusCode || 500));
+        }
+    }
     async getAllUsers(req, res, next) {
         try {
             const users = await user_service_1.default.getAllUsers();
-            res.status(200).json(new ApiResponse_1.default(200, users.map(user_interface_1.toUserResponseDto), 'Users fetched successfully'));
+            res.status(200).json(new ApiResponse_1.ApiResponse(200, users, 'Users berhasil diambil'));
         }
         catch (error) {
-            next(error);
+            next(new AppError_1.AppError(error.message, error.statusCode || 500));
         }
     }
     async getUserById(req, res, next) {
         try {
             const user = await user_service_1.default.getUserById(req.params.id);
-            res.status(200).json(new ApiResponse_1.default(200, (0, user_interface_1.toUserResponseDto)(user), 'User fetched successfully'));
+            res.status(200).json(new ApiResponse_1.ApiResponse(200, user, 'User berhasil ditemukan'));
         }
         catch (error) {
-            next(error);
+            next(new AppError_1.AppError(error.message, error.statusCode || 500));
         }
     }
     async updateUser(req, res, next) {
         try {
-            const userData = req.body;
-            const updatedUser = await user_service_1.default.updateUser(req.params.id, userData);
-            res.status(200).json(new ApiResponse_1.default(200, (0, user_interface_1.toUserResponseDto)(updatedUser), 'User updated successfully'));
+            const user = await user_service_1.default.updateUser(req.params.id, req.body);
+            res.status(200).json(new ApiResponse_1.ApiResponse(200, user, 'User berhasil diperbarui'));
         }
         catch (error) {
-            next(error);
+            next(new AppError_1.AppError(error.message, error.statusCode || 500));
         }
     }
     async deleteUser(req, res, next) {
         try {
             await user_service_1.default.deleteUser(req.params.id);
-            res.status(204).json(new ApiResponse_1.default(204, null, 'User deleted successfully'));
+            res.status(200).json(new ApiResponse_1.ApiResponse(200, null, 'User berhasil dihapus'));
         }
         catch (error) {
-            next(error);
+            next(new AppError_1.AppError(error.message, error.statusCode || 500));
         }
     }
 }

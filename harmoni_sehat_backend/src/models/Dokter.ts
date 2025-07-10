@@ -1,20 +1,23 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { generateCustomId } from '../utils/idGenerator';
 
-export interface IDoctor extends Document {
-  _id: Types.ObjectId;
+export interface IDokter extends Document {
+  _id: string; // Custom ID
   user_id: Types.ObjectId;
   nama: string;
   nomor_str: string;
-  specialization_id: Types.ObjectId; // Reference to Specialization model
+  spesialisasi_id?: Types.ObjectId;
   biaya_konsultasi: number;
-  foto?: string; // URL to photo
+  foto?: string;
   bio?: string;
-  status: 'active' | 'inactive' | 'pending';
-  createdAt: Date;
-  updatedAt: Date;
+  status: 'active' | 'inactive';
 }
 
-const doctorSchema = new Schema<IDoctor>({
+const DokterSchema = new Schema<IDokter>({
+  _id: {
+    type: String,
+    default: () => generateCustomId('10', 12), // Dokter ID starts with 10
+  },
   user_id: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -32,14 +35,14 @@ const doctorSchema = new Schema<IDoctor>({
     unique: true,
     trim: true,
   },
-  specialization_id: {
+  spesialisasi_id: {
     type: Schema.Types.ObjectId,
     ref: 'Specialization',
-    required: true,
   },
   biaya_konsultasi: {
     type: Number,
     required: true,
+    min: 0,
   },
   foto: {
     type: String,
@@ -49,14 +52,11 @@ const doctorSchema = new Schema<IDoctor>({
   },
   status: {
     type: String,
-    enum: ['active', 'inactive', 'pending'],
-    default: 'pending',
+    enum: ['active', 'inactive'],
+    default: 'active',
   },
-},
-{
-  timestamps: true,
-});
+}, { _id: false }); // Disable default _id generation
 
-const Doctor = model<IDoctor>('Doctor', doctorSchema);
+const Dokter = model<IDokter>('Dokter', DokterSchema);
 
-export default Doctor;
+export default Dokter;

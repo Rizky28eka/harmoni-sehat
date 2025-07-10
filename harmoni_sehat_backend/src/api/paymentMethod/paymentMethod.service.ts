@@ -1,51 +1,41 @@
 import PaymentMethod, { IPaymentMethod } from '../../models/PaymentMethod';
-import AppError from '../../utils/AppError';
-import { Types } from 'mongoose';
-import { CreatePaymentMethodInput, UpdatePaymentMethodInput } from './paymentMethod.validation';
+import { AppError } from '../../utils/AppError';
 
 class PaymentMethodService {
-  async createPaymentMethod(paymentMethodData: CreatePaymentMethodInput): Promise<IPaymentMethod> {
-    const existingPaymentMethod = await PaymentMethod.findOne({ kode: paymentMethodData.kode });
+  async createPaymentMethod(data: Partial<IPaymentMethod>): Promise<IPaymentMethod> {
+    const existingPaymentMethod = await PaymentMethod.findOne({ kode: data.kode });
     if (existingPaymentMethod) {
-      throw new AppError('Payment method with this code already exists', 409);
+      throw new AppError('Metode pembayaran dengan kode tersebut sudah ada', 409);
     }
-    const newPaymentMethod = await PaymentMethod.create(paymentMethodData);
-    return newPaymentMethod;
+    const paymentMethod = await PaymentMethod.create(data);
+    return paymentMethod;
   }
 
   async getAllPaymentMethods(): Promise<IPaymentMethod[]> {
-    return PaymentMethod.find();
+    const paymentMethods = await PaymentMethod.find();
+    return paymentMethods;
   }
 
-  async getPaymentMethodById(paymentMethodId: string): Promise<IPaymentMethod | null> {
-    if (!Types.ObjectId.isValid(paymentMethodId)) {
-      throw new AppError('Invalid Payment Method ID', 400);
-    }
-    const paymentMethod = await PaymentMethod.findById(paymentMethodId);
+  async getPaymentMethodById(id: string): Promise<IPaymentMethod> {
+    const paymentMethod = await PaymentMethod.findById(id);
     if (!paymentMethod) {
-      throw new AppError('Payment Method not found', 404);
+      throw new AppError('Metode pembayaran tidak ditemukan', 404);
     }
     return paymentMethod;
   }
 
-  async updatePaymentMethod(paymentMethodId: string, paymentMethodData: UpdatePaymentMethodInput): Promise<IPaymentMethod | null> {
-    if (!Types.ObjectId.isValid(paymentMethodId)) {
-      throw new AppError('Invalid Payment Method ID', 400);
-    }
-    const paymentMethod = await PaymentMethod.findByIdAndUpdate(paymentMethodId, paymentMethodData, { new: true, runValidators: true });
+  async updatePaymentMethod(id: string, data: Partial<IPaymentMethod>): Promise<IPaymentMethod> {
+    const paymentMethod = await PaymentMethod.findByIdAndUpdate(id, data, { new: true, runValidators: true });
     if (!paymentMethod) {
-      throw new AppError('Payment Method not found', 404);
+      throw new AppError('Metode pembayaran tidak ditemukan', 404);
     }
     return paymentMethod;
   }
 
-  async deletePaymentMethod(paymentMethodId: string): Promise<void> {
-    if (!Types.ObjectId.isValid(paymentMethodId)) {
-      throw new AppError('Invalid Payment Method ID', 400);
-    }
-    const paymentMethod = await PaymentMethod.findByIdAndDelete(paymentMethodId);
+  async deletePaymentMethod(id: string): Promise<void> {
+    const paymentMethod = await PaymentMethod.findByIdAndDelete(id);
     if (!paymentMethod) {
-      throw new AppError('Payment Method not found', 404);
+      throw new AppError('Metode pembayaran tidak ditemukan', 404);
     }
   }
 }

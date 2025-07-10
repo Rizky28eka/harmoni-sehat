@@ -18,7 +18,7 @@ export interface UpdateDrugOrderDto {
 
 export interface IDrugOrderResponseDto {
   id: string;
-  patient_id: string;
+  pasien_id: string;
   kode_pesanan: string;
   total_harga: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
@@ -27,10 +27,10 @@ export interface IDrugOrderResponseDto {
   updatedAt: Date;
 }
 
-export const toDrugOrderResponseDto = (drugOrder: IDrugOrder): IDrugOrderResponseDto => {
+export const toDrugOrderResponseDto = (drugOrder: any): IDrugOrderResponseDto => {
   return {
     id: drugOrder._id.toString(),
-    patient_id: drugOrder.patient_id.toString(),
+    pasien_id: drugOrder.pasien_id.toString(),
     kode_pesanan: drugOrder.kode_pesanan,
     total_harga: drugOrder.total_harga,
     status: drugOrder.status,

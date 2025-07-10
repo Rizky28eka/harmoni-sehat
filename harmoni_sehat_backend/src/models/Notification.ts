@@ -1,7 +1,6 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface INotification extends Document {
-  _id: Types.ObjectId;
   user_id: Types.ObjectId;
   judul: string;
   isi: string;
@@ -11,7 +10,7 @@ export interface INotification extends Document {
   updatedAt: Date;
 }
 
-const notificationSchema = new Schema<INotification>({
+const NotificationSchema = new Schema<INotification>({
   user_id: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -25,6 +24,7 @@ const notificationSchema = new Schema<INotification>({
   isi: {
     type: String,
     required: true,
+    trim: true,
   },
   tipe: {
     type: String,
@@ -36,11 +36,8 @@ const notificationSchema = new Schema<INotification>({
     type: Boolean,
     default: false,
   },
-},
-{
-  timestamps: true,
-});
+}, { timestamps: true });
 
-const Notification = model<INotification>('Notification', notificationSchema);
+const Notification = model<INotification>('Notification', NotificationSchema);
 
 export default Notification;

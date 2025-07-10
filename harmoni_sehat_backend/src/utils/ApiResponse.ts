@@ -1,16 +1,10 @@
-interface ApiResponseOptions {
-  statusCode?: number;
-  message?: string;
-  success?: boolean;
-}
-
-class ApiResponse<T> {
+class ApiResponse {
   statusCode: number;
-  data: T;
+  data: any;
   message: string;
   success: boolean;
 
-  constructor(statusCode: number, data: T, message = "Success") {
+  constructor(statusCode: number, data: any, message = "Success") {
     this.statusCode = statusCode;
     this.data = data;
     this.message = message;
@@ -18,4 +12,4 @@ class ApiResponse<T> {
   }
 }
 
-export default ApiResponse;
+export { ApiResponse };

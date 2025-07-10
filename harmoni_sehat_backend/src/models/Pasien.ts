@@ -1,7 +1,8 @@
 import { Schema, model, Document, Types } from 'mongoose';
+import { generateCustomId } from '../utils/idGenerator';
 
-export interface IPatient extends Document {
-  _id: Types.ObjectId;
+export interface IPasien extends Document {
+  _id: string; // Custom ID
   user_id: Types.ObjectId;
   nama: string;
   nik: string;
@@ -9,11 +10,13 @@ export interface IPatient extends Document {
   jenis_kelamin: 'Laki-laki' | 'Perempuan';
   alamat: string;
   no_telepon: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
-const patientSchema = new Schema<IPatient>({
+const PasienSchema = new Schema<IPasien>({
+  _id: {
+    type: String,
+    default: () => generateCustomId('08', 12), // Pasien ID starts with 08
+  },
   user_id: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -30,6 +33,8 @@ const patientSchema = new Schema<IPatient>({
     required: true,
     unique: true,
     trim: true,
+    minlength: 16,
+    maxlength: 16,
   },
   tanggal_lahir: {
     type: Date,
@@ -43,16 +48,15 @@ const patientSchema = new Schema<IPatient>({
   alamat: {
     type: String,
     required: true,
+    trim: true,
   },
   no_telepon: {
     type: String,
     required: true,
+    trim: true,
   },
-},
-{
-  timestamps: true,
-});
+}, { _id: false }); // Disable default _id generation
 
-const Patient = model<IPatient>('Patient', patientSchema);
+const Pasien = model<IPasien>('Pasien', PasienSchema);
 
-export default Patient;
+export default Pasien;

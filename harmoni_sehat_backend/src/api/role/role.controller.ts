@@ -1,57 +1,53 @@
 import { Request, Response, NextFunction } from 'express';
-import RoleService from './role.service';
-import ApiResponse from '../../utils/ApiResponse';
-import AppError from '../../utils/AppError';
-import { toRoleResponseDto } from './role.interface';
-import { CreateRoleInput, UpdateRoleInput } from './role.validation';
+import roleService from './role.service';
+import { ApiResponse } from '../../utils/ApiResponse';
+import { AppError } from '../../utils/AppError';
 
 class RoleController {
   async createRole(req: Request, res: Response, next: NextFunction) {
     try {
-      const roleData: CreateRoleInput = req.body;
-      const newRole = await RoleService.createRole(roleData);
-      res.status(201).json(new ApiResponse(201, toRoleResponseDto(newRole), 'Role created successfully'));
-    } catch (error) {
-      next(error);
+      const { nama_peran } = req.body;
+      const role = await roleService.createRole(nama_peran);
+      res.status(201).json(new ApiResponse(201, role, 'Role berhasil ditambahkan'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async getAllRoles(req: Request, res: Response, next: NextFunction) {
     try {
-      const roles = await RoleService.getAllRoles();
-      res.status(200).json(new ApiResponse(200, roles.map(toRoleResponseDto), 'Roles fetched successfully'));
-    } catch (error) {
-      next(error);
+      const roles = await roleService.getAllRoles();
+      res.status(200).json(new ApiResponse(200, roles, 'Roles berhasil diambil'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async getRoleById(req: Request, res: Response, next: NextFunction) {
     try {
-      const role = await RoleService.getRoleById(req.params.id);
-      res.status(200).json(new ApiResponse(200, toRoleResponseDto(role!), 'Role fetched successfully'));
-    } catch (error) {
-      next(error);
+      const role = await roleService.getRoleById(req.params.id);
+      res.status(200).json(new ApiResponse(200, role, 'Role berhasil ditemukan'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async updateRole(req: Request, res: Response, next: NextFunction) {
     try {
-      const roleData: UpdateRoleInput = req.body;
-      const roleId = req.params.id;
-      const updatedRole = await RoleService.updateRole(roleId, roleData);
-      res.status(200).json(new ApiResponse(200, toRoleResponseDto(updatedRole!), 'Role updated successfully'));
-    } catch (error) {
-      next(error);
+      const { nama_peran } = req.body;
+      const role = await roleService.updateRole(req.params.id, nama_peran);
+      res.status(200).json(new ApiResponse(200, role, 'Role berhasil diperbarui'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async deleteRole(req: Request, res: Response, next: NextFunction) {
     try {
-      const roleId = req.params.id;
-      await RoleService.deleteRole(roleId);
-      res.status(204).json(new ApiResponse(204, null, 'Role deleted successfully'));
-    } catch (error) {
-      next(error);
+      await roleService.deleteRole(req.params.id);
+      res.status(200).json(new ApiResponse(200, null, 'Role berhasil dihapus'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 }

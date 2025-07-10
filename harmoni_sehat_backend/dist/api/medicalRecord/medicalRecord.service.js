@@ -4,56 +4,38 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const MedicalRecord_1 = __importDefault(require("../../models/MedicalRecord"));
-const AppError_1 = __importDefault(require("../../utils/AppError"));
-const mongoose_1 = require("mongoose");
+const AppError_1 = require("../../utils/AppError");
 class MedicalRecordService {
-    // Get all medical records for a specific patient
-    async getMyMedicalRecord(patientId) {
-        if (!mongoose_1.Types.ObjectId.isValid(patientId)) {
-            throw new AppError_1.default('Invalid Patient ID', 400);
+    async createMedicalRecord(data) {
+        const existingRecord = await MedicalRecord_1.default.findOne({ pasien_id: data.pasien_id });
+        if (existingRecord) {
+            throw new AppError_1.AppError('Rekam medis untuk pasien ini sudah ada', 409);
         }
-        // In a real app, you might find based on a user ID reference
-        return MedicalRecord_1.default.findOne({ patient_id: patientId }).populate('patient_id');
+        const medicalRecord = await MedicalRecord_1.default.create(data);
+        return medicalRecord;
+    }
+    async getAllMedicalRecords() {
+        const medicalRecords = await MedicalRecord_1.default.find().populate('pasien_id');
+        return medicalRecords;
     }
     async getMedicalRecordById(id) {
-        if (!mongoose_1.Types.ObjectId.isValid(id)) {
-            throw new AppError_1.default('Invalid Medical Record ID', 400);
+        const medicalRecord = await MedicalRecord_1.default.findById(id).populate('pasien_id');
+        if (!medicalRecord) {
+            throw new AppError_1.AppError('Rekam medis tidak ditemukan', 404);
         }
-        const record = await MedicalRecord_1.default.findById(id).populate('patient_id');
-        if (!record) {
-            throw new AppError_1.default('Medical Record not found', 404);
-        }
-        return record;
+        return medicalRecord;
     }
-    // Create a medical record for a specific patient ID (from logged-in user)
-    async createMedicalRecord(patientId, recordData) {
-        if (!mongoose_1.Types.ObjectId.isValid(patientId)) {
-            throw new AppError_1.default('Invalid Patient ID', 400);
+    async updateMedicalRecord(id, data) {
+        const medicalRecord = await MedicalRecord_1.default.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+        if (!medicalRecord) {
+            throw new AppError_1.AppError('Rekam medis tidak ditemukan', 404);
         }
-        const existingRecord = await MedicalRecord_1.default.findOne({ patient_id: patientId });
-        if (existingRecord) {
-            throw new AppError_1.default('Medical record for this patient already exists', 409);
-        }
-        const newRecord = await MedicalRecord_1.default.create({ ...recordData, patient_id: patientId });
-        return newRecord;
-    }
-    async updateMedicalRecord(id, recordData) {
-        if (!mongoose_1.Types.ObjectId.isValid(id)) {
-            throw new AppError_1.default('Invalid Medical Record ID', 400);
-        }
-        const record = await MedicalRecord_1.default.findByIdAndUpdate(id, recordData, { new: true, runValidators: true });
-        if (!record) {
-            throw new AppError_1.default('Medical Record not found', 404);
-        }
-        return record;
+        return medicalRecord;
     }
     async deleteMedicalRecord(id) {
-        if (!mongoose_1.Types.ObjectId.isValid(id)) {
-            throw new AppError_1.default('Invalid Medical Record ID', 400);
-        }
-        const record = await MedicalRecord_1.default.findByIdAndDelete(id);
-        if (!record) {
-            throw new AppError_1.default('Medical Record not found', 404);
+        const medicalRecord = await MedicalRecord_1.default.findByIdAndDelete(id);
+        if (!medicalRecord) {
+            throw new AppError_1.AppError('Rekam medis tidak ditemukan', 404);
         }
     }
 }

@@ -1,8 +1,7 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IDrugOrder extends Document {
-  _id: Types.ObjectId;
-  patient_id: Types.ObjectId;
+  pasien_id: string; // Refers to Pasien's custom _id
   kode_pesanan: string;
   total_harga: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
@@ -11,10 +10,10 @@ export interface IDrugOrder extends Document {
   updatedAt: Date;
 }
 
-const drugOrderSchema = new Schema<IDrugOrder>({
-  patient_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Patient',
+const DrugOrderSchema = new Schema<IDrugOrder>({
+  pasien_id: {
+    type: String,
+    ref: 'Pasien',
     required: true,
   },
   kode_pesanan: {
@@ -36,12 +35,10 @@ const drugOrderSchema = new Schema<IDrugOrder>({
   alamat_pengiriman: {
     type: String,
     required: true,
+    trim: true,
   },
-},
-{
-  timestamps: true,
-});
+}, { timestamps: true });
 
-const DrugOrder = model<IDrugOrder>('DrugOrder', drugOrderSchema);
+const DrugOrder = model<IDrugOrder>('DrugOrder', DrugOrderSchema);
 
 export default DrugOrder;

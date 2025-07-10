@@ -1,9 +1,8 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IPrescriptionDrug extends Document {
-  _id: Types.ObjectId;
-  prescription_id: Types.ObjectId;
-  drug_id: Types.ObjectId;
+  resep_id: Types.ObjectId;
+  obat_id: Types.ObjectId;
   dosis: string;
   jumlah: number;
   aturan_pakai: string;
@@ -11,13 +10,13 @@ export interface IPrescriptionDrug extends Document {
   updatedAt: Date;
 }
 
-const prescriptionDrugSchema = new Schema<IPrescriptionDrug>({
-  prescription_id: {
+const PrescriptionDrugSchema = new Schema<IPrescriptionDrug>({
+  resep_id: {
     type: Schema.Types.ObjectId,
     ref: 'Prescription',
     required: true,
   },
-  drug_id: {
+  obat_id: {
     type: Schema.Types.ObjectId,
     ref: 'Drug',
     required: true,
@@ -35,12 +34,10 @@ const prescriptionDrugSchema = new Schema<IPrescriptionDrug>({
   aturan_pakai: {
     type: String,
     required: true,
+    trim: true,
   },
-},
-{
-  timestamps: true,
-});
+}, { timestamps: true });
 
-const PrescriptionDrug = model<IPrescriptionDrug>('PrescriptionDrug', prescriptionDrugSchema);
+const PrescriptionDrug = model<IPrescriptionDrug>('PrescriptionDrug', PrescriptionDrugSchema);
 
 export default PrescriptionDrug;

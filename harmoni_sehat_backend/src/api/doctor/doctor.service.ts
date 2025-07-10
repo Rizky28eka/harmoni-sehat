@@ -1,68 +1,41 @@
-import Doctor, { IDoctor } from '../../models/Doctor';
-import AppError from '../../utils/AppError';
-import { Types } from 'mongoose';
-import { CreateDoctorInput, UpdateDoctorInput } from './doctor.validation';
-import User from '../../models/User';
+import Dokter, { IDokter } from '../../models/Dokter';
+import { AppError } from '../../utils/AppError';
 
 class DoctorService {
-  async createDoctor(userId: string, doctorData: CreateDoctorInput): Promise<IDoctor> {
-    // Check if a doctor record already exists for this user
-    const existingDoctor = await Doctor.findOne({ user_id: userId });
+  async createDoctor(data: Partial<IDokter>): Promise<IDokter> {
+    const existingDoctor = await Dokter.findOne({ user_id: data.user_id });
     if (existingDoctor) {
-      throw new AppError('Doctor record already exists for this user', 409);
+      throw new AppError('Dokter dengan user ID ini sudah ada', 409);
     }
-
-    // Check if the user exists and is active
-    const user = await User.findById(userId);
-    if (!user || !user.is_active) {
-      throw new AppError('User not found or not active', 404);
-    }
-
-    const newDoctor = await Doctor.create({ ...doctorData, user_id: userId });
-    return newDoctor;
+    const doctor = await Dokter.create(data);
+    return doctor;
   }
 
-  async getAllDoctors(): Promise<IDoctor[]> {
-    return Doctor.find().populate('user_id').populate('specialization_id');
+  async getAllDoctors(): Promise<IDokter[]> {
+    const doctors = await Dokter.find().populate('user_id').populate('spesialisasi_id');
+    return doctors;
   }
 
-  async getDoctorById(doctorId: string): Promise<IDoctor | null> {
-    if (!Types.ObjectId.isValid(doctorId)) {
-      throw new AppError('Invalid Doctor ID', 400);
-    }
-    const doctor = await Doctor.findById(doctorId).populate('user_id').populate('specialization_id');
+  async getDoctorById(id: string): Promise<IDokter> {
+    const doctor = await Dokter.findById(id).populate('user_id').populate('spesialisasi_id');
     if (!doctor) {
-      throw new AppError('Doctor not found', 404);
+      throw new AppError('Dokter tidak ditemukan', 404);
     }
     return doctor;
   }
 
-  async getMyDoctorProfile(userId: string): Promise<IDoctor | null> {
-    const doctor = await Doctor.findOne({ user_id: userId }).populate('user_id').populate('specialization_id');
+  async updateDoctor(id: string, data: Partial<IDokter>): Promise<IDokter> {
+    const doctor = await Dokter.findByIdAndUpdate(id, data, { new: true, runValidators: true });
     if (!doctor) {
-      throw new AppError('Doctor profile not found for this user', 404);
+      throw new AppError('Dokter tidak ditemukan', 404);
     }
     return doctor;
   }
 
-  async updateDoctor(doctorId: string, doctorData: UpdateDoctorInput): Promise<IDoctor | null> {
-    if (!Types.ObjectId.isValid(doctorId)) {
-      throw new AppError('Invalid Doctor ID', 400);
-    }
-    const doctor = await Doctor.findByIdAndUpdate(doctorId, doctorData, { new: true, runValidators: true });
+  async deleteDoctor(id: string): Promise<void> {
+    const doctor = await Dokter.findByIdAndDelete(id);
     if (!doctor) {
-      throw new AppError('Doctor not found', 404);
-    }
-    return doctor;
-  }
-
-  async deleteDoctor(doctorId: string): Promise<void> {
-    if (!Types.ObjectId.isValid(doctorId)) {
-      throw new AppError('Invalid Doctor ID', 400);
-    }
-    const doctor = await Doctor.findByIdAndDelete(doctorId);
-    if (!doctor) {
-      throw new AppError('Doctor not found', 404);
+      throw new AppError('Dokter tidak ditemukan', 404);
     }
   }
 }

@@ -1,12 +1,11 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IConsultation extends Document {
-  _id: Types.ObjectId;
-  patient_id: Types.ObjectId;
-  doctor_id: Types.ObjectId;
-  schedule_id: Types.ObjectId; // Reference to PracticeSchedule
+  pasien_id: string; // Refers to Pasien's custom _id
+  dokter_id: string; // Refers to Dokter's custom _id
+  jadwal_id: Types.ObjectId;
   tanggal: Date;
-  status: 'scheduled' | 'completed' | 'cancelled' | 'pending';
+  status: 'pending' | 'scheduled' | 'completed' | 'cancelled';
   keluhan: string;
   diagnosa?: string;
   tindakan?: string;
@@ -16,18 +15,18 @@ export interface IConsultation extends Document {
   updatedAt: Date;
 }
 
-const consultationSchema = new Schema<IConsultation>({
-  patient_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Patient',
+const ConsultationSchema = new Schema<IConsultation>({
+  pasien_id: {
+    type: String,
+    ref: 'Pasien',
     required: true,
   },
-  doctor_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Doctor',
+  dokter_id: {
+    type: String,
+    ref: 'Dokter',
     required: true,
   },
-  schedule_id: {
+  jadwal_id: {
     type: Schema.Types.ObjectId,
     ref: 'PracticeSchedule',
     required: true,
@@ -38,30 +37,32 @@ const consultationSchema = new Schema<IConsultation>({
   },
   status: {
     type: String,
-    enum: ['scheduled', 'completed', 'cancelled', 'pending'],
+    enum: ['pending', 'scheduled', 'completed', 'cancelled'],
     default: 'pending',
   },
   keluhan: {
     type: String,
     required: true,
+    trim: true,
   },
   diagnosa: {
     type: String,
+    trim: true,
   },
   tindakan: {
     type: String,
+    trim: true,
   },
   catatan_dokter: {
     type: String,
+    trim: true,
   },
   video_call_url: {
     type: String,
+    trim: true,
   },
-},
-{
-  timestamps: true,
-});
+}, { timestamps: true });
 
-const Consultation = model<IConsultation>('Consultation', consultationSchema);
+const Consultation = model<IConsultation>('Consultation', ConsultationSchema);
 
 export default Consultation;

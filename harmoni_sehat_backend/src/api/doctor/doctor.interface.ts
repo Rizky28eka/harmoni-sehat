@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import { IDoctor } from '../../models/Doctor';
+import { IDokter } from '../../models/Dokter';
 
 export interface CreateDoctorDto {
   nama: string;
@@ -35,7 +35,7 @@ export interface IDoctorResponseDto {
   updatedAt: Date;
 }
 
-export const toDoctorResponseDto = (doctor: IDoctor): IDoctorResponseDto => {
+export const toDoctorResponseDto = (doctor: any): IDoctorResponseDto => {
   return {
     id: doctor._id.toString(),
     user_id: doctor.user_id.toString(),

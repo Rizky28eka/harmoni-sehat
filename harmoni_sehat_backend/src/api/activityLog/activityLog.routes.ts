@@ -1,20 +1,17 @@
 import { Router } from 'express';
-import ActivityLogController from './activityLog.controller';
-import validate from '../../middlewares/validator';
-import { protect } from '../../middlewares/protect';
-import { authorize } from '../../middlewares/authorize';
+import activityLogController from './activityLog.controller';
+import { validate } from '../../middlewares/validator';
 import { createActivityLogSchema, updateActivityLogSchema } from './activityLog.validation';
 
 const router = Router();
 
-// All activity log routes are protected and restricted to admin
-router.use(protect);
-router.use(authorize('admin'));
+router.route('/')
+  .post(validate(createActivityLogSchema), activityLogController.createActivityLog)
+  .get(activityLogController.getAllActivityLogs);
 
-router.post('/', validate(createActivityLogSchema), ActivityLogController.createActivityLog);
-router.get('/', ActivityLogController.getAllActivityLogs);
-router.get('/:id', ActivityLogController.getActivityLogById);
-router.put('/:id', validate(updateActivityLogSchema), ActivityLogController.updateActivityLog);
-router.delete('/:id', ActivityLogController.deleteActivityLog);
+router.route('/:id')
+  .get(activityLogController.getActivityLogById)
+  .put(validate(updateActivityLogSchema), activityLogController.updateActivityLog)
+  .delete(activityLogController.deleteActivityLog);
 
 export default router;

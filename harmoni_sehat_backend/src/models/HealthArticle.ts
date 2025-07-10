@@ -1,53 +1,44 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IHealthArticle extends Document {
-  _id: Types.ObjectId;
   judul: string;
   slug: string;
   konten: string;
-  author_id: Types.ObjectId; // Can be Admin or Doctor
-  author_type: 'Admin' | 'Doctor';
+  penulis_id: Types.ObjectId; // Can be Admin or Dokter user_id
   status_publikasi: 'draft' | 'published' | 'archived';
   createdAt: Date;
   updatedAt: Date;
 }
 
-const healthArticleSchema = new Schema<IHealthArticle>({
+const HealthArticleSchema = new Schema<IHealthArticle>({
   judul: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
   },
   slug: {
     type: String,
     required: true,
     unique: true,
+    lowercase: true,
     trim: true,
   },
   konten: {
     type: String,
     required: true,
   },
-  author_id: {
+  penulis_id: {
     type: Schema.Types.ObjectId,
+    ref: 'User', // Refers to User model, as both Admin and Dokter are Users
     required: true,
-  },
-  author_type: {
-    type: String,
-    required: true,
-    enum: ['Admin', 'Doctor'],
   },
   status_publikasi: {
     type: String,
     enum: ['draft', 'published', 'archived'],
     default: 'draft',
   },
-},
-{
-  timestamps: true,
-});
+}, { timestamps: true });
 
-const HealthArticle = model<IHealthArticle>('HealthArticle', healthArticleSchema);
+const HealthArticle = model<IHealthArticle>('HealthArticle', HealthArticleSchema);
 
 export default HealthArticle;

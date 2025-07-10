@@ -21,7 +21,7 @@ export interface IRefreshTokenResponseDto {
   updatedAt: Date;
 }
 
-export const toRefreshTokenResponseDto = (refreshToken: IRefreshToken): IRefreshTokenResponseDto => {
+export const toRefreshTokenResponseDto = (refreshToken: any): IRefreshTokenResponseDto => {
   return {
     id: refreshToken._id.toString(),
     user_id: refreshToken.user_id.toString(),

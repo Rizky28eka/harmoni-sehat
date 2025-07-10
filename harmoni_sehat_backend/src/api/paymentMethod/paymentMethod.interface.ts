@@ -25,7 +25,7 @@ export interface IPaymentMethodResponseDto {
   updatedAt: Date;
 }
 
-export const toPaymentMethodResponseDto = (paymentMethod: IPaymentMethod): IPaymentMethodResponseDto => {
+export const toPaymentMethodResponseDto = (paymentMethod: any): IPaymentMethodResponseDto => {
   return {
     id: paymentMethod._id.toString(),
     nama: paymentMethod.nama,

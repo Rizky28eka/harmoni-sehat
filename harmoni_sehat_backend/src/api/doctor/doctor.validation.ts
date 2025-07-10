@@ -1,36 +1,23 @@
 import { z } from 'zod';
-import { Types } from 'mongoose';
-
-const objectIdValidation = z.string().refine((val) => Types.ObjectId.isValid(val), {
-  message: 'Invalid ObjectId',
-});
 
 export const createDoctorSchema = z.object({
-  body: z.object({
-    nama: z.string().min(1, 'Nama is required').trim(),
-    nomor_str: z.string().min(1, 'Nomor STR is required').trim(),
-    specialization_id: objectIdValidation,
-    biaya_konsultasi: z.number().min(0, 'Biaya konsultasi must be non-negative'),
-    foto: z.string().url('Foto must be a valid URL').optional(),
-    bio: z.string().optional(),
-    status: z.enum(['active', 'inactive', 'pending']).default('pending'),
-  }),
+  user_id: z.string().min(1, 'User ID tidak boleh kosong'),
+  nama: z.string().min(1, 'Nama tidak boleh kosong').trim(),
+  nomor_str: z.string().min(1, 'Nomor STR tidak boleh kosong').trim(),
+  spesialisasi_id: z.string().optional(),
+  biaya_konsultasi: z.number().min(0, 'Biaya konsultasi tidak boleh negatif'),
+  foto: z.string().optional(),
+  bio: z.string().optional(),
+  status: z.enum(['active', 'inactive']).optional(),
 });
 
 export const updateDoctorSchema = z.object({
-  body: z.object({
-    nama: z.string().min(1, 'Nama is required').trim().optional(),
-    nomor_str: z.string().min(1, 'Nomor STR is required').trim().optional(),
-    specialization_id: objectIdValidation.optional(),
-    biaya_konsultasi: z.number().min(0, 'Biaya konsultasi must be non-negative').optional(),
-    foto: z.string().url('Foto must be a valid URL').optional(),
-    bio: z.string().optional(),
-    status: z.enum(['active', 'inactive', 'pending']).optional(),
-  }).partial(),
-  params: z.object({
-    id: objectIdValidation,
-  }),
+  user_id: z.string().min(1, 'User ID tidak boleh kosong').optional(),
+  nama: z.string().min(1, 'Nama tidak boleh kosong').trim().optional(),
+  nomor_str: z.string().min(1, 'Nomor STR tidak boleh kosong').trim().optional(),
+  spesialisasi_id: z.string().optional(),
+  biaya_konsultasi: z.number().min(0, 'Biaya konsultasi tidak boleh negatif').optional(),
+  foto: z.string().optional(),
+  bio: z.string().optional(),
+  status: z.enum(['active', 'inactive']).optional(),
 });
-
-export type CreateDoctorInput = z.infer<typeof createDoctorSchema>['body'];
-export type UpdateDoctorInput = z.infer<typeof updateDoctorSchema>['body'];

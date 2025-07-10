@@ -1,53 +1,37 @@
 import ActivityLog, { IActivityLog } from '../../models/ActivityLog';
-import AppError from '../../utils/AppError';
-import { Types } from 'mongoose';
-import { CreateActivityLogInput, UpdateActivityLogInput } from './activityLog.validation';
-import User from '../../models/User';
+import { AppError } from '../../utils/AppError';
 
 class ActivityLogService {
-  async createActivityLog(activityLogData: CreateActivityLogInput): Promise<IActivityLog> {
-    // Check if user exists
-    const user = await User.findById(activityLogData.user_id);
-    if (!user) {
-      throw new AppError('User not found', 404);
-    }
-    const newActivityLog = await ActivityLog.create(activityLogData);
-    return newActivityLog;
+  async createActivityLog(data: Partial<IActivityLog>): Promise<IActivityLog> {
+    const activityLog = await ActivityLog.create(data);
+    return activityLog;
   }
 
   async getAllActivityLogs(): Promise<IActivityLog[]> {
-    return ActivityLog.find().populate('user_id');
+    const activityLogs = await ActivityLog.find().populate('user_id');
+    return activityLogs;
   }
 
-  async getActivityLogById(activityLogId: string): Promise<IActivityLog | null> {
-    if (!Types.ObjectId.isValid(activityLogId)) {
-      throw new AppError('Invalid Activity Log ID', 400);
-    }
-    const activityLog = await ActivityLog.findById(activityLogId).populate('user_id');
+  async getActivityLogById(id: string): Promise<IActivityLog> {
+    const activityLog = await ActivityLog.findById(id).populate('user_id');
     if (!activityLog) {
-      throw new AppError('Activity Log not found', 404);
+      throw new AppError('Log aktivitas tidak ditemukan', 404);
     }
     return activityLog;
   }
 
-  async updateActivityLog(activityLogId: string, activityLogData: UpdateActivityLogInput): Promise<IActivityLog | null> {
-    if (!Types.ObjectId.isValid(activityLogId)) {
-      throw new AppError('Invalid Activity Log ID', 400);
-    }
-    const activityLog = await ActivityLog.findByIdAndUpdate(activityLogId, activityLogData, { new: true, runValidators: true });
+  async updateActivityLog(id: string, data: Partial<IActivityLog>): Promise<IActivityLog> {
+    const activityLog = await ActivityLog.findByIdAndUpdate(id, data, { new: true, runValidators: true });
     if (!activityLog) {
-      throw new AppError('Activity Log not found', 404);
+      throw new AppError('Log aktivitas tidak ditemukan', 404);
     }
     return activityLog;
   }
 
-  async deleteActivityLog(activityLogId: string): Promise<void> {
-    if (!Types.ObjectId.isValid(activityLogId)) {
-      throw new AppError('Invalid Activity Log ID', 400);
-    }
-    const activityLog = await ActivityLog.findByIdAndDelete(activityLogId);
+  async deleteActivityLog(id: string): Promise<void> {
+    const activityLog = await ActivityLog.findByIdAndDelete(id);
     if (!activityLog) {
-      throw new AppError('Activity Log not found', 404);
+      throw new AppError('Log aktivitas tidak ditemukan', 404);
     }
   }
 }

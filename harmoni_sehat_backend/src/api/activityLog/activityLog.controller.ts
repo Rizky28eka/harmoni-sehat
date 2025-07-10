@@ -1,57 +1,51 @@
 import { Request, Response, NextFunction } from 'express';
-import ActivityLogService from './activityLog.service';
-import ApiResponse from '../../utils/ApiResponse';
-import AppError from '../../utils/AppError';
-import { toActivityLogResponseDto } from './activityLog.interface';
-import { CreateActivityLogInput, UpdateActivityLogInput } from './activityLog.validation';
+import activityLogService from './activityLog.service';
+import { ApiResponse } from '../../utils/ApiResponse';
+import { AppError } from '../../utils/AppError';
 
 class ActivityLogController {
   async createActivityLog(req: Request, res: Response, next: NextFunction) {
     try {
-      const activityLogData: CreateActivityLogInput = req.body;
-      const newActivityLog = await ActivityLogService.createActivityLog(activityLogData);
-      res.status(201).json(new ApiResponse(201, toActivityLogResponseDto(newActivityLog), 'Activity log created successfully'));
-    } catch (error) {
-      next(error);
+      const activityLog = await activityLogService.createActivityLog(req.body);
+      res.status(201).json(new ApiResponse(201, activityLog, 'Log aktivitas berhasil ditambahkan'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async getAllActivityLogs(req: Request, res: Response, next: NextFunction) {
     try {
-      const activityLogs = await ActivityLogService.getAllActivityLogs();
-      res.status(200).json(new ApiResponse(200, activityLogs.map(toActivityLogResponseDto), 'Activity logs fetched successfully'));
-    } catch (error) {
-      next(error);
+      const activityLogs = await activityLogService.getAllActivityLogs();
+      res.status(200).json(new ApiResponse(200, activityLogs, 'Daftar log aktivitas berhasil diambil'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async getActivityLogById(req: Request, res: Response, next: NextFunction) {
     try {
-      const activityLog = await ActivityLogService.getActivityLogById(req.params.id);
-      res.status(200).json(new ApiResponse(200, toActivityLogResponseDto(activityLog!), 'Activity log fetched successfully'));
-    } catch (error) {
-      next(error);
+      const activityLog = await activityLogService.getActivityLogById(req.params.id);
+      res.status(200).json(new ApiResponse(200, activityLog, 'Log aktivitas berhasil ditemukan'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async updateActivityLog(req: Request, res: Response, next: NextFunction) {
     try {
-      const activityLogData: UpdateActivityLogInput = req.body;
-      const activityLogId = req.params.id;
-      const updatedActivityLog = await ActivityLogService.updateActivityLog(activityLogId, activityLogData);
-      res.status(200).json(new ApiResponse(200, toActivityLogResponseDto(updatedActivityLog!), 'Activity log updated successfully'));
-    } catch (error) {
-      next(error);
+      const activityLog = await activityLogService.updateActivityLog(req.params.id, req.body);
+      res.status(200).json(new ApiResponse(200, activityLog, 'Log aktivitas berhasil diperbarui'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 
   async deleteActivityLog(req: Request, res: Response, next: NextFunction) {
     try {
-      const activityLogId = req.params.id;
-      await ActivityLogService.deleteActivityLog(activityLogId);
-      res.status(204).json(new ApiResponse(204, null, 'Activity log deleted successfully'));
-    } catch (error) {
-      next(error);
+      await activityLogService.deleteActivityLog(req.params.id);
+      res.status(200).json(new ApiResponse(200, null, 'Log aktivitas berhasil dihapus'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
     }
   }
 }

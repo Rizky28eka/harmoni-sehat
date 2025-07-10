@@ -1,51 +1,41 @@
 import Specialization, { ISpecialization } from '../../models/Specialization';
-import AppError from '../../utils/AppError';
-import { Types } from 'mongoose';
-import { CreateSpecializationInput, UpdateSpecializationInput } from './specialization.validation';
+import { AppError } from '../../utils/AppError';
 
 class SpecializationService {
-  async createSpecialization(specializationData: CreateSpecializationInput): Promise<ISpecialization> {
-    const existingSpecialization = await Specialization.findOne({ nama: specializationData.nama });
+  async createSpecialization(nama: string, deskripsi?: string): Promise<ISpecialization> {
+    const existingSpecialization = await Specialization.findOne({ nama });
     if (existingSpecialization) {
-      throw new AppError('Specialization with this name already exists', 409);
+      throw new AppError('Spesialisasi dengan nama tersebut sudah ada', 409);
     }
-    const newSpecialization = await Specialization.create(specializationData);
-    return newSpecialization;
+    const specialization = await Specialization.create({ nama, deskripsi });
+    return specialization;
   }
 
   async getAllSpecializations(): Promise<ISpecialization[]> {
-    return Specialization.find();
+    const specializations = await Specialization.find();
+    return specializations;
   }
 
-  async getSpecializationById(specializationId: string): Promise<ISpecialization | null> {
-    if (!Types.ObjectId.isValid(specializationId)) {
-      throw new AppError('Invalid Specialization ID', 400);
-    }
-    const specialization = await Specialization.findById(specializationId);
+  async getSpecializationById(id: string): Promise<ISpecialization> {
+    const specialization = await Specialization.findById(id);
     if (!specialization) {
-      throw new AppError('Specialization not found', 404);
+      throw new AppError('Spesialisasi tidak ditemukan', 404);
     }
     return specialization;
   }
 
-  async updateSpecialization(specializationId: string, specializationData: UpdateSpecializationInput): Promise<ISpecialization | null> {
-    if (!Types.ObjectId.isValid(specializationId)) {
-      throw new AppError('Invalid Specialization ID', 400);
-    }
-    const specialization = await Specialization.findByIdAndUpdate(specializationId, specializationData, { new: true, runValidators: true });
+  async updateSpecialization(id: string, data: Partial<ISpecialization>): Promise<ISpecialization> {
+    const specialization = await Specialization.findByIdAndUpdate(id, data, { new: true, runValidators: true });
     if (!specialization) {
-      throw new AppError('Specialization not found', 404);
+      throw new AppError('Spesialisasi tidak ditemukan', 404);
     }
     return specialization;
   }
 
-  async deleteSpecialization(specializationId: string): Promise<void> {
-    if (!Types.ObjectId.isValid(specializationId)) {
-      throw new AppError('Invalid Specialization ID', 400);
-    }
-    const specialization = await Specialization.findByIdAndDelete(specializationId);
+  async deleteSpecialization(id: string): Promise<void> {
+    const specialization = await Specialization.findByIdAndDelete(id);
     if (!specialization) {
-      throw new AppError('Specialization not found', 404);
+      throw new AppError('Spesialisasi tidak ditemukan', 404);
     }
   }
 }

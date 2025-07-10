@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 import { IPrescription } from '../../models/Prescription';
 
 export interface CreatePrescriptionDto {
-  consultation_id: string; // Will be ObjectId in service
+  konsultasi_id: string; // Will be ObjectId in service
   catatan?: string;
   status?: 'active' | 'inactive' | 'expired';
   expired_at: Date;
@@ -16,7 +16,7 @@ export interface UpdatePrescriptionDto {
 
 export interface IPrescriptionResponseDto {
   id: string;
-  consultation_id: string;
+  konsultasi_id: string;
   catatan?: string;
   status: 'active' | 'inactive' | 'expired';
   expired_at: Date;
@@ -24,10 +24,10 @@ export interface IPrescriptionResponseDto {
   updatedAt: Date;
 }
 
-export const toPrescriptionResponseDto = (prescription: IPrescription): IPrescriptionResponseDto => {
+export const toPrescriptionResponseDto = (prescription: any): IPrescriptionResponseDto => {
   return {
     id: prescription._id.toString(),
-    consultation_id: prescription.consultation_id.toString(),
+    konsultasi_id: prescription.konsultasi_id.toString(),
     catatan: prescription.catatan,
     status: prescription.status,
     expired_at: prescription.expired_at,

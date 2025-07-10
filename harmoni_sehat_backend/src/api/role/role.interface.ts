@@ -14,7 +14,7 @@ export interface IRoleResponseDto {
   nama_peran: string;
 }
 
-export const toRoleResponseDto = (role: IRole): IRoleResponseDto => {
+export const toRoleResponseDto = (role: any): IRoleResponseDto => {
   return {
     id: role._id.toString(),
     nama_peran: role.nama_peran,

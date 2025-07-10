@@ -1,10 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const clinicSchema = new mongoose_1.Schema({
+const ClinicSchema = new mongoose_1.Schema({
     nama: {
         type: String,
         required: true,
+        unique: true,
         trim: true,
     },
     alamat: {
@@ -15,12 +16,13 @@ const clinicSchema = new mongoose_1.Schema({
     no_telepon: {
         type: String,
         required: true,
+        trim: true,
     },
     email: {
         type: String,
-        required: true,
-        lowercase: true,
         unique: true,
+        sparse: true, // Allows null values to not violate unique constraint
+        lowercase: true,
         trim: true,
     },
     status: {
@@ -28,8 +30,6 @@ const clinicSchema = new mongoose_1.Schema({
         enum: ['active', 'inactive'],
         default: 'active',
     },
-}, {
-    timestamps: true,
 });
-const Clinic = (0, mongoose_1.model)('Clinic', clinicSchema);
+const Clinic = (0, mongoose_1.model)('Clinic', ClinicSchema);
 exports.default = Clinic;

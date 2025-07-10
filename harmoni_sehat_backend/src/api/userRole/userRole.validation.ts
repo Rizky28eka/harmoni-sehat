@@ -1,26 +1,11 @@
 import { z } from 'zod';
-import { Types } from 'mongoose';
-
-const objectIdValidation = z.string().refine((val) => Types.ObjectId.isValid(val), {
-  message: 'Invalid ObjectId',
-});
 
 export const createUserRoleSchema = z.object({
-  body: z.object({
-    user_id: objectIdValidation,
-    role_id: objectIdValidation,
-  }),
+  user_id: z.string().min(1, 'User ID tidak boleh kosong'),
+  peran_id: z.string().min(1, 'Peran ID tidak boleh kosong'),
 });
 
 export const updateUserRoleSchema = z.object({
-  body: z.object({
-    user_id: objectIdValidation.optional(),
-    role_id: objectIdValidation.optional(),
-  }).partial(),
-  params: z.object({
-    id: objectIdValidation,
-  }),
+  user_id: z.string().min(1, 'User ID tidak boleh kosong').optional(),
+  peran_id: z.string().min(1, 'Peran ID tidak boleh kosong').optional(),
 });
-
-export type CreateUserRoleInput = z.infer<typeof createUserRoleSchema>['body'];
-export type UpdateUserRoleInput = z.infer<typeof updateUserRoleSchema>['body'];

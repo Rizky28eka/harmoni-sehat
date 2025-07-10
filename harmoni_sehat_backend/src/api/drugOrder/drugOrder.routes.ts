@@ -1,25 +1,17 @@
 import { Router } from 'express';
-import DrugOrderController from './drugOrder.controller';
-import validate from '../../middlewares/validator';
-import { protect } from '../../middlewares/protect';
-import { authorize } from '../../middlewares/authorize';
+import drugOrderController from './drugOrder.controller';
+import { validate } from '../../middlewares/validator';
 import { createDrugOrderSchema, updateDrugOrderSchema } from './drugOrder.validation';
 
 const router = Router();
 
-// All drug order routes are protected
-router.use(protect);
+router.route('/')
+  .post(validate(createDrugOrderSchema), drugOrderController.createDrugOrder)
+  .get(drugOrderController.getAllDrugOrders);
 
-// Routes for patient to manage their own orders
-router.post('/', authorize('patient'), validate(createDrugOrderSchema), DrugOrderController.createDrugOrder);
-router.get('/me', authorize('patient'), DrugOrderController.getMyDrugOrders);
-
-// Routes for admin/pharmacist to get all orders
-router.get('/', authorize('admin', 'pharmacist'), DrugOrderController.getAllDrugOrders);
-
-// Routes for specific order by ID
-router.get('/:id', authorize('admin', 'pharmacist', 'patient'), DrugOrderController.getDrugOrderById);
-router.put('/:id', authorize('admin', 'pharmacist', 'patient'), validate(updateDrugOrderSchema), DrugOrderController.updateDrugOrder);
-router.delete('/:id', authorize('admin', 'patient'), DrugOrderController.deleteDrugOrder);
+router.route('/:id')
+  .get(drugOrderController.getDrugOrderById)
+  .put(validate(updateDrugOrderSchema), drugOrderController.updateDrugOrder)
+  .delete(drugOrderController.deleteDrugOrder);
 
 export default router;

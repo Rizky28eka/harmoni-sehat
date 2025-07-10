@@ -1,55 +1,60 @@
 # Harmoni Sehat Backend API
 
-This is the backend API for the Harmoni Sehat application, built to manage healthcare-related data and services.
+Welcome to the backend API documentation for the Harmoni Sehat application. This backend is built to comprehensively manage healthcare-related data and services, providing a strong foundation for the frontend application.
 
-## Features
+## Overview
 
--   **User Authentication & Authorization:** Secure user registration, login, and role-based access control (RBAC) using JWT.
-    -   Roles: `admin`, `doctor`, `patient`, `pharmacist`.
--   **Secure CRUD Operations:**
-    -   **User Management:** Secure Create, Read, Update, Delete (CRUD) operations for user profiles.
-    -   **Medical Records:** Secure and validated CRUD operations for patient medical records, including ownership-based authorization.
-    -   **Patient Profiles:** Secure and validated CRUD operations for patient profiles, including ownership-based authorization.
-    -   **Doctor Profiles:** Secure and validated CRUD operations for doctor profiles, including ownership-based authorization.
-    -   **Role Management:** Secure and validated CRUD operations for roles (admin-only).
-    -   **Specialization Management:** Secure and validated CRUD operations for medical specializations.
-    -   **Clinic Management:** Secure and validated CRUD operations for clinics.
-    -   **Drug Management:** Secure and validated CRUD operations for drugs.
-    -   **Drug Cart Management:** Secure and validated CRUD operations for patient drug carts, including ownership-based authorization.
-    -   **Drug Order Management:** Secure and validated CRUD operations for patient drug orders, including ownership-based authorization.
-    -   **Drug Order Detail Management:** Secure and validated CRUD operations for drug order details.
-    -   **Consultation Management:** Secure and validated CRUD operations for consultations, including ownership-based authorization.
-    -   **Chat Message Management:** Secure and validated CRUD operations for chat messages, including ownership-based authorization.
-    -   **Doctor Review Management:** Secure and validated CRUD operations for doctor reviews, including ownership-based authorization.
-    -   **Practice Schedule Management:** Secure and validated CRUD operations for practice schedules, including ownership-based authorization.
-    -   **Doctor-Clinic Association Management:** Secure and validated CRUD operations for doctor-clinic associations, including ownership-based authorization.
-    -   **Prescription Management:** Secure and validated CRUD operations for prescriptions, including ownership-based authorization.
-    -   **Prescription Drug Management:** Secure and validated CRUD operations for prescription drugs, including ownership-based authorization.
-    -   **Health Article Management:** Secure and validated CRUD operations for health articles, including ownership-based authorization.
-    -   **Media Management:** Secure and validated CRUD operations for media, including ownership-based authorization.
-    -   **Notification Management:** Secure and validated CRUD operations for notifications, including ownership-based authorization.
-    -   **Payment Method Management:** Secure and validated CRUD operations for payment methods.
-    -   **Transaction Management:** Secure and validated CRUD operations for transactions, including ownership-based authorization.
-    -   **User Profile Management:** Secure and validated CRUD operations for user profiles, including ownership-based authorization.
-    -   **User Role Management:** Secure and validated CRUD operations for user role associations.
-    -   **Admin Management:** Secure and validated CRUD operations for admin profiles.
-    -   **Activity Log Management:** Secure and validated CRUD operations for activity logs.
-    -   **Refresh Token Management:** Secure and validated CRUD operations for refresh tokens.
--   **Data Validation:** Robust input validation using Zod.
--   **Error Handling:** Centralized error handling for consistent API responses.
--   **Database Seeding:** Script to populate the database with dummy data for development and testing.
+The Harmoni Sehat backend is a RESTful API developed using Node.js, Express.js, and TypeScript. MongoDB is used as the primary database, modeled with Mongoose. The main focus of this backend is on security, scalability, and ease of maintenance, by providing various endpoints for health data management.
+
+## Key Features
+
+The Harmoni Sehat backend provides the following core functionalities:
+
+-   **User Authentication & Authorization**: Secure user registration, login, and role-based access control (RBAC) using JSON Web Tokens (JWT). Supported roles include `admin`, `doctor`, `patient`, and `pharmacist`.
+-   **Secure CRUD Operations**: Provides secure and validated Create, Read, Update, Delete (CRUD) operations for various data entities, including:
+    -   User Management
+    -   Medical Records
+    -   Patient Profiles
+    -   Doctor Profiles
+    -   Role Management (admin-only)
+    -   Specialization Management
+    -   Clinic Management
+    -   Drug Management
+    -   Drug Cart Management
+    -   Drug Order Management
+    -   Drug Order Detail Management
+    -   Consultation Management
+    -   Chat Message Management
+    -   Doctor Review Management
+    -   Practice Schedule Management
+    -   Doctor-Clinic Association Management
+    -   Prescription Management
+    -   Prescription Drug Management
+    -   Health Article Management
+    -   Media Management
+    -   Notification Management
+    -   Payment Method Management
+    -   Transaction Management
+    -   User Profile Management
+    -   User Role Management
+    -   Admin Management
+    -   Activity Log Management
+    -   Refresh Token Management
+-   **Data Validation**: Robust input validation using Zod to ensure data integrity and cleanliness.
+-   **Error Handling**: Centralized error handling system for consistent and informative API responses.
+-   **Database Seeding**: Script to populate the database with dummy data, facilitating development and testing.
 
 ## Technologies Used
 
--   **Node.js**
--   **Express.js** (Web Framework)
--   **TypeScript** (Language)
--   **MongoDB** (Database)
--   **Mongoose** (ODM for MongoDB)
--   **JSON Web Tokens (JWT)** (for Authentication)
--   **Bcrypt.js** (for Password Hashing)
--   **Zod** (for Data Validation)
--   **Dotenv** (for Environment Variables)
+-   **Node.js**: JavaScript runtime environment.
+-   **Express.js**: Minimalist and flexible web framework for Node.js.
+-   **TypeScript**: Superset of JavaScript that adds static typing.
+-   **MongoDB**: Document-based NoSQL database.
+-   **Mongoose**: Object Data Modeling (ODM) for MongoDB.
+-   **JSON Web Tokens (JWT)**: For token-based authentication.
+-   **Bcrypt.js**: For secure password hashing.
+-   **Zod**: For data schema validation.
+-   **Dotenv**: For environment variable management.
 
 ## Getting Started
 
@@ -57,26 +62,30 @@ Follow these steps to set up and run the backend API locally.
 
 ### Prerequisites
 
--   Node.js (v18 or higher recommended)
--   npm (Node Package Manager)
--   MongoDB Atlas account (or local MongoDB instance)
+Ensure you have the following software installed:
+
+-   **Node.js**: Version 18 or higher recommended.
+-   **npm**: Node Package Manager (usually installed with Node.js).
+-   **MongoDB Atlas Account**: Or a running local MongoDB instance.
 
 ### Installation
 
-1.  **Clone the repository:**
+1.  **Clone the repository**: Navigate to the main project directory (`harmoni_sehat_project/`) and clone this repository.
+
     ```bash
     git clone <repository_url>
     cd harmoni_sehat_project/harmoni_sehat_backend
     ```
 
-2.  **Install dependencies:**
+2.  **Install dependencies**: From the `harmoni_sehat_backend/` directory, run the following command to install all project dependencies:
+
     ```bash
     npm install
     ```
 
 ### Environment Variables
 
-Create a `.env` file in the `harmoni_sehat_backend` directory and add the following environment variables. Replace the placeholder values with your actual credentials.
+Create a `.env` file in the `harmoni_sehat_backend/` directory and add the following environment variables. Replace the placeholder values with your actual credentials and configurations. For more details, refer to `docs/backend/env.example.md`.
 
 ```env
 # =========================
@@ -118,36 +127,40 @@ EMAIL_FROM="Harmoni Sehat <no-reply@harmonisehat.com>"
 
 ### Database Setup
 
-1.  **Build the project:**
+1.  **Build the project**: Before seeding, ensure the project has been built.
+
     ```bash
     npm run build
     ```
 
-2.  **Seed the database (WARNING: This will delete all existing data in the connected database):**
+2.  **Seed the database (WARNING: This will delete all existing data in the connected database)**:
+
     ```bash
     npm run seed
     ```
 
 ### Running the API
 
-1.  **Start the development server:**
+1.  **Start the development server**: To run the server in development mode with hot-reloading:
+
     ```bash
     npm run dev
     ```
     The API will be running at `http://localhost:5000` (or your specified PORT).
 
-2.  **Start the production server (after building):**
+2.  **Start the production server (after building)**: To run the production server (after you have run `npm run build`):
+
     ```bash
     npm start
     ```
 
-## API Endpoints
+## Additional Documentation
 
-For a detailed list of all API endpoints, their methods, and expected request/response formats, please refer to the [API Endpoints Documentation](../../docs/backend/api-endpoints.md).
+For more information about the Harmoni Sehat backend, please refer to the following documents in the `docs/backend/` directory:
 
-## Database Schema
-
-For a visual representation and detailed description of the database models and their relationships, please refer to the [Database Schema Documentation](../../docs/backend/database-schema.md).
+-   **API Endpoints**: A complete list of API endpoints, methods, and expected request/response formats. [View Documentation](docs/backend/api-endpoints.md)
+-   **Database Schema**: Visual representation and detailed description of database models and their relationships. [View Documentation](docs/backend/database-schema.md)
+-   **Setup Guide**: More detailed setup instructions. [View Documentation](docs/backend/setup-guide.md)
 
 ## Project Structure
 

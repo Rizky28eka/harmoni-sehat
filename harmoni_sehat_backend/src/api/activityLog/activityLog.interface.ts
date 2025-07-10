@@ -23,7 +23,7 @@ export interface IActivityLogResponseDto {
   timestamp: Date;
 }
 
-export const toActivityLogResponseDto = (activityLog: IActivityLog): IActivityLogResponseDto => {
+export const toActivityLogResponseDto = (activityLog: any): IActivityLogResponseDto => {
   return {
     id: activityLog._id.toString(),
     user_id: activityLog.user_id.toString(),

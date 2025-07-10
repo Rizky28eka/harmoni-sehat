@@ -1,68 +1,41 @@
 import UserProfile, { IUserProfile } from '../../models/UserProfile';
-import AppError from '../../utils/AppError';
-import { Types } from 'mongoose';
-import { CreateUserProfileInput, UpdateUserProfileInput } from './userProfile.validation';
-import User from '../../models/User';
+import { AppError } from '../../utils/AppError';
 
 class UserProfileService {
-  async createUserProfile(userId: string, userProfileData: CreateUserProfileInput): Promise<IUserProfile> {
-    // Check if a user profile already exists for this user
-    const existingProfile = await UserProfile.findOne({ user_id: userId });
+  async createUserProfile(data: Partial<IUserProfile>): Promise<IUserProfile> {
+    const existingProfile = await UserProfile.findOne({ user_id: data.user_id });
     if (existingProfile) {
-      throw new AppError('User profile already exists for this user', 409);
+      throw new AppError('Profil pengguna untuk user ini sudah ada', 409);
     }
-
-    // Check if the user exists and is active
-    const user = await User.findById(userId);
-    if (!user || !user.is_active) {
-      throw new AppError('User not found or not active', 404);
-    }
-
-    const newUserProfile = await UserProfile.create({ ...userProfileData, user_id: userId });
-    return newUserProfile;
+    const userProfile = await UserProfile.create(data);
+    return userProfile;
   }
 
   async getAllUserProfiles(): Promise<IUserProfile[]> {
-    return UserProfile.find().populate('user_id');
+    const userProfiles = await UserProfile.find().populate('user_id');
+    return userProfiles;
   }
 
-  async getUserProfileById(userProfileId: string): Promise<IUserProfile | null> {
-    if (!Types.ObjectId.isValid(userProfileId)) {
-      throw new AppError('Invalid User Profile ID', 400);
-    }
-    const userProfile = await UserProfile.findById(userProfileId).populate('user_id');
+  async getUserProfileById(id: string): Promise<IUserProfile> {
+    const userProfile = await UserProfile.findById(id).populate('user_id');
     if (!userProfile) {
-      throw new AppError('User Profile not found', 404);
+      throw new AppError('Profil pengguna tidak ditemukan', 404);
     }
     return userProfile;
   }
 
-  async getMyUserProfile(userId: string): Promise<IUserProfile | null> {
-    const userProfile = await UserProfile.findOne({ user_id: userId }).populate('user_id');
+  async updateUserProfile(id: string, data: Partial<IUserProfile>): Promise<IUserProfile> {
+    const userProfile = await UserProfile.findByIdAndUpdate(id, data, { new: true, runValidators: true });
     if (!userProfile) {
-      throw new AppError('User Profile not found for this user', 404);
+      throw new AppError('Profil pengguna tidak ditemukan', 404);
     }
     return userProfile;
   }
 
-  async updateUserProfile(userProfileId: string, userProfileData: UpdateUserProfileInput): Promise<IUserProfile | null> {
-    if (!Types.ObjectId.isValid(userProfileId)) {
-      throw new AppError('Invalid User Profile ID', 400);
-    }
-    const userProfile = await UserProfile.findByIdAndUpdate(userProfileId, userProfileData, { new: true, runValidators: true });
+  async deleteUserProfile(id: string): Promise<void> {
+    const userProfile = await UserProfile.findByIdAndDelete(id);
     if (!userProfile) {
-      throw new AppError('User Profile not found', 404);
-    }
-    return userProfile;
-  }
-
-  async deleteUserProfile(userProfileId: string): Promise<void> {
-    if (!Types.ObjectId.isValid(userProfileId)) {
-      throw new AppError('Invalid User Profile ID', 400);
-    }
-    const userProfile = await UserProfile.findByIdAndDelete(userProfileId);
-    if (!userProfile) {
-      throw new AppError('User Profile not found', 404);
+      throw new AppError('Profil pengguna tidak ditemukan', 404);
     }
   }
 }

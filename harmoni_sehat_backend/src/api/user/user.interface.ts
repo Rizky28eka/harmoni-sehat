@@ -17,7 +17,7 @@ export interface UserResponseDto {
   updatedAt: Date;
 }
 
-export const toUserResponseDto = (user: IUser): UserResponseDto => {
+export const toUserResponseDto = (user: any): UserResponseDto => {
   return {
     id: user._id.toString(),
     email: user.email,

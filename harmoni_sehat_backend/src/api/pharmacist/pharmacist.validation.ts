@@ -1,26 +1,13 @@
 import { z } from 'zod';
-import { Types } from 'mongoose';
-
-const objectIdValidation = z.string().refine((val) => Types.ObjectId.isValid(val), {
-  message: 'Invalid ObjectId',
-});
 
 export const createPharmacistSchema = z.object({
-  body: z.object({
-    nama: z.string().min(1, 'Nama is required').trim(),
-    nomor_sipa: z.string().min(1, 'Nomor SIPA is required').trim(),
-  }),
+  user_id: z.string().min(1, 'User ID tidak boleh kosong'),
+  nama: z.string().min(1, 'Nama tidak boleh kosong').trim(),
+  nomor_sipa: z.string().min(1, 'Nomor SIPA tidak boleh kosong').trim(),
 });
 
 export const updatePharmacistSchema = z.object({
-  body: z.object({
-    nama: z.string().min(1, 'Nama is required').trim().optional(),
-    nomor_sipa: z.string().min(1, 'Nomor SIPA is required').trim().optional(),
-  }).partial(),
-  params: z.object({
-    id: objectIdValidation,
-  }),
+  user_id: z.string().min(1, 'User ID tidak boleh kosong').optional(),
+  nama: z.string().min(1, 'Nama tidak boleh kosong').trim().optional(),
+  nomor_sipa: z.string().min(1, 'Nomor SIPA tidak boleh kosong').trim().optional(),
 });
-
-export type CreatePharmacistInput = z.infer<typeof createPharmacistSchema>['body'];
-export type UpdatePharmacistInput = z.infer<typeof updatePharmacistSchema>['body'];
