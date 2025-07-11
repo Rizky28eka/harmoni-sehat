@@ -8,23 +8,28 @@ export interface IDrugCart extends Document {
   updatedAt: Date;
 }
 
-const DrugCartSchema = new Schema<IDrugCart>({
-  pasien_id: {
-    type: String,
-    ref: 'Pasien',
-    required: true,
+const DrugCartSchema = new Schema<IDrugCart>(
+  {
+    pasien_id: {
+      type: String,
+      ref: 'Pasien',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    obat_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Drug',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    jumlah: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
   },
-  obat_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Drug',
-    required: true,
-  },
-  jumlah: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const DrugCart = model<IDrugCart>('DrugCart', DrugCartSchema);
 

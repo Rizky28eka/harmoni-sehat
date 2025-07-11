@@ -1,5 +1,6 @@
-import { Types } from 'mongoose';
-import { IDrugCart } from '../../models/DrugCart';
+
+import { Document, Types } from 'mongoose';
+import { IDrugCart as IDrugCartModel } from '../../models/DrugCart';
 
 export interface CreateDrugCartDto {
   obat_id: string; // Will be ObjectId in service
@@ -15,17 +16,13 @@ export interface IDrugCartResponseDto {
   pasien_id: string;
   obat_id: string;
   jumlah: number;
-  createdAt: Date;
-  updatedAt: Date;
+  tanggal_ditambahkan: Date;
 }
 
-export const toDrugCartResponseDto = (drugCart: any): IDrugCartResponseDto => {
-  return {
-    id: drugCart._id.toString(),
-    pasien_id: drugCart.pasien_id.toString(),
-    obat_id: drugCart.obat_id.toString(),
-    jumlah: drugCart.jumlah,
-    createdAt: drugCart.createdAt,
-    updatedAt: drugCart.updatedAt,
-  };
-};
+export const toDrugCartResponseDto = (drugCart: IDrugCartModel): IDrugCartResponseDto => ({
+  id: (drugCart._id as Types.ObjectId).toString(),
+  pasien_id: drugCart.pasien_id.toString(),
+  obat_id: (drugCart.obat_id as Types.ObjectId).toString(),
+  jumlah: drugCart.jumlah,
+  tanggal_ditambahkan: drugCart.createdAt,
+});

@@ -1,5 +1,5 @@
-import { Types } from 'mongoose';
-import { IChatMessage } from '../../models/ChatMessage';
+import { Document, Types } from 'mongoose';
+import { IChatMessage as IChatMessageModel } from '../../models/ChatMessage';
 
 export interface CreateChatMessageDto {
   konsultasi_id: string; // Will be ObjectId in service
@@ -21,22 +21,20 @@ export interface IChatMessageResponseDto {
   id: string;
   konsultasi_id: string;
   pengirim_id: string;
-  isi: string;
   tipe: 'text' | 'image' | 'file';
+  isi: string;
   file_url?: string;
-  is_read: boolean;
   timestamp: Date;
+  is_read: boolean;
 }
 
-export const toChatMessageResponseDto = (chatMessage: any): IChatMessageResponseDto => {
-  return {
-    id: chatMessage._id.toString(),
-    konsultasi_id: chatMessage.konsultasi_id.toString(),
-    pengirim_id: chatMessage.pengirim_id.toString(),
-    isi: chatMessage.isi,
-    tipe: chatMessage.tipe,
-    file_url: chatMessage.file_url,
-    is_read: chatMessage.is_read,
-    timestamp: chatMessage.timestamp,
-  };
-};
+export const toChatMessageResponseDto = (chatMessage: IChatMessageModel): IChatMessageResponseDto => ({
+  id: (chatMessage._id as Types.ObjectId).toString(),
+  konsultasi_id: (chatMessage.konsultasi_id as Types.ObjectId).toString(),
+  pengirim_id: (chatMessage.pengirim_id as Types.ObjectId).toString(),
+  tipe: chatMessage.tipe,
+  isi: chatMessage.isi,
+  file_url: chatMessage.file_url,
+  timestamp: chatMessage.timestamp,
+  is_read: chatMessage.is_read,
+});

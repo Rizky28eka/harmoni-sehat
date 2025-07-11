@@ -11,37 +11,42 @@ export interface IPracticeSchedule extends Document {
   updatedAt: Date;
 }
 
-const PracticeScheduleSchema = new Schema<IPracticeSchedule>({
-  dokter_id: {
-    type: String,
-    ref: 'Dokter',
-    required: true,
+const PracticeScheduleSchema = new Schema<IPracticeSchedule>(
+  {
+    dokter_id: {
+      type: String,
+      ref: 'Dokter',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    klinik_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Clinic',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    hari: {
+      type: String,
+      required: true,
+      enum: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
+    },
+    jam_mulai: {
+      type: String,
+      required: true,
+      match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // HH:mm format
+    },
+    jam_selesai: {
+      type: String,
+      required: true,
+      match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // HH:mm format
+    },
+    is_active: {
+      type: Boolean,
+      default: true,
+    },
   },
-  klinik_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Clinic',
-    required: true,
-  },
-  hari: {
-    type: String,
-    required: true,
-    enum: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'],
-  },
-  jam_mulai: {
-    type: String,
-    required: true,
-    match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // HH:mm format
-  },
-  jam_selesai: {
-    type: String,
-    required: true,
-    match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // HH:mm format
-  },
-  is_active: {
-    type: Boolean,
-    default: true,
-  },
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const PracticeSchedule = model<IPracticeSchedule>('PracticeSchedule', PracticeScheduleSchema);
 

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+
 import dotenv from 'dotenv';
 import { faker } from '@faker-js/faker';
 import connectDB from '../config/db';
@@ -36,7 +36,6 @@ import PrescriptionDrug from '../models/PrescriptionDrug';
 dotenv.config();
 
 // Set locale to Indonesian
-
 
 const seedData = async () => {
   try {
@@ -83,11 +82,11 @@ const seedData = async () => {
       { nama_peran: 'apoteker' },
       { nama_peran: 'pasien' },
     ]);
-    const superadminRole = roles.find(role => role.nama_peran === 'superadmin');
-    const adminRole = roles.find(role => role.nama_peran === 'admin');
-    const dokterRole = roles.find(role => role.nama_peran === 'dokter');
-    const apotekerRole = roles.find(role => role.nama_peran === 'apoteker');
-    const pasienRole = roles.find(role => role.nama_peran === 'pasien');
+    const superadminRole = roles.find((role) => role.nama_peran === 'superadmin');
+    const adminRole = roles.find((role) => role.nama_peran === 'admin');
+    const dokterRole = roles.find((role) => role.nama_peran === 'dokter');
+    const apotekerRole = roles.find((role) => role.nama_peran === 'apoteker');
+    const pasienRole = roles.find((role) => role.nama_peran === 'pasien');
     console.log('Roles created.');
 
     // Create Superadmin User
@@ -163,7 +162,11 @@ const seedData = async () => {
       nik: faker.number.int({ min: 1000000000000000, max: 9999999999999999 }).toString(),
       tanggal_lahir: faker.date.past({ years: 30, refDate: '2000-01-01' }),
       jenis_kelamin: faker.helpers.arrayElement(['Laki-laki', 'Perempuan']),
-      alamat: faker.location.streetAddress({ useFullAddress: true }) + ', ' + faker.location.city() + ', Jawa Tengah',
+      alamat:
+        faker.location.streetAddress({ useFullAddress: true }) +
+        ', ' +
+        faker.location.city() +
+        ', Jawa Tengah',
       no_telepon: faker.phone.number(),
     });
     console.log('Pasien created.');
@@ -337,10 +340,14 @@ const seedData = async () => {
     // Create DrugOrder
     const drugOrder = await DrugOrder.create({
       pasien_id: pasien._id,
-      kode_pesanan: faker.number.int({ min: 10000000, max: 99999999 }).toString(),
+      kode_pesanan: faker.string.numeric(8),
       total_harga: faker.number.int({ min: 50000, max: 500000 }),
       status: 'processing',
-      alamat_pengiriman: faker.location.streetAddress({ useFullAddress: true }) + ', ' + faker.location.city() + ', Jawa Timur',
+      alamat_pengiriman:
+        faker.location.streetAddress({ useFullAddress: true }) +
+        ', ' +
+        faker.location.city() +
+        ', Jawa Timur',
     });
     console.log('DrugOrder created.');
 

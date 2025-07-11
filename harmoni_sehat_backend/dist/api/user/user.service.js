@@ -14,17 +14,6 @@ class UserService {
         const user = await User_1.default.create({ email, password });
         return user;
     }
-    async getAllUsers() {
-        const users = await User_1.default.find();
-        return users;
-    }
-    async getUserById(id) {
-        const user = await User_1.default.findById(id);
-        if (!user) {
-            throw new AppError_1.AppError('User tidak ditemukan', 404);
-        }
-        return user;
-    }
     async updateUser(id, data) {
         const user = await User_1.default.findByIdAndUpdate(id, data, { new: true, runValidators: true });
         if (!user) {

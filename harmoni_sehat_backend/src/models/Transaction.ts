@@ -12,41 +12,44 @@ export interface ITransaction extends Document {
   updatedAt: Date;
 }
 
-const TransactionSchema = new Schema<ITransaction>({
-  user_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
+const TransactionSchema = new Schema<ITransaction>(
+  {
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    total_biaya: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'completed', 'failed', 'refunded'],
+      default: 'pending',
+    },
+    metode_pembayaran_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'PaymentMethod',
+      required: true,
+    },
+    external_id: {
+      type: String,
+      trim: true,
+    },
+    transaksiable_id: {
+      type: Schema.Types.ObjectId,
+      required: true,
+    },
+    transaksiable_type: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
-  total_biaya: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  status: {
-    type: String,
-    enum: ['pending', 'completed', 'failed', 'refunded'],
-    default: 'pending',
-  },
-  metode_pembayaran_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'PaymentMethod',
-    required: true,
-  },
-  external_id: {
-    type: String,
-    trim: true,
-  },
-  transaksiable_id: {
-    type: Schema.Types.ObjectId,
-    required: true,
-  },
-  transaksiable_type: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const Transaction = model<ITransaction>('Transaction', TransactionSchema);
 

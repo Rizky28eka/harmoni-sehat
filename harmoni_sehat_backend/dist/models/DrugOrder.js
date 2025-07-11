@@ -6,6 +6,7 @@ const DrugOrderSchema = new mongoose_1.Schema({
         type: String,
         ref: 'Pasien',
         required: true,
+        index: true, // Add index for efficient lookups
     },
     kode_pesanan: {
         type: String,

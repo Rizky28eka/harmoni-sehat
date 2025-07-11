@@ -1,41 +1,34 @@
-import { Types } from 'mongoose';
-import { INotification } from '../../models/Notification';
 
-export interface CreateNotificationDto {
-  user_id: string; // Will be ObjectId in service
+import { Document, Types } from 'mongoose';
+
+export interface INotification extends Document {
+  user_id: Types.ObjectId;
   judul: string;
-  isi: string;
+  pesan: string;
   tipe: 'info' | 'warning' | 'error' | 'success';
-  is_read?: boolean;
-}
-
-export interface UpdateNotificationDto {
-  judul?: string;
-  isi?: string;
-  tipe?: 'info' | 'warning' | 'error' | 'success';
-  is_read?: boolean;
+  dibaca: boolean;
+  tanggal_kirim: Date;
+  link?: string;
 }
 
 export interface INotificationResponseDto {
   id: string;
   user_id: string;
   judul: string;
-  isi: string;
+  pesan: string;
   tipe: 'info' | 'warning' | 'error' | 'success';
-  is_read: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  dibaca: boolean;
+  tanggal_kirim: Date;
+  link?: string;
 }
 
-export const toNotificationResponseDto = (notification: any): INotificationResponseDto => {
-  return {
-    id: notification._id.toString(),
-    user_id: notification.user_id.toString(),
-    judul: notification.judul,
-    isi: notification.isi,
-    tipe: notification.tipe,
-    is_read: notification.is_read,
-    createdAt: notification.createdAt,
-    updatedAt: notification.updatedAt,
-  };
-};
+export const toNotificationResponseDto = (notification: INotification): INotificationResponseDto => ({
+  id: (notification._id as Types.ObjectId).toString(),
+  user_id: (notification.user_id as Types.ObjectId).toString(),
+  judul: notification.judul,
+  pesan: notification.pesan,
+  tipe: notification.tipe,
+  dibaca: notification.dibaca,
+  tanggal_kirim: notification.tanggal_kirim,
+  link: notification.link,
+});

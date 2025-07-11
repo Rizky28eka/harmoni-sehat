@@ -8,21 +8,24 @@ export interface IUserProfile extends Document {
   updatedAt: Date;
 }
 
-const UserProfileSchema = new Schema<IUserProfile>({
-  user_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    unique: true,
+const UserProfileSchema = new Schema<IUserProfile>(
+  {
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      unique: true,
+      index: true, // Add index for efficient lookups
+    },
+    foto: {
+      type: String,
+    },
+    bio: {
+      type: String,
+    },
   },
-  foto: {
-    type: String,
-  },
-  bio: {
-    type: String,
-  },
-  
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const UserProfile = model<IUserProfile>('UserProfile', UserProfileSchema);
 

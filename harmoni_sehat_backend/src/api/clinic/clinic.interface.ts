@@ -1,42 +1,37 @@
-import { Types } from 'mongoose';
-import { IClinic } from '../../models/Clinic';
 
-export interface CreateClinicDto {
-  nama: string;
+import { Document, Types } from 'mongoose';
+
+export interface IClinic extends Document {
+  nama_klinik: string;
   alamat: string;
-  no_telepon: string;
+  telepon: string;
   email: string;
-  status?: 'active' | 'inactive';
-}
-
-export interface UpdateClinicDto {
-  nama?: string;
-  alamat?: string;
-  no_telepon?: string;
-  email?: string;
-  status?: 'active' | 'inactive';
+  deskripsi?: string;
+  gambar_url?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface IClinicResponseDto {
   id: string;
-  nama: string;
+  nama_klinik: string;
   alamat: string;
-  no_telepon: string;
-  email?: string;
-  status: 'active' | 'inactive';
-  createdAt: Date;
-  updatedAt: Date;
+  telepon: string;
+  email: string;
+  deskripsi?: string;
+  gambar_url?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
-export const toClinicResponseDto = (clinic: any): IClinicResponseDto => {
-  return {
-    id: clinic._id.toString(),
-    nama: clinic.nama,
-    alamat: clinic.alamat,
-    no_telepon: clinic.no_telepon,
-    email: clinic.email,
-    status: clinic.status,
-    createdAt: clinic.createdAt,
-    updatedAt: clinic.updatedAt,
-  };
-};
+export const toClinicResponseDto = (clinic: IClinic): IClinicResponseDto => ({
+  id: (clinic._id as Types.ObjectId).toString(),
+  nama_klinik: clinic.nama_klinik,
+  alamat: clinic.alamat,
+  telepon: clinic.telepon,
+  email: clinic.email,
+  deskripsi: clinic.deskripsi,
+  gambar_url: clinic.gambar_url,
+  latitude: clinic.latitude,
+  longitude: clinic.longitude,
+});

@@ -5,6 +5,8 @@ export const generateCustomId = (prefix: string, length: number = 10): string =>
     throw new AppError('Prefix must be 2 characters long', 500);
   }
   const randomDigitsLength = length - prefix.length;
-  const randomDigits = Math.floor(Math.random() * Math.pow(10, randomDigitsLength)).toString().padStart(randomDigitsLength, '0');
+  const randomDigits = Math.floor(Math.random() * Math.pow(10, randomDigitsLength))
+    .toString()
+    .padStart(randomDigitsLength, '0');
   return `${prefix}${randomDigits}`;
 };

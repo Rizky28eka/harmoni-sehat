@@ -11,18 +11,7 @@ class UserService {
     return user;
   }
 
-  async getAllUsers(): Promise<IUser[]> {
-    const users = await User.find();
-    return users;
-  }
-
-  async getUserById(id: string): Promise<IUser> {
-    const user = await User.findById(id);
-    if (!user) {
-      throw new AppError('User tidak ditemukan', 404);
-    }
-    return user;
-  }
+ 
 
   async updateUser(id: string, data: Partial<IUser>): Promise<IUser> {
     const user = await User.findByIdAndUpdate(id, data, { new: true, runValidators: true });

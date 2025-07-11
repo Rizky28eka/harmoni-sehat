@@ -1,5 +1,6 @@
-import { Types } from 'mongoose';
-import { IHealthArticle } from '../../models/HealthArticle';
+
+import { Document, Types } from 'mongoose';
+import { IHealthArticle as IHealthArticleModel } from '../../models/HealthArticle';
 
 export interface CreateHealthArticleDto {
   judul: string;
@@ -28,15 +29,13 @@ export interface IHealthArticleResponseDto {
   updatedAt: Date;
 }
 
-export const toHealthArticleResponseDto = (article: any): IHealthArticleResponseDto => {
-  return {
-    id: article._id.toString(),
-    judul: article.judul,
-    slug: article.slug,
-    konten: article.konten,
-    penulis_id: article.penulis_id.toString(),
-    status_publikasi: article.status_publikasi,
-    createdAt: article.createdAt,
-    updatedAt: article.updatedAt,
-  };
-};
+export const toHealthArticleResponseDto = (article: IHealthArticleModel): IHealthArticleResponseDto => ({
+  id: (article._id as Types.ObjectId).toString(),
+  judul: article.judul,
+  slug: article.slug,
+  konten: article.konten,
+  penulis_id: (article.penulis_id as Types.ObjectId).toString(),
+  status_publikasi: article.status_publikasi,
+  createdAt: article.createdAt,
+  updatedAt: article.updatedAt,
+});

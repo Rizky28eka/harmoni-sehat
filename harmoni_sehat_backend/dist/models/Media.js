@@ -6,10 +6,12 @@ const MediaSchema = new mongoose_1.Schema({
         type: String,
         required: true,
         trim: true,
+        index: true, // Add index for efficient lookups
     },
     model_id: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: true,
+        index: true, // Add index for efficient lookups
     },
     url: {
         type: String,

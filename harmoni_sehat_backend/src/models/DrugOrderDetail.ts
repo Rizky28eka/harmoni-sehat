@@ -10,33 +10,38 @@ export interface IDrugOrderDetail extends Document {
   updatedAt: Date;
 }
 
-const DrugOrderDetailSchema = new Schema<IDrugOrderDetail>({
-  pesanan_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'DrugOrder',
-    required: true,
+const DrugOrderDetailSchema = new Schema<IDrugOrderDetail>(
+  {
+    pesanan_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'DrugOrder',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    obat_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Drug',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    jumlah: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    harga_satuan: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    subtotal: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
   },
-  obat_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Drug',
-    required: true,
-  },
-  jumlah: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-  harga_satuan: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  subtotal: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const DrugOrderDetail = model<IDrugOrderDetail>('DrugOrderDetail', DrugOrderDetailSchema);
 

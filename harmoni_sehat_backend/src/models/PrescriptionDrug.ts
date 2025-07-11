@@ -10,33 +10,38 @@ export interface IPrescriptionDrug extends Document {
   updatedAt: Date;
 }
 
-const PrescriptionDrugSchema = new Schema<IPrescriptionDrug>({
-  resep_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Prescription',
-    required: true,
+const PrescriptionDrugSchema = new Schema<IPrescriptionDrug>(
+  {
+    resep_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Prescription',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    obat_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Drug',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    dosis: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    jumlah: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    aturan_pakai: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
-  obat_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Drug',
-    required: true,
-  },
-  dosis: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  jumlah: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-  aturan_pakai: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const PrescriptionDrug = model<IPrescriptionDrug>('PrescriptionDrug', PrescriptionDrugSchema);
 

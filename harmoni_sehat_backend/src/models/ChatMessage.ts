@@ -15,11 +15,13 @@ const ChatMessageSchema = new Schema<IChatMessage>({
     type: Schema.Types.ObjectId,
     ref: 'Consultation',
     required: true,
+    index: true, // Add index for efficient lookups
   },
   pengirim_id: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
+    index: true, // Add index for efficient lookups
   },
   isi: {
     type: String,

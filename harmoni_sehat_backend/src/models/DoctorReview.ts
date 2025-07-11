@@ -10,35 +10,39 @@ export interface IDoctorReview extends Document {
   updatedAt: Date;
 }
 
-const DoctorReviewSchema = new Schema<IDoctorReview>({
-  pasien_id: {
-    type: String,
-    ref: 'Pasien',
-    required: true,
+const DoctorReviewSchema = new Schema<IDoctorReview>(
+  {
+    pasien_id: {
+      type: String,
+      ref: 'Pasien',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    dokter_id: {
+      type: String,
+      ref: 'Dokter',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    konsultasi_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Consultation',
+      required: true,
+      unique: true,
+    },
+    rating: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5,
+    },
+    komentar: {
+      type: String,
+      trim: true,
+    },
   },
-  dokter_id: {
-    type: String,
-    ref: 'Dokter',
-    required: true,
-  },
-  konsultasi_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Consultation',
-    required: true,
-    unique: true,
-  },
-  rating: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 5,
-  },
-  komentar: {
-    type: String,
-    trim: true,
-  },
-  
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const DoctorReview = model<IDoctorReview>('DoctorReview', DoctorReviewSchema);
 

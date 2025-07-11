@@ -8,23 +8,28 @@ export interface IDoctorClinic extends Document {
   updatedAt: Date;
 }
 
-const DoctorClinicSchema = new Schema<IDoctorClinic>({
-  dokter_id: {
-    type: String,
-    ref: 'Dokter',
-    required: true,
+const DoctorClinicSchema = new Schema<IDoctorClinic>(
+  {
+    dokter_id: {
+      type: String,
+      ref: 'Dokter',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    klinik_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Clinic',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    status: {
+      type: String,
+      enum: ['active', 'inactive'],
+      default: 'active',
+    },
   },
-  klinik_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Clinic',
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ['active', 'inactive'],
-    default: 'active',
-  },
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const DoctorClinic = model<IDoctorClinic>('DoctorClinic', DoctorClinicSchema);
 

@@ -16,6 +16,7 @@ const ClinicSchema = new Schema<IClinic>({
     required: true,
     unique: true,
     trim: true,
+    index: true, // Add index for efficient lookups
   },
   alamat: {
     type: String,

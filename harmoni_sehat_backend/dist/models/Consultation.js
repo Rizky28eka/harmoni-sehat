@@ -3,14 +3,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const ConsultationSchema = new mongoose_1.Schema({
     pasien_id: {
-        type: String,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Pasien',
         required: true,
+        index: true, // Add index for efficient lookups
     },
     dokter_id: {
-        type: String,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Dokter',
         required: true,
+        index: true, // Add index for efficient lookups
     },
     jadwal_id: {
         type: mongoose_1.Schema.Types.ObjectId,

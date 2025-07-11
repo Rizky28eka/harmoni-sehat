@@ -6,11 +6,13 @@ const DrugCartSchema = new mongoose_1.Schema({
         type: String,
         ref: 'Pasien',
         required: true,
+        index: true, // Add index for efficient lookups
     },
     obat_id: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Drug',
         required: true,
+        index: true, // Add index for efficient lookups
     },
     jumlah: {
         type: Number,

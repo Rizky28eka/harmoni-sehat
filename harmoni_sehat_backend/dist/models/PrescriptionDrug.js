@@ -6,11 +6,13 @@ const PrescriptionDrugSchema = new mongoose_1.Schema({
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Prescription',
         required: true,
+        index: true, // Add index for efficient lookups
     },
     obat_id: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Drug',
         required: true,
+        index: true, // Add index for efficient lookups
     },
     dosis: {
         type: String,

@@ -9,23 +9,27 @@ export interface IAdmin extends Document {
   updatedAt: Date;
 }
 
-const AdminSchema = new Schema<IAdmin>({
-  _id: {
-    type: String,
-    default: () => generateCustomId('04', 12), // Admin ID starts with 04
+const AdminSchema = new Schema<IAdmin>(
+  {
+    _id: {
+      type: String,
+      default: () => generateCustomId('04', 12), // Admin ID starts with 04
+    },
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      unique: true,
+      index: true, // Add index for efficient lookups
+    },
+    nama: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
-  user_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    unique: true,
-  },
-  nama: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-}, { _id: false, timestamps: true }); // Disable default _id generation
+  { _id: false, timestamps: true },
+); // Disable default _id generation
 
 const Admin = model<IAdmin>('Admin', AdminSchema);
 

@@ -7,6 +7,7 @@ const RoleSchema = new mongoose_1.Schema({
         required: true,
         unique: true,
         trim: true,
+        index: true, // Add index for efficient lookups
     },
 });
 const Role = (0, mongoose_1.model)('Role', RoleSchema);

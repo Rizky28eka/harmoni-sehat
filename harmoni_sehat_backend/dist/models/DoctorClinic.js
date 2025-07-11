@@ -6,11 +6,13 @@ const DoctorClinicSchema = new mongoose_1.Schema({
         type: String,
         ref: 'Dokter',
         required: true,
+        index: true, // Add index for efficient lookups
     },
     klinik_id: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Clinic',
         required: true,
+        index: true, // Add index for efficient lookups
     },
     status: {
         type: String,

@@ -7,18 +7,22 @@ export interface IUserRole extends Document {
   updatedAt: Date;
 }
 
-const UserRoleSchema = new Schema<IUserRole>({
-  user_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
+const UserRoleSchema = new Schema<IUserRole>(
+  {
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    peran_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Role',
+      required: true,
+    },
   },
-  peran_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Role',
-    required: true,
-  },
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const UserRole = model<IUserRole>('UserRole', UserRoleSchema);
 

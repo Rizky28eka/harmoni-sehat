@@ -10,33 +10,37 @@ export interface IMedia extends Document {
   updatedAt: Date;
 }
 
-const MediaSchema = new Schema<IMedia>({
-  model_type: {
-    type: String,
-    required: true,
-    trim: true,
+const MediaSchema = new Schema<IMedia>(
+  {
+    model_type: {
+      type: String,
+      required: true,
+      trim: true,
+      index: true, // Add index for efficient lookups
+    },
+    model_id: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    url: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    mime_type: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    size: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
   },
-  model_id: {
-    type: Schema.Types.ObjectId,
-    required: true,
-  },
-  url: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  mime_type: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  size: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const Media = model<IMedia>('Media', MediaSchema);
 

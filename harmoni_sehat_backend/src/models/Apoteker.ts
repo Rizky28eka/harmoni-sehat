@@ -8,29 +8,33 @@ export interface IApoteker extends Document {
   nomor_sipa: string;
 }
 
-const ApotekerSchema = new Schema<IApoteker>({
-  _id: {
-    type: String,
-    default: () => generateCustomId('20', 12), // Apoteker ID starts with 20
+const ApotekerSchema = new Schema<IApoteker>(
+  {
+    _id: {
+      type: String,
+      default: () => generateCustomId('20', 12), // Apoteker ID starts with 20
+    },
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      unique: true,
+      index: true, // Add index for efficient lookups
+    },
+    nama: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    nomor_sipa: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
   },
-  user_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    unique: true,
-  },
-  nama: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  nomor_sipa: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-  },
-}, { _id: false }); // Disable default _id generation
+  { _id: false },
+); // Disable default _id generation
 
 const Apoteker = model<IApoteker>('Apoteker', ApotekerSchema);
 

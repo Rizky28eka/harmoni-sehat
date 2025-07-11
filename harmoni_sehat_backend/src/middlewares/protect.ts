@@ -29,7 +29,7 @@ const protect = async (req: Request, res: Response, next: NextFunction) => {
 
     (req as any).user = currentUser;
     next();
-  } catch (err) {
+  } catch (error: any) {
     return next(new AppError('Invalid token. Please log in again!', 401));
   }
 };

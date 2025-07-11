@@ -10,33 +10,37 @@ export interface INotification extends Document {
   updatedAt: Date;
 }
 
-const NotificationSchema = new Schema<INotification>({
-  user_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
+const NotificationSchema = new Schema<INotification>(
+  {
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    judul: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    isi: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    tipe: {
+      type: String,
+      enum: ['info', 'warning', 'error', 'success'],
+      required: true,
+      trim: true,
+    },
+    is_read: {
+      type: Boolean,
+      default: false,
+    },
   },
-  judul: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  isi: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  tipe: {
-    type: String,
-    enum: ['info', 'warning', 'error', 'success'],
-    required: true,
-    trim: true,
-  },
-  is_read: {
-    type: Boolean,
-    default: false,
-  },
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const Notification = model<INotification>('Notification', NotificationSchema);
 

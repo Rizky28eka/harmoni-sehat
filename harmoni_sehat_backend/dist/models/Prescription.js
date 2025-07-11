@@ -7,6 +7,7 @@ const PrescriptionSchema = new mongoose_1.Schema({
         ref: 'Consultation',
         required: true,
         unique: true,
+        index: true, // Add index for efficient lookups
     },
     catatan: {
         type: String,

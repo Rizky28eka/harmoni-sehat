@@ -10,6 +10,7 @@ const RoleSchema = new Schema<IRole>({
     required: true,
     unique: true,
     trim: true,
+    index: true, // Add index for efficient lookups
   },
 });
 

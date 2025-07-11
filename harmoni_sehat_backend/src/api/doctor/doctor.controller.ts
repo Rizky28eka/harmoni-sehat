@@ -6,7 +6,10 @@ import { AppError } from '../../utils/AppError';
 class DoctorController {
   async createDoctor(req: Request, res: Response, next: NextFunction) {
     try {
-      const doctor = await doctorService.createDoctor(req.body);
+      // Assuming req.user.id contains the user_id from the authenticated user
+      const userId = (req as any).user.id;
+      const doctorData = { ...req.body, user_id: userId };
+      const doctor = await doctorService.createDoctor(doctorData);
       res.status(201).json(new ApiResponse(201, doctor, 'Dokter berhasil ditambahkan'));
     } catch (error: any) {
       next(new AppError(error.message, error.statusCode || 500));

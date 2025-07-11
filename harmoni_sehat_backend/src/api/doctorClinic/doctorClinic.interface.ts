@@ -1,5 +1,6 @@
-import { Types } from 'mongoose';
-import { IDoctorClinic } from '../../models/DoctorClinic';
+
+import { Document, Types } from 'mongoose';
+import { IDoctorClinic as IDoctorClinicModel } from '../../models/DoctorClinic';
 
 export interface CreateDoctorClinicDto {
   dokter_id: string; // Will be ObjectId in service
@@ -18,17 +19,11 @@ export interface IDoctorClinicResponseDto {
   dokter_id: string;
   klinik_id: string;
   status: 'active' | 'inactive';
-  createdAt: Date;
-  updatedAt: Date;
 }
 
-export const toDoctorClinicResponseDto = (doctorClinic: any): IDoctorClinicResponseDto => {
-  return {
-    id: doctorClinic._id.toString(),
-    dokter_id: doctorClinic.dokter_id.toString(),
-    klinik_id: doctorClinic.klinik_id.toString(),
-    status: doctorClinic.status,
-    createdAt: doctorClinic.createdAt,
-    updatedAt: doctorClinic.updatedAt,
-  };
-};
+export const toDoctorClinicResponseDto = (doctorClinic: IDoctorClinicModel): IDoctorClinicResponseDto => ({
+  id: (doctorClinic._id as Types.ObjectId).toString(),
+  dokter_id: doctorClinic.dokter_id.toString(),
+  klinik_id: (doctorClinic.klinik_id as Types.ObjectId).toString(),
+  status: doctorClinic.status,
+});

@@ -80,11 +80,11 @@ const seedData = async () => {
             { nama_peran: 'apoteker' },
             { nama_peran: 'pasien' },
         ]);
-        const superadminRole = roles.find(role => role.nama_peran === 'superadmin');
-        const adminRole = roles.find(role => role.nama_peran === 'admin');
-        const dokterRole = roles.find(role => role.nama_peran === 'dokter');
-        const apotekerRole = roles.find(role => role.nama_peran === 'apoteker');
-        const pasienRole = roles.find(role => role.nama_peran === 'pasien');
+        const superadminRole = roles.find((role) => role.nama_peran === 'superadmin');
+        const adminRole = roles.find((role) => role.nama_peran === 'admin');
+        const dokterRole = roles.find((role) => role.nama_peran === 'dokter');
+        const apotekerRole = roles.find((role) => role.nama_peran === 'apoteker');
+        const pasienRole = roles.find((role) => role.nama_peran === 'pasien');
         console.log('Roles created.');
         // Create Superadmin User
         const superadminUser = await User_1.default.create({
@@ -155,7 +155,10 @@ const seedData = async () => {
             nik: faker_1.faker.number.int({ min: 1000000000000000, max: 9999999999999999 }).toString(),
             tanggal_lahir: faker_1.faker.date.past({ years: 30, refDate: '2000-01-01' }),
             jenis_kelamin: faker_1.faker.helpers.arrayElement(['Laki-laki', 'Perempuan']),
-            alamat: faker_1.faker.location.streetAddress(true) + ', ' + faker_1.faker.location.city() + ', Jawa Tengah',
+            alamat: faker_1.faker.location.streetAddress({ useFullAddress: true }) +
+                ', ' +
+                faker_1.faker.location.city() +
+                ', Jawa Tengah',
             no_telepon: faker_1.faker.phone.number(),
         });
         console.log('Pasien created.');
@@ -311,10 +314,13 @@ const seedData = async () => {
         // Create DrugOrder
         const drugOrder = await DrugOrder_1.default.create({
             pasien_id: pasien._id,
-            kode_pesanan: faker_1.faker.number.int({ min: 10000000, max: 99999999 }).toString(),
+            kode_pesanan: faker_1.faker.string.numeric(8),
             total_harga: faker_1.faker.number.int({ min: 50000, max: 500000 }),
             status: 'processing',
-            alamat_pengiriman: faker_1.faker.address.streetAddress(true) + ', ' + faker_1.faker.address.city() + ', Jawa Timur',
+            alamat_pengiriman: faker_1.faker.location.streetAddress({ useFullAddress: true }) +
+                ', ' +
+                faker_1.faker.location.city() +
+                ', Jawa Timur',
         });
         console.log('DrugOrder created.');
         // Create DrugOrderDetail

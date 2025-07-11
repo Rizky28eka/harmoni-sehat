@@ -7,6 +7,7 @@ const pharmacistSchema = new mongoose_1.Schema({
         ref: 'User',
         required: true,
         unique: true,
+        index: true, // Add index for efficient lookups
     },
     nama: {
         type: String,

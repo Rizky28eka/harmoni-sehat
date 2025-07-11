@@ -6,7 +6,10 @@ import { AppError } from '../../utils/AppError';
 class PharmacistController {
   async createPharmacist(req: Request, res: Response, next: NextFunction) {
     try {
-      const pharmacist = await pharmacistService.createPharmacist(req.body);
+      // Assuming req.user.id contains the user_id from the authenticated user
+      const userId = (req as any).user.id;
+      const pharmacistData = { ...req.body, user_id: userId };
+      const pharmacist = await pharmacistService.createPharmacist(pharmacistData);
       res.status(201).json(new ApiResponse(201, pharmacist, 'Apoteker berhasil ditambahkan'));
     } catch (error: any) {
       next(new AppError(error.message, error.statusCode || 500));

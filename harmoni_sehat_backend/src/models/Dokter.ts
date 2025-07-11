@@ -13,49 +13,54 @@ export interface IDokter extends Document {
   status: 'active' | 'inactive';
 }
 
-const DokterSchema = new Schema<IDokter>({
-  _id: {
-    type: String,
-    default: () => generateCustomId('10', 12), // Dokter ID starts with 10
+const DokterSchema = new Schema<IDokter>(
+  {
+    _id: {
+      type: String,
+      default: () => generateCustomId('10', 12), // Dokter ID starts with 10
+    },
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      unique: true,
+      index: true, // Add index for efficient lookups
+    },
+    nama: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    nomor_str: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    spesialisasi_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Specialization',
+      index: true, // Add index for efficient lookups
+    },
+    biaya_konsultasi: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    foto: {
+      type: String,
+    },
+    bio: {
+      type: String,
+    },
+    status: {
+      type: String,
+      enum: ['active', 'inactive'],
+      default: 'active',
+    },
   },
-  user_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    unique: true,
-  },
-  nama: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  nomor_str: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-  },
-  spesialisasi_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Specialization',
-  },
-  biaya_konsultasi: {
-    type: Number,
-    required: true,
-    min: 0,
-  },
-  foto: {
-    type: String,
-  },
-  bio: {
-    type: String,
-  },
-  status: {
-    type: String,
-    enum: ['active', 'inactive'],
-    default: 'active',
-  },
-}, { _id: false }); // Disable default _id generation
+  { _id: false },
+); // Disable default _id generation
 
 const Dokter = model<IDokter>('Dokter', DokterSchema);
 

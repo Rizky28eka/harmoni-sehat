@@ -9,27 +9,31 @@ export interface IPrescription extends Document {
   updatedAt: Date;
 }
 
-const PrescriptionSchema = new Schema<IPrescription>({
-  konsultasi_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'Consultation',
-    required: true,
-    unique: true,
+const PrescriptionSchema = new Schema<IPrescription>(
+  {
+    konsultasi_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Consultation',
+      required: true,
+      unique: true,
+      index: true, // Add index for efficient lookups
+    },
+    catatan: {
+      type: String,
+      trim: true,
+    },
+    status: {
+      type: String,
+      enum: ['active', 'inactive', 'expired'],
+      default: 'active',
+    },
+    expired_at: {
+      type: Date,
+      required: true,
+    },
   },
-  catatan: {
-    type: String,
-    trim: true,
-  },
-  status: {
-    type: String,
-    enum: ['active', 'inactive', 'expired'],
-    default: 'active',
-  },
-  expired_at: {
-    type: Date,
-    required: true,
-  },
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const Prescription = model<IPrescription>('Prescription', PrescriptionSchema);
 

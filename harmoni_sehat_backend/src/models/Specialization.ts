@@ -8,21 +8,25 @@ export interface ISpecialization extends Document {
   updatedAt: Date;
 }
 
-const SpecializationSchema = new Schema<ISpecialization>({
-  nama: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
+const SpecializationSchema = new Schema<ISpecialization>(
+  {
+    nama: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      index: true, // Add index for efficient lookups
+    },
+    deskripsi: {
+      type: String,
+    },
+    is_active: {
+      type: Boolean,
+      default: true,
+    },
   },
-  deskripsi: {
-    type: String,
-  },
-  is_active: {
-    type: Boolean,
-    default: true,
-  },
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const Specialization = model<ISpecialization>('Specialization', SpecializationSchema);
 

@@ -12,50 +12,54 @@ export interface IPasien extends Document {
   no_telepon: string;
 }
 
-const PasienSchema = new Schema<IPasien>({
-  _id: {
-    type: String,
-    default: () => generateCustomId('08', 12), // Pasien ID starts with 08
+const PasienSchema = new Schema<IPasien>(
+  {
+    _id: {
+      type: String,
+      default: () => generateCustomId('08', 12), // Pasien ID starts with 08
+    },
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      unique: true,
+      index: true, // Add index for efficient lookups
+    },
+    nama: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    nik: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      minlength: 16,
+      maxlength: 16,
+    },
+    tanggal_lahir: {
+      type: Date,
+      required: true,
+    },
+    jenis_kelamin: {
+      type: String,
+      enum: ['Laki-laki', 'Perempuan'],
+      required: true,
+    },
+    alamat: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    no_telepon: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
-  user_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    unique: true,
-  },
-  nama: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  nik: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-    minlength: 16,
-    maxlength: 16,
-  },
-  tanggal_lahir: {
-    type: Date,
-    required: true,
-  },
-  jenis_kelamin: {
-    type: String,
-    enum: ['Laki-laki', 'Perempuan'],
-    required: true,
-  },
-  alamat: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  no_telepon: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-}, { _id: false }); // Disable default _id generation
+  { _id: false },
+); // Disable default _id generation
 
 const Pasien = model<IPasien>('Pasien', PasienSchema);
 

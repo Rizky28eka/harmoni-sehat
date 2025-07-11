@@ -6,6 +6,7 @@ const UserRoleSchema = new mongoose_1.Schema({
         type: mongoose_1.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
+        index: true, // Add index for efficient lookups
     },
     peran_id: {
         type: mongoose_1.Schema.Types.ObjectId,

@@ -6,6 +6,7 @@ const HealthArticleSchema = new mongoose_1.Schema({
         type: String,
         required: true,
         trim: true,
+        index: true, // Add index for efficient lookups
     },
     slug: {
         type: String,
@@ -13,6 +14,7 @@ const HealthArticleSchema = new mongoose_1.Schema({
         unique: true,
         lowercase: true,
         trim: true,
+        index: true, // Add index for efficient lookups
     },
     konten: {
         type: String,

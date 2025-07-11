@@ -1,5 +1,6 @@
-import { Types } from 'mongoose';
-import { IMedia } from '../../models/Media';
+
+import { Document, Types } from 'mongoose';
+import { IMedia as IMediaModel } from '../../models/Media';
 
 export interface CreateMediaDto {
   model_type: string; // e.g., 'User', 'HealthArticle'
@@ -22,21 +23,19 @@ export interface IMediaResponseDto {
   model_type: string;
   model_id: string;
   url: string;
-  mime_type?: string;
-  size?: number;
+  mime_type: string;
+  size: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export const toMediaResponseDto = (media: any): IMediaResponseDto => {
-  return {
-    id: media._id.toString(),
-    model_type: media.model_type,
-    model_id: media.model_id.toString(),
-    url: media.url,
-    mime_type: media.mime_type,
-    size: media.size,
-    createdAt: media.createdAt,
-    updatedAt: media.updatedAt,
-  };
-};
+export const toMediaResponseDto = (media: IMediaModel): IMediaResponseDto => ({
+  id: (media._id as Types.ObjectId).toString(),
+  model_type: media.model_type,
+  model_id: (media.model_id as Types.ObjectId).toString(),
+  url: media.url,
+  mime_type: media.mime_type,
+  size: media.size,
+  createdAt: media.createdAt,
+  updatedAt: media.updatedAt,
+});

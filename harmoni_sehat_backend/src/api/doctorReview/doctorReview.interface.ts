@@ -1,5 +1,6 @@
-import { Types } from 'mongoose';
-import { IDoctorReview } from '../../models/DoctorReview';
+
+import { Document, Types } from 'mongoose';
+import { IDoctorReview as IDoctorReviewModel } from '../../models/DoctorReview';
 
 export interface CreateDoctorReviewDto {
   pasien_id: string; // Will be ObjectId in service
@@ -21,19 +22,15 @@ export interface IDoctorReviewResponseDto {
   konsultasi_id: string;
   rating: number;
   komentar?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  tanggal_ulasan: Date;
 }
 
-export const toDoctorReviewResponseDto = (doctorReview: any): IDoctorReviewResponseDto => {
-  return {
-    id: doctorReview._id.toString(),
-    pasien_id: doctorReview.pasien_id.toString(),
-    dokter_id: doctorReview.dokter_id.toString(),
-    konsultasi_id: doctorReview.konsultasi_id.toString(),
-    rating: doctorReview.rating,
-    komentar: doctorReview.komentar,
-    createdAt: doctorReview.createdAt,
-    updatedAt: doctorReview.updatedAt,
-  };
-};
+export const toDoctorReviewResponseDto = (doctorReview: IDoctorReviewModel): IDoctorReviewResponseDto => ({
+  id: (doctorReview._id as Types.ObjectId).toString(),
+  pasien_id: doctorReview.pasien_id.toString(),
+  dokter_id: doctorReview.dokter_id.toString(),
+  konsultasi_id: (doctorReview.konsultasi_id as Types.ObjectId).toString(),
+  rating: doctorReview.rating,
+  komentar: doctorReview.komentar,
+  tanggal_ulasan: doctorReview.createdAt,
+});

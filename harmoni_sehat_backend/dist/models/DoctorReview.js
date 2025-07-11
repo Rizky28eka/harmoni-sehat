@@ -6,11 +6,13 @@ const DoctorReviewSchema = new mongoose_1.Schema({
         type: String,
         ref: 'Pasien',
         required: true,
+        index: true, // Add index for efficient lookups
     },
     dokter_id: {
         type: String,
         ref: 'Dokter',
         required: true,
+        index: true, // Add index for efficient lookups
     },
     konsultasi_id: {
         type: mongoose_1.Schema.Types.ObjectId,

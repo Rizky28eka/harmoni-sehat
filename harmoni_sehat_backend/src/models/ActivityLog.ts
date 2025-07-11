@@ -12,6 +12,7 @@ const ActivityLogSchema = new Schema<IActivityLog>({
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
+    index: true, // Add index for efficient lookups
   },
   aksi: {
     type: String,

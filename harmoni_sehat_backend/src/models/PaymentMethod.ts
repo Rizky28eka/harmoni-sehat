@@ -9,28 +9,31 @@ export interface IPaymentMethod extends Document {
   updatedAt: Date;
 }
 
-const PaymentMethodSchema = new Schema<IPaymentMethod>({
-  nama: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
+const PaymentMethodSchema = new Schema<IPaymentMethod>(
+  {
+    nama: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    kode: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    deskripsi: {
+      type: String,
+      trim: true,
+    },
+    is_active: {
+      type: Boolean,
+      default: true,
+    },
   },
-  kode: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
-  },
-  deskripsi: {
-    type: String,
-    trim: true,
-  },
-  is_active: {
-    type: Boolean,
-    default: true,
-  },
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const PaymentMethod = model<IPaymentMethod>('PaymentMethod', PaymentMethodSchema);
 

@@ -8,23 +8,26 @@ export interface IRefreshToken extends Document {
   updatedAt: Date;
 }
 
-const RefreshTokenSchema = new Schema<IRefreshToken>({
-  user_id: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
+const RefreshTokenSchema = new Schema<IRefreshToken>(
+  {
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true, // Add index for efficient lookups
+    },
+    token: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    expired_at: {
+      type: Date,
+      required: true,
+    },
   },
-  token: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  expired_at: {
-    type: Date,
-    required: true,
-  },
-  
-}, { timestamps: true });
+  { timestamps: true },
+);
 
 const RefreshToken = model<IRefreshToken>('RefreshToken', RefreshTokenSchema);
 
