@@ -40,6 +40,16 @@ class DoctorReviewController {
     }
   }
 
+  async replyToReview(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { replyText } = req.body;
+      const doctorReview = await doctorReviewService.replyToReview(req.params.id, replyText);
+      res.status(200).json(new ApiResponse(200, doctorReview, 'Balasan review berhasil ditambahkan'));
+    } catch (error: any) {
+      next(new AppError(error.message, error.statusCode || 500));
+    }
+  }
+
   async deleteDoctorReview(req: Request, res: Response, next: NextFunction) {
     try {
       await doctorReviewService.deleteDoctorReview(req.params.id);

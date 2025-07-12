@@ -1,0 +1,31 @@
+<variant
+    name="release"
+    package="io.flutter.plugins.pathprovider"
+    minSdkVersion="21"
+    targetSdkVersion="21"
+    mergedManifest="/Users/rizky28eka/Development/flutterDev/harmoni_sehat_project/harmoni_sehat_frontend/build/path_provider_android/intermediates/merged_manifest/release/processReleaseManifest/AndroidManifest.xml"
+    manifestMergeReport="/Users/rizky28eka/Development/flutterDev/harmoni_sehat_project/harmoni_sehat_frontend/build/path_provider_android/outputs/logs/manifest-merger-release-report.txt"
+    proguardFiles="/Users/rizky28eka/Development/flutterDev/harmoni_sehat_project/harmoni_sehat_frontend/build/path_provider_android/intermediates/default_proguard_files/global/proguard-android.txt-8.7.3"
+    partialResultsDir="/Users/rizky28eka/Development/flutterDev/harmoni_sehat_project/harmoni_sehat_frontend/build/path_provider_android/intermediates/lint_partial_results/release/lintAnalyzeRelease/out">
+  <buildFeatures
+      namespacing="REQUIRED"/>
+  <sourceProviders>
+    <sourceProvider
+        manifests="src/main/AndroidManifest.xml"
+        javaDirectories="src/main/java:src/release/java:src/main/kotlin:src/release/kotlin"
+        resDirectories="src/main/res:src/release/res"
+        assetsDirectories="src/main/assets:src/release/assets"/>
+  </sourceProviders>
+  <testSourceProviders>
+  </testSourceProviders>
+  <testFixturesSourceProviders>
+  </testFixturesSourceProviders>
+  <artifact
+      classOutputs="/Users/rizky28eka/Development/flutterDev/harmoni_sehat_project/harmoni_sehat_frontend/build/path_provider_android/intermediates/javac/release/compileReleaseJavaWithJavac/classes:/Users/rizky28eka/Development/flutterDev/harmoni_sehat_project/harmoni_sehat_frontend/build/path_provider_android/intermediates/compile_r_class_jar/release/generateReleaseRFile/R.jar"
+      type="MAIN"
+      applicationId="io.flutter.plugins.pathprovider"
+      generatedSourceFolders="/Users/rizky28eka/Development/flutterDev/harmoni_sehat_project/harmoni_sehat_frontend/build/path_provider_android/generated/ap_generated_sources/release/out"
+      generatedResourceFolders="/Users/rizky28eka/Development/flutterDev/harmoni_sehat_project/harmoni_sehat_frontend/build/path_provider_android/generated/res/resValues/release"
+      desugaredMethodsFiles="/Users/rizky28eka/.gradle/caches/8.12/transforms/7ff7c222f72a39cd2d6660f4156e5aff/transformed/D8BackportedDesugaredMethods.txt">
+  </artifact>
+</variant>

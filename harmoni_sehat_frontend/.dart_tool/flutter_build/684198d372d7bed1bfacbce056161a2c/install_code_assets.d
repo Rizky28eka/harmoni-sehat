@@ -1,0 +1,1 @@
+ /Users/rizky28eka/Development/flutterDev/harmoni_sehat_project/harmoni_sehat_frontend/.dart_tool/flutter_build/684198d372d7bed1bfacbce056161a2c/native_assets.json: 

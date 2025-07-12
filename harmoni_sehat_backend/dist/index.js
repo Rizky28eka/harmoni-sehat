@@ -44,6 +44,7 @@ const drugOrder_routes_1 = __importDefault(require("./api/drugOrder/drugOrder.ro
 const drugOrderDetail_routes_1 = __importDefault(require("./api/drugOrderDetail/drugOrderDetail.routes"));
 const prescription_routes_1 = __importDefault(require("./api/prescription/prescription.routes"));
 const prescriptionDrug_routes_1 = __importDefault(require("./api/prescriptionDrug/prescriptionDrug.routes"));
+const gemini_routes_1 = __importDefault(require("./api/gemini/gemini.routes"));
 // Routes
 app.use('/api/v1/roles', role_routes_1.default);
 app.use('/api/v1/users', user_routes_1.default);
@@ -75,8 +76,29 @@ app.use('/api/v1/drug-orders', drugOrder_routes_1.default);
 app.use('/api/v1/drug-order-details', drugOrderDetail_routes_1.default);
 app.use('/api/v1/prescriptions', prescription_routes_1.default);
 app.use('/api/prescription-drugs', prescriptionDrug_routes_1.default);
+app.use('/api/v1/gemini', gemini_routes_1.default);
 // Error handling middleware
 app.use(errorHandler_1.default);
-app.listen(env_1.PORT, () => {
+const http_1 = __importDefault(require("http"));
+const socket_io_1 = require("socket.io");
+const server = http_1.default.createServer(app);
+const io = new socket_io_1.Server(server, {
+    cors: {
+        origin: "*", // Allow all origins for now, refine in production
+        methods: ["GET", "POST"]
+    }
+});
+io.on('connection', (socket) => {
+    console.log('a user connected');
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+    });
+    // Example: Listen for chat messages
+    socket.on('chat message', (msg) => {
+        console.log('message: ' + msg);
+        io.emit('chat message', msg); // Broadcast to all connected clients
+    });
+});
+server.listen(env_1.PORT, () => {
     console.log(`Server running on port ${env_1.PORT}`);
 });

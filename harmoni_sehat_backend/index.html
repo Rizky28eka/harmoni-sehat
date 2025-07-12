@@ -9,13 +9,12 @@
         .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); max-width: 600px; margin: auto; }
         h2 { text-align: center; color: #333; }
         form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        input[type="text"], input[type="email"], input[type="password"], input[type="number"], select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        input[type="text"], input[type="email"], input[type="password"], select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
         button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
         button:hover { background-color: #0056b3; }
         .response { background-color: #e9e9e9; padding: 15px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word; }
         .error { color: red; }
         .success { color: green; }
-        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -33,29 +32,20 @@
                 <option value="farmasi">Farmasi</option>
                 <option value="admin">Admin</option>
             </select>
-
-            <div id="pasienFields" class="hidden">
-                <input type="text" id="registerNik" placeholder="NIK (Pasien only)">
-                <input type="text" id="registerTanggalLahir" placeholder="Tanggal Lahir YYYY-MM-DD (Pasien only)">
-                <select id="registerJenisKelamin">
-                    <option value="">Jenis Kelamin (Pasien only)</option>
-                    <option value="Laki-laki">Laki-laki</option>
-                    <option value="Perempuan">Perempuan</option>
-                </select>
-                <input type="text" id="registerAlamat" placeholder="Alamat (Pasien only)">
-                <input type="text" id="registerNoTelepon" placeholder="No Telepon (Pasien only)">
-            </div>
-
-            <div id="dokterFields" class="hidden">
-                <input type="text" id="registerNomorStr" placeholder="Nomor STR (Dokter only)">
-                <input type="text" id="registerSpesialisasiId" placeholder="Spesialisasi ID (Dokter only)">
-                <input type="number" id="registerBiayaKonsultasi" placeholder="Biaya Konsultasi (Dokter only)">
-            </div>
-
-            <div id="farmasiFields" class="hidden">
-                <input type="text" id="registerNomorSipa" placeholder="Nomor SIPA (Farmasi only)">
-            </div>
-
+            <!-- Role-specific fields (simplified for testing) -->
+            <input type="text" id="registerNik" placeholder="NIK (Pasien only)">
+            <input type="text" id="registerTanggalLahir" placeholder="Tanggal Lahir YYYY-MM-DD (Pasien only)">
+            <select id="registerJenisKelamin">
+                <option value="">Jenis Kelamin (Pasien only)</option>
+                <option value="Laki-laki">Laki-laki</option>
+                <option value="Perempuan">Perempuan</option>
+            </select>
+            <input type="text" id="registerAlamat" placeholder="Alamat (Pasien only)">
+            <input type="text" id="registerNoTelepon" placeholder="No Telepon (Pasien only)">
+            <input type="text" id="registerNomorStr" placeholder="Nomor STR (Dokter only)">
+            <input type="text" id="registerSpesialisasiId" placeholder="Spesialisasi ID (Dokter only)">
+            <input type="number" id="registerBiayaKonsultasi" placeholder="Biaya Konsultasi (Dokter only)">
+            <input type="text" id="registerNomorSipa" placeholder="Nomor SIPA (Farmasi only)">
             <button type="submit">Register</button>
         </form>
         <div id="registerResponse" class="response"></div>
@@ -71,29 +61,6 @@
 
     <script>
         const BASE_URL = 'http://localhost:8000/api'; // Sesuaikan dengan port backend Anda
-
-        const registerRoleSelect = document.getElementById('registerRole');
-        const pasienFields = document.getElementById('pasienFields');
-        const dokterFields = document.getElementById('dokterFields');
-        const farmasiFields = document.getElementById('farmasiFields');
-
-        function toggleRoleFields() {
-            const selectedRole = registerRoleSelect.value;
-            pasienFields.classList.add('hidden');
-            dokterFields.classList.add('hidden');
-            farmasiFields.classList.add('hidden');
-
-            if (selectedRole === 'pasien') {
-                pasienFields.classList.remove('hidden');
-            } else if (selectedRole === 'dokter') {
-                dokterFields.classList.remove('hidden');
-            } else if (selectedRole === 'farmasi') {
-                farmasiFields.classList.remove('hidden');
-            }
-        }
-
-        registerRoleSelect.addEventListener('change', toggleRoleFields);
-        toggleRoleFields(); // Initial call to set visibility based on default selected role
 
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();

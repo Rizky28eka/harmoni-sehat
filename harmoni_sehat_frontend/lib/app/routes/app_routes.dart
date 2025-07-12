@@ -1,15 +1,25 @@
-part of 'app_pages.dart';
+class AppRoutes {
+  static const splash = '/';
+  static const onboarding = '/onboarding';
+  static const login = '/login';
+  static const register = '/register';
+  
+  static const dashboard = '/dashboard'; // Generic dashboard
 
-abstract class Routes {
-  Routes._();
-  static const SPLASH = _Paths.SPLASH;
-  static const ONBOARDING = _Paths.ONBOARDING;
-  static const HOME = _Paths.HOME;
-}
+  // Role-specific dashboards
+  static const pasienDashboard = '/pasien/dashboard';
+  static const dokterDashboard = '/dokter/dashboard';
+  static const farmasiDashboard = '/farmasi/dashboard';
 
-abstract class _Paths {
-  _Paths._();
-  static const SPLASH = '/splash';
-  static const ONBOARDING = '/onboarding';
-  static const HOME = '/home';
+  // Role-specific registration
+  static const registerPasien = '/register/pasien';
+  static const registerDokter = '/register/dokter';
+  static const registerFarmasi = '/register/farmasi';
+
+  // Password reset
+  static const forgotPassword = '/forgot-password';
+  static const verifyResetToken = '/verify-reset-token';
+  static const resetPassword = '/reset-password';
+
+  
 }

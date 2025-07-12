@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db';
 import { PORT } from './config/env';
 import errorHandler from './middlewares/errorHandler';
+import cors from 'cors';
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ const app = express();
 connectDB();
 
 // Middleware
+app.use(cors()); // Add CORS middleware
 app.use(express.json());
 
 import roleRoutes from './api/role/role.routes';
@@ -44,8 +46,17 @@ import drugOrderRoutes from './api/drugOrder/drugOrder.routes';
 import drugOrderDetailRoutes from './api/drugOrderDetail/drugOrderDetail.routes';
 import prescriptionRoutes from './api/prescription/prescription.routes';
 import prescriptionDrugRoutes from './api/prescriptionDrug/prescriptionDrug.routes';
+import geminiRoutes from './api/gemini/gemini.routes';
 
 // Routes
+app.get('/', (req, res) => {
+  res.send('Welcome to Harmoni Sehat API!');
+});
+
+app.get('/api/v1', (req, res) => {
+    res.send('Welcome to Harmoni Sehat API v1!');
+});
+
 app.use('/api/v1/roles', roleRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/patients', patientRoutes);
@@ -76,10 +87,36 @@ app.use('/api/v1/drug-orders', drugOrderRoutes);
 app.use('/api/v1/drug-order-details', drugOrderDetailRoutes);
 app.use('/api/v1/prescriptions', prescriptionRoutes);
 app.use('/api/prescription-drugs', prescriptionDrugRoutes);
+app.use('/api/v1/gemini', geminiRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+import http from 'http';
+import { Server } from 'socket.io';
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Allow all origins for now, refine in production
+    methods: ["GET", "POST"]
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('a user connected');
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+
+  // Example: Listen for chat messages
+  socket.on('chat message', (msg) => {
+    console.log('message: ' + msg);
+    io.emit('chat message', msg); // Broadcast to all connected clients
+  });
+});
+
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

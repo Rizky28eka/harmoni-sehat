@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:harmoni_sehat_frontend/app/routes/app_pages.dart';
+import 'package:get_storage/get_storage.dart';
 
-void main() {
+import 'app/bindings/initial_binding.dart';
+import 'app/routes/app_pages.dart';
+import 'app/routes/app_routes.dart';
+import 'app/theme/app_theme.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
+
   runApp(const MyApp());
 }
 
@@ -14,13 +21,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Harmoni Sehat',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-        textTheme: GoogleFonts.montserratTextTheme(Theme.of(context).textTheme),
-      ),
-      initialRoute: AppPages.INITIAL,
-      getPages: AppPages.routes,
+      theme: AppTheme.lightTheme,
+      initialRoute: AppRoutes.splash,
+      getPages: AppPages.pages,
+      initialBinding: InitialBinding(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

@@ -3,13 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const DoctorReviewSchema = new mongoose_1.Schema({
     pasien_id: {
-        type: String,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Pasien',
         required: true,
         index: true, // Add index for efficient lookups
     },
     dokter_id: {
-        type: String,
+        type: mongoose_1.Schema.Types.ObjectId,
         ref: 'Dokter',
         required: true,
         index: true, // Add index for efficient lookups
@@ -30,6 +30,14 @@ const DoctorReviewSchema = new mongoose_1.Schema({
         type: String,
         trim: true,
     },
-}, { timestamps: true });
+    balasan: {
+        type: String,
+        trim: true,
+    },
+    sentimen: {
+        type: String,
+        enum: ['positive', 'negative', 'neutral'],
+    },
+});
 const DoctorReview = (0, mongoose_1.model)('DoctorReview', DoctorReviewSchema);
 exports.default = DoctorReview;

@@ -11,6 +11,8 @@ import { AppError } from '../../utils/AppError';
 import { JWT_SECRET, JWT_EXPIRES_IN } from '../../config/env';
 import crypto from 'crypto';
 
+import sendEmail from '../../utils/email';
+
 const signToken = (id: string) => {
   const jwtOptions: SignOptions = {
     expiresIn: JWT_EXPIRES_IN as any,
@@ -117,8 +119,24 @@ export const forgotPasswordService = async (email: string) => {
 
   await user.save({ validateBeforeSave: false });
 
-  // In a real application, you would send this token via email
-  console.log('Password Reset Token:', resetToken);
+  const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.
+If you didn't forget your password, please ignore this email!`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: 'Your password reset token (valid for 10 min)',
+      message,
+    });
+    console.log('Password Reset Token sent to email!');
+  } catch (err: any) {
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+    throw new AppError('There was an error sending the email. Try again later!', 500);
+  }
 };
 
 export const verifyResetTokenService = async (token: string) => {

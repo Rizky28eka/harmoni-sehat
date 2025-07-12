@@ -8,8 +8,10 @@
       "version": "1.0.0+1",
       "dependencies": [
         "cupertino_icons",
+        "dio",
         "flutter",
         "get",
+        "get_storage",
         "google_fonts"
       ],
       "devDependencies": [
@@ -50,6 +52,27 @@
         "test_api",
         "vector_math",
         "vm_service"
+      ]
+    },
+    {
+      "name": "dio",
+      "version": "5.8.0+1",
+      "dependencies": [
+        "async",
+        "collection",
+        "dio_web_adapter",
+        "http_parser",
+        "meta",
+        "path"
+      ]
+    },
+    {
+      "name": "get_storage",
+      "version": "2.1.1",
+      "dependencies": [
+        "flutter",
+        "get",
+        "path_provider"
       ]
     },
     {
@@ -251,9 +274,22 @@
       ]
     },
     {
-      "name": "crypto",
-      "version": "3.0.6",
+      "name": "dio_web_adapter",
+      "version": "2.1.1",
       "dependencies": [
+        "dio",
+        "http_parser",
+        "meta",
+        "web"
+      ]
+    },
+    {
+      "name": "http_parser",
+      "version": "4.1.2",
+      "dependencies": [
+        "collection",
+        "source_span",
+        "string_scanner",
         "typed_data"
       ]
     },
@@ -267,6 +303,13 @@
         "path_provider_linux",
         "path_provider_platform_interface",
         "path_provider_windows"
+      ]
+    },
+    {
+      "name": "crypto",
+      "version": "3.0.6",
+      "dependencies": [
+        "typed_data"
       ]
     },
     {
@@ -340,16 +383,6 @@
       "dependencies": [
         "flutter",
         "path_provider_platform_interface"
-      ]
-    },
-    {
-      "name": "http_parser",
-      "version": "4.1.2",
-      "dependencies": [
-        "collection",
-        "source_span",
-        "string_scanner",
-        "typed_data"
       ]
     },
     {
