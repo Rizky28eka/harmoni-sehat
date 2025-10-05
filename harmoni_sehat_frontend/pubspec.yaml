@@ -38,6 +38,7 @@ dependencies:
   google_fonts: ^6.2.1
   get_storage: ^2.1.1
   dio: ^5.8.0+1
+  flutter_svg: ^2.2.1
   
 
 dev_dependencies:

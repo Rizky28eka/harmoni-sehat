@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:harmoni_sehat_frontend/app/theme/app_colors.dart';
+import 'package:harmoni_sehat_frontend/shared/widgets/custom_primary_button.dart';
+import 'package:harmoni_sehat_frontend/shared/widgets/custom_text_form_field.dart';
 import '../controllers/pasien_register_controller.dart';
 
 class PasienRegisterView extends GetView<PasienRegisterController> {
@@ -8,100 +12,108 @@ class PasienRegisterView extends GetView<PasienRegisterController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Daftar Pasien'), centerTitle: true),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Lengkapi Data Pasien',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 32),
-              TextFormField(
-                controller: controller.nameController,
-                decoration: const InputDecoration(
+      backgroundColor: AppColors.lightBackground,
+      appBar: AppBar(
+        title: Text(
+          'Lengkapi Profil Pasien',
+          style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Satu langkah lagi untuk menyelesaikan akun Anda.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 16,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                CustomTextFormField(
+                  controller: controller.nameController,
                   labelText: 'Nama Lengkap',
-                  prefixIcon: Icon(Icons.person_outline),
+                  prefixIcon: Icons.person_outline,
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: controller.nikController,
-                decoration: const InputDecoration(
+                const SizedBox(height: 16),
+                CustomTextFormField(
+                  controller: controller.nikController,
                   labelText: 'NIK',
-                  prefixIcon: Icon(Icons.credit_card),
+                  prefixIcon: Icons.credit_card_outlined,
+                  keyboardType: TextInputType.number,
                 ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: controller.tanggalLahirController,
-                decoration: const InputDecoration(
+                const SizedBox(height: 16),
+                CustomTextFormField(
+                  controller: controller.tanggalLahirController,
                   labelText: 'Tanggal Lahir',
-                  prefixIcon: Icon(Icons.calendar_today),
+                  prefixIcon: Icons.calendar_today_outlined,
+                  readOnly: true,
+                  onTap: () => controller.selectDate(context),
                 ),
-                readOnly: true, // Make it read-only to use a date picker
-                onTap: () => controller.selectDate(context),
-              ),
-              const SizedBox(height: 16),
-              Obx(
-                () => DropdownButtonFormField<String>(
-                  value: controller.jenisKelamin.value,
-                  decoration: const InputDecoration(
-                    labelText: 'Jenis Kelamin',
-                    prefixIcon: Icon(Icons.person_outline),
+                const SizedBox(height: 16),
+                Obx(
+                  () => DropdownButtonFormField<String>(
+                    value: controller.jenisKelamin.value,
+                    decoration: InputDecoration(
+                      labelText: 'Jenis Kelamin',
+                      prefixIcon: const Icon(Icons.wc_outlined, color: AppColors.textSecondary),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.borderColor),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppColors.borderColor),
+                      ),
+                    ),
+                    items: <String>['Laki-laki', 'Perempuan']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        controller.jenisKelamin.value = newValue;
+                      }
+                    },
                   ),
-                  items: <String>['Laki-laki', 'Perempuan']
-                      .map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      controller.jenisKelamin.value = newValue;
-                    }
-                  },
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: controller.alamatController,
-                decoration: const InputDecoration(
+                const SizedBox(height: 16),
+                CustomTextFormField(
+                  controller: controller.alamatController,
                   labelText: 'Alamat',
-                  prefixIcon: Icon(Icons.location_on_outlined),
+                  prefixIcon: Icons.location_on_outlined,
+                  maxLines: 3,
                 ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: controller.noTeleponController,
-                decoration: const InputDecoration(
+                const SizedBox(height: 16),
+                CustomTextFormField(
+                  controller: controller.noTeleponController,
                   labelText: 'Nomor Telepon',
-                  prefixIcon: Icon(Icons.phone),
+                  prefixIcon: Icons.phone_outlined,
+                  keyboardType: TextInputType.phone,
                 ),
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 24),
-              Obx(
-                () => SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: controller.isLoading.value
-                        ? null
-                        : controller.registerPasien,
-                    child: controller.isLoading.value
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Daftar Sebagai Pasien', style: TextStyle(fontSize: 16)),
+                const SizedBox(height: 32),
+                Obx(
+                  () => CustomPrimaryButton(
+                    onPressed: controller.registerPasien,
+                    isLoading: controller.isLoading.value,
+                    child: const Text('Selesai & Simpan Profil'),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

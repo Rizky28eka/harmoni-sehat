@@ -11,7 +11,7 @@ class ApiProvider {
   // 'localhost' atau '127.0.0.1' tidak akan berfungsi di emulator Android.
   // Gunakan 'ipconfig' (Windows) atau 'ifconfig' (macOS/Linux) untuk menemukan IP Anda.
   static const String _baseUrl =
-    'http://localhost:8000/api'; // Sesuaikan dengan IP backend Anda
+    'http://10.0.2.2:8000/api'; // Sesuaikan dengan IP backend Anda
 
   ApiProvider() : _dio = dio.Dio(dio.BaseOptions(baseUrl: _baseUrl)) {
     _dio.interceptors.add(

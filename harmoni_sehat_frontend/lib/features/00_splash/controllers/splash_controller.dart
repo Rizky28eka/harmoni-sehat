@@ -10,27 +10,20 @@ class SplashController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    print('SplashController: onReady called');
     _navigateToNextScreen();
   }
 
   Future<void> _navigateToNextScreen() async {
-    print('SplashController: _navigateToNextScreen called');
     await Future.delayed(const Duration(seconds: 2));
-    print('SplashController: Delay finished');
 
     final bool hasSeenOnboarding = storage.read('hasSeenOnboarding') ?? false;
-    print('SplashController: hasSeenOnboarding = $hasSeenOnboarding');
 
     if (!hasSeenOnboarding) {
-      print('SplashController: Navigating to onboarding');
       Get.offAllNamed(AppRoutes.onboarding);
     } else {
       final bool tokenValid = await _storageService.validateToken();
-      print('SplashController: tokenValid = $tokenValid');
       if (tokenValid) {
         final userRole = _storageService.getUserRole();
-        print('SplashController: userRole = $userRole');
         if (userRole == 'pasien') {
           Get.offAllNamed(AppRoutes.pasienDashboard);
         } else if (userRole == 'dokter') {
@@ -39,11 +32,9 @@ class SplashController extends GetxController {
           Get.offAllNamed(AppRoutes.farmasiDashboard);
         } else {
           // Default or error case if role is not recognized
-          print('SplashController: Unknown role, navigating to login');
           Get.offAllNamed(AppRoutes.login);
         }
       } else {
-        print('SplashController: Navigating to login');
         Get.offAllNamed(AppRoutes.login);
       }
     }

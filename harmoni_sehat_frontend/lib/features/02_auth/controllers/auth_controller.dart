@@ -17,19 +17,6 @@ class AuthController extends GetxController {
   final tokenController = TextEditingController(); // For password reset token
   final newPasswordController = TextEditingController(); // For new password
 
-  // Role-specific controllers
-  final nikController = TextEditingController();
-  final tanggalLahirController = TextEditingController();
-  final jenisKelaminController = TextEditingController();
-  final alamatController = TextEditingController();
-  final noTeleponController = TextEditingController();
-  final nomorStrController = TextEditingController();
-  final spesialisasiIdController = TextEditingController();
-  final biayaKonsultasiController = TextEditingController();
-  final fotoController = TextEditingController();
-  final bioController = TextEditingController();
-  final nomorSipaController = TextEditingController();
-
   final selectedRole = 'pasien'.obs; // Default selected role for login
   final selectedRegisterRole =
       'pasien'.obs; // Default selected role for registration
@@ -46,17 +33,6 @@ class AuthController extends GetxController {
     nameController.dispose();
     tokenController.dispose();
     newPasswordController.dispose();
-    nikController.dispose();
-    tanggalLahirController.dispose();
-    jenisKelaminController.dispose();
-    alamatController.dispose();
-    noTeleponController.dispose();
-    nomorStrController.dispose();
-    spesialisasiIdController.dispose();
-    biayaKonsultasiController.dispose();
-    fotoController.dispose();
-    bioController.dispose();
-    nomorSipaController.dispose();
     super.onClose();
   }
 
@@ -113,68 +89,48 @@ class AuthController extends GetxController {
   }
 
   Future<void> register() async {
-    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-      Get.snackbar(
-        'Gagal',
-        'Email dan password tidak boleh kosong.',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+    if (nameController.text.isEmpty ||
+        emailController.text.isEmpty ||
+        passwordController.text.isEmpty) {
+      Get.snackbar('Gagal', 'Nama, Email, dan Password harus diisi.',
+          backgroundColor: Colors.red, colorText: Colors.white);
       return;
     }
 
     try {
       isLoading.value = true;
       final response = await _authRepository.register(
-        nameController.text, // Use name from controller
+        nameController.text,
         emailController.text,
         passwordController.text,
-        selectedRegisterRole.value, // Pass the selected role
+        selectedRegisterRole.value,
       );
+
+      // Save user ID and role for the next step (profile completion)
       await _storageService.saveUserId(response.user.id);
       await _storageService.saveUserRole(response.user.role);
+
       isLoading.value = false;
       Get.snackbar(
-        'Sukses',
-        'Registrasi dasar berhasil! Silakan lengkapi data Anda.',
+        'Registrasi Awal Berhasil',
+        'Silakan lengkapi data profil Anda.',
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
 
-      // Navigate to role-specific registration form
-      if (selectedRegisterRole.value == 'pasien') {
-        final pasien = Pasien(
-          id: response.user.id,
-          nama: nameController.text,
-          nik: nikController.text,
-          tanggalLahir: DateTime.parse(tanggalLahirController.text),
-          jenisKelamin: jenisKelaminController.text,
-          alamat: alamatController.text,
-          noTelepon: noTeleponController.text,
-        );
-        await registerPasien(pasien);
-      } else if (selectedRegisterRole.value == 'dokter') {
-        final dokter = Dokter(
-          id: response.user.id,
-          nama: nameController.text,
-          nomorStr: nomorStrController.text,
-          spesialisasiId: spesialisasiIdController.text.isNotEmpty
-              ? spesialisasiIdController.text
-              : null,
-          biayaKonsultasi: double.parse(biayaKonsultasiController.text),
-          foto: fotoController.text.isNotEmpty ? fotoController.text : null,
-          bio: bioController.text.isNotEmpty ? bioController.text : null,
-        );
-        await registerDokter(dokter);
-      } else if (selectedRegisterRole.value == 'farmasi') {
-        final pharmacist = Pharmacist(
-          id: response.user.id,
-          nama: nameController.text,
-          nomorSipa: nomorSipaController.text,
-        );
-        await registerFarmasi(pharmacist);
-      } else {
-        Get.offAllNamed(AppRoutes.login); // Fallback
+      // Navigate to the specific profile completion page
+      switch (selectedRegisterRole.value) {
+        case 'pasien':
+          Get.offNamed(AppRoutes.registerPasien);
+          break;
+        case 'dokter':
+          Get.offNamed(AppRoutes.registerDokter);
+          break;
+        case 'farmasi':
+          Get.offNamed(AppRoutes.registerFarmasi);
+          break;
+        default:
+          Get.offAllNamed(AppRoutes.login); // Fallback
       }
     } catch (e) {
       isLoading.value = false;

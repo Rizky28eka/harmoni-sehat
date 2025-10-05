@@ -12,7 +12,8 @@ import '../../features/02_auth/views/verify_token_view.dart';
 import '../../features/02_auth/views/reset_password_view.dart';
 import '../../features/03_dashboard/bindings/dashboard_binding.dart';
 import '../../features/03_dashboard/views/dashboard_view.dart';
-import '../../features/03_dashboard/views/pasien_dashboard_view.dart';
+import '../../features/03_dashboard/bindings/pasien_main_binding.dart';
+import '../../features/03_dashboard/views/pasien_main_view.dart';
 import '../../features/04_doctor/views/dokter_dashboard_view.dart';
 import '../../features/05_pharmac/views/farmasi_dashboard_view.dart';
 import '../../features/02_auth/views/pasien_register_view.dart';
@@ -52,8 +53,8 @@ class AppPages {
     ),
     GetPage(
       name: AppRoutes.pasienDashboard,
-      page: () => const PasienDashboardView(),
-      binding: DashboardBinding(),
+      page: () => const PasienMainView(),
+      binding: PasienMainBinding(),
     ),
     GetPage(
       name: AppRoutes.dokterDashboard,
