@@ -100,7 +100,7 @@ class DoctorListView extends StatelessWidget {
             controller: c.search,
             onChanged: c.onSearch,
             decoration: InputDecoration(
-              hintText: 'Cari nama dokter',
+              hintText: 'Cari nama dokter'.tr,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: PopupMenuButton<String>(
                 icon: const Icon(Icons.sort),
@@ -108,11 +108,11 @@ class DoctorListView extends StatelessWidget {
                   c.sort.value = v;
                   c.load();
                 },
-                itemBuilder: (_) => const [
-                  PopupMenuItem(value: 'rating', child: Text('Rating tertinggi')),
-                  PopupMenuItem(value: 'fee_asc', child: Text('Biaya terendah')),
-                  PopupMenuItem(value: 'fee_desc', child: Text('Biaya tertinggi')),
-                  PopupMenuItem(value: 'name', child: Text('Nama A–Z')),
+                itemBuilder: (_) => [
+                  PopupMenuItem(value: 'rating', child: Text('Rating tertinggi'.tr)),
+                  PopupMenuItem(value: 'fee_asc', child: Text('Biaya terendah'.tr)),
+                  PopupMenuItem(value: 'fee_desc', child: Text('Biaya tertinggi'.tr)),
+                  PopupMenuItem(value: 'name', child: Text('Nama A–Z'.tr)),
                 ],
               ),
             ),
@@ -121,7 +121,7 @@ class DoctorListView extends StatelessWidget {
         SizedBox(
           height: 52,
           child: Obx(() => ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), children: [
-                Padding(padding: const EdgeInsets.only(right: 8), child: ChoiceChip(label: const Text('Semua'), selected: c.selectedSpec.value == null, onSelected: (_) { c.selectedSpec.value = null; c.load(); })),
+                Padding(padding: const EdgeInsets.only(right: 8), child: ChoiceChip(label: Text('Semua'.tr), selected: c.selectedSpec.value == null, onSelected: (_) { c.selectedSpec.value = null; c.load(); })),
                 for (final s in c.specs)
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
@@ -130,14 +130,14 @@ class DoctorListView extends StatelessWidget {
               ])),
         ),
         Expanded(
-          child: Obx(() => AsyncBody(
+          child: Obx(() => asyncBody(
                 loading: c.loading.value,
                 error: c.error.value,
                 isEmpty: c.doctors.isEmpty,
                 emptyText: 'Dokter tidak ditemukan',
                 emptyIcon: Icons.person_search_outlined,
                 onRetry: c.load,
-                child: RefreshIndicator(
+                builder: () => RefreshIndicator(
                   onRefresh: c.load,
                   child: ListView.builder(
                     controller: c.scroll,
@@ -178,7 +178,7 @@ class DoctorCard extends StatelessWidget {
                 const SizedBox(height: 6),
                 Row(children: [
                   const Icon(Icons.star, color: Colors.amber, size: 16),
-                  Text(' ${rating == 0 ? 'Baru' : rating.toStringAsFixed(1)}${(d['jumlah_ulasan'] ?? 0) > 0 ? ' (${d['jumlah_ulasan']})' : ''}'),
+                  Text(' ${rating == 0 ? 'Baru'.tr : rating.toStringAsFixed(1)}${(d['jumlah_ulasan'] ?? 0) > 0 ? ' (${d['jumlah_ulasan']})' : ''}'),
                   const Spacer(),
                   Text(rupiah(d['biaya_konsultasi'] as num?), style: const TextStyle(fontWeight: FontWeight.bold)),
                 ]),
@@ -272,13 +272,13 @@ class DoctorDetailView extends StatelessWidget {
     final id = Get.arguments as String;
     final c = Get.put(DoctorDetailController(id), tag: id);
     return Scaffold(
-      appBar: AppBar(title: const Text('Detail Dokter')),
-      body: Obx(() => AsyncBody(
+      appBar: AppBar(title: Text('Detail Dokter'.tr)),
+      body: Obx(() => asyncBody(
             loading: c.loading.value,
             error: c.error.value,
             isEmpty: c.data.value == null,
             onRetry: c.load,
-            child: _content(context, c),
+            builder: () => _content(context, c),
           )),
     );
   }
@@ -299,26 +299,28 @@ class DoctorDetailView extends StatelessWidget {
             const SizedBox(height: 6),
             Row(children: [
               const Icon(Icons.star, color: Colors.amber, size: 18),
-              Text(' ${d.n('rating') == 0 ? 'Baru' : d.n('rating').toStringAsFixed(1)} • ${d.n('jumlah_ulasan').toInt()} ulasan'),
+              Text(' ${d.n('rating') == 0 ? 'Baru'.tr : d.n('rating').toStringAsFixed(1)} • ${d.n('jumlah_ulasan').toInt()} ${'ulasan'.tr}'),
             ]),
           ]),
         ),
       ]),
       if (d.s('bio').isNotEmpty) ...[const SizedBox(height: 16), Text(d.s('bio'))],
       const SizedBox(height: 8),
-      ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.payments_outlined), title: const Text('Biaya konsultasi'), trailing: Text(rupiah(d.n('biaya_konsultasi')), style: const TextStyle(fontWeight: FontWeight.bold))),
+      ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.payments_outlined), title: Text('Biaya konsultasi'.tr), trailing: Text(rupiah(d.n('biaya_konsultasi')), style: const TextStyle(fontWeight: FontWeight.bold))),
       const Divider(),
-      Text('Pilih tanggal', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+      Text('Pilih tanggal'.tr, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
       const SizedBox(height: 8),
       SizedBox(
         height: 72,
-        child: Obx(() => ListView.separated(
+        child: Obx(() {
+          final selectedDay = c.selectedDate.value; // read here: item builders run outside this Obx's scope
+          return ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: days.length,
               separatorBuilder: (_, __) => const SizedBox(width: 8),
               itemBuilder: (_, i) {
                 final day = days[i];
-                final sel = DateUtils.isSameDay(day, c.selectedDate.value);
+                final sel = DateUtils.isSameDay(day, selectedDay);
                 return GestureDetector(
                   onTap: () => c.pickDate(day),
                   child: Container(
@@ -331,14 +333,15 @@ class DoctorDetailView extends StatelessWidget {
                   ),
                 );
               },
-            )),
+            );
+        }),
       ),
       const SizedBox(height: 16),
-      Text('Pilih jam (WIB)', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+      Text('Pilih jam (WIB)'.tr, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
       const SizedBox(height: 8),
       Obx(() {
         if (c.slotsLoading.value) return const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()));
-        if (c.slots.isEmpty) return const Padding(padding: EdgeInsets.all(12), child: Text('Tidak ada jadwal praktik pada tanggal ini.', style: TextStyle(color: Colors.grey)));
+        if (c.slots.isEmpty) return Padding(padding: EdgeInsets.all(12), child: Text('Tidak ada jadwal praktik pada tanggal ini.'.tr, style: TextStyle(color: Colors.grey)));
         return Wrap(spacing: 8, runSpacing: 8, children: [
           for (final s in c.slots)
             ChoiceChip(
@@ -349,22 +352,22 @@ class DoctorDetailView extends StatelessWidget {
         ]);
       }),
       const SizedBox(height: 16),
-      TextField(controller: c.complaint, maxLines: 3, decoration: const InputDecoration(labelText: 'Keluhan Anda', alignLabelWithHint: true)),
+      TextField(controller: c.complaint, maxLines: 3, decoration: InputDecoration(labelText: 'Keluhan Anda'.tr, alignLabelWithHint: true)),
       const SizedBox(height: 16),
       Obx(() => FilledButton.icon(
             onPressed: c.booking.value ? null : c.book,
             icon: c.booking.value ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.event_available),
-            label: Text(d.n('biaya_konsultasi') > 0 ? 'Pesan & Bayar ${rupiah(d.n('biaya_konsultasi'))}' : 'Pesan Konsultasi'),
+            label: Text(d.n('biaya_konsultasi') > 0 ? '${'Pesan & Bayar'.tr} ${rupiah(d.n('biaya_konsultasi'))}' : 'Pesan Konsultasi'.tr),
             style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
           )),
       if (reviews.isNotEmpty) ...[
         const SizedBox(height: 24),
-        Text('Ulasan pasien', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+        Text('Ulasan pasien'.tr, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
         for (final r in reviews)
           ListTile(
             contentPadding: EdgeInsets.zero,
             title: Row(children: [for (var i = 0; i < 5; i++) Icon(i < (r['rating'] as num) ? Icons.star : Icons.star_border, color: Colors.amber, size: 16)]),
-            subtitle: Text('${r['komentar'] ?? ''}${r['balasan'] != null ? '\n↳ Dokter: ${r['balasan']}' : ''}'),
+            subtitle: Text('${r['komentar'] ?? ''}${r['balasan'] != null ? '\n↳ ${'Dokter'.tr}: ${r['balasan']}' : ''}'),
           ),
       ],
     ]);

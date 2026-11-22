@@ -71,7 +71,7 @@ class AiChatView extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
             child: Row(children: [
-              Expanded(child: TextField(controller: c.input, minLines: 1, maxLines: 4, maxLength: 1000, buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null, textCapitalization: TextCapitalization.sentences, onSubmitted: (_) => c.send(), decoration: InputDecoration(hintText: 'Tulis gejala Anda…', filled: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none)))),
+              Expanded(child: TextField(controller: c.input, minLines: 1, maxLines: 4, maxLength: 1000, buildCounter: (_, {required currentLength, required isFocused, maxLength}) => null, textCapitalization: TextCapitalization.sentences, onSubmitted: (_) => c.send(), decoration: InputDecoration(hintText: 'Tulis gejala Anda…'.tr, filled: true, border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none)))),
               const SizedBox(width: 8),
               Obx(() => IconButton.filled(onPressed: c.sending.value ? null : c.send, icon: const Icon(Icons.send))),
             ]),
@@ -99,12 +99,12 @@ class AiChatView extends StatelessWidget {
           border: emergency ? Border.all(color: Colors.red) : null,
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          if (emergency) const Row(children: [Icon(Icons.emergency, color: Colors.red), SizedBox(width: 6), Text('Kemungkinan darurat', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold))]),
+          if (emergency) Row(children: [Icon(Icons.emergency, color: Colors.red), SizedBox(width: 6), Text('Kemungkinan darurat'.tr, style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold))]),
           Text(t['content'].toString(), style: TextStyle(color: mine ? Colors.white : null)),
-          if (!mine && meta['urgency'] == 'high' && !emergency) const Padding(padding: EdgeInsets.only(top: 6), child: Text('⚠ Disarankan segera ke dokter/IGD.', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600))),
+          if (!mine && meta['urgency'] == 'high' && !emergency) Padding(padding: EdgeInsets.only(top: 6), child: Text('⚠ Disarankan segera ke dokter/IGD.'.tr, style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600))),
           if (doctors.isNotEmpty) ...[
             const SizedBox(height: 8),
-            Text('Dokter ${meta.s('specialization')} yang tersedia:', style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text('${'Dokter'.tr} ${meta.s('specialization')} ${'yang tersedia:'.tr}', style: const TextStyle(fontWeight: FontWeight.w600)),
             for (final d in doctors) SizedBox(width: 260, child: DoctorCard(d: d)),
           ],
           if (!mine && meta['disclaimer'] != null) Padding(padding: const EdgeInsets.only(top: 6), child: Text(meta.s('disclaimer'), style: const TextStyle(fontSize: 10, color: Colors.grey))),
@@ -128,14 +128,14 @@ class ArticlesView extends StatelessWidget {
     final c = Get.isRegistered<ArticlesController>() ? Get.find<ArticlesController>() : Get.put(ArticlesController());
     return Scaffold(
       appBar: AppBar(title: Text('Artikel kesehatan'.tr)),
-      body: Obx(() => AsyncBody(
+      body: Obx(() => asyncBody(
             loading: c.loading.value,
             error: c.error.value,
             isEmpty: (c.data.value ?? []).isEmpty,
             emptyText: 'Belum ada artikel',
             emptyIcon: Icons.article_outlined,
             onRetry: c.load,
-            child: RefreshIndicator(
+            builder: () => RefreshIndicator(
               onRefresh: c.load,
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
@@ -175,13 +175,13 @@ class ArticleDetailView extends StatelessWidget {
     final slug = Get.arguments as String;
     final c = Get.put(ArticleDetailController(slug), tag: slug);
     return Scaffold(
-      appBar: AppBar(title: const Text('Artikel')),
-      body: Obx(() => AsyncBody(
+      appBar: AppBar(title: Text('Artikel'.tr)),
+      body: Obx(() => asyncBody(
             loading: c.loading.value,
             error: c.error.value,
             isEmpty: c.data.value == null,
             onRetry: c.load,
-            child: ListView(padding: const EdgeInsets.all(20), children: [
+            builder: () => ListView(padding: const EdgeInsets.all(20), children: [
               Text(c.data.value!.s('judul'), style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 4),
               Text(fmtDate(c.data.value!['createdAt']), style: const TextStyle(color: Colors.grey)),

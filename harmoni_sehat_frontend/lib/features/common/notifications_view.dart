@@ -57,15 +57,15 @@ class NotificationsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Get.put(NotificationsController());
     return Scaffold(
-      appBar: AppBar(title: Text('Notifikasi'.tr), actions: [IconButton(tooltip: 'Tandai semua dibaca', icon: const Icon(Icons.done_all), onPressed: c.readAll)]),
-      body: Obx(() => AsyncBody(
+      appBar: AppBar(title: Text('Notifikasi'.tr), actions: [IconButton(tooltip: 'Tandai semua dibaca'.tr, icon: const Icon(Icons.done_all), onPressed: c.readAll)]),
+      body: Obx(() => asyncBody(
             loading: c.loading.value,
             error: c.error.value,
             isEmpty: (c.data.value ?? []).isEmpty,
             emptyText: 'Belum ada notifikasi',
             emptyIcon: Icons.notifications_none,
             onRetry: c.load,
-            child: RefreshIndicator(
+            builder: () => RefreshIndicator(
               onRefresh: c.load,
               child: ListView.separated(
                 itemCount: c.data.value!.length,
@@ -114,6 +114,6 @@ Future<void> primeUnreadCount() async {
 String greeting() {
   final h = DateTime.now().hour;
   final name = Get.find<SessionService>().displayName;
-  final part = h < 11 ? 'Selamat pagi' : h < 15 ? 'Selamat siang' : h < 19 ? 'Selamat sore' : 'Selamat malam';
+  final part = (h < 11 ? 'Selamat pagi' : h < 15 ? 'Selamat siang' : h < 19 ? 'Selamat sore' : 'Selamat malam').tr;
   return '$part, ${name.split(' ').first}';
 }

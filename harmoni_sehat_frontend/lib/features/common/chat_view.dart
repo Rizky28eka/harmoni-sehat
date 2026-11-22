@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../../app/routes/app_routes.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../core/api_client.dart';
@@ -137,15 +137,13 @@ class ChatView extends StatelessWidget {
       appBar: AppBar(
         title: Obx(() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(c.title, style: const TextStyle(fontSize: 16)),
-              if (c.peerTyping.value) const Text('sedang mengetik…', style: TextStyle(fontSize: 11)),
+              if (c.peerTyping.value) Text('sedang mengetik…'.tr, style: TextStyle(fontSize: 11)),
             ])),
         actions: [
-          if (args['video'] != null)
-            IconButton(
-              tooltip: 'Video call',
-              icon: const Icon(Icons.videocam_outlined),
-              onPressed: () => launchUrl(Uri.parse(args['video'] as String), mode: LaunchMode.externalApplication),
-            ),
+          if (args['canCall'] == true) ...[
+            IconButton(tooltip: 'Panggilan suara'.tr, icon: const Icon(Icons.call_outlined), onPressed: () => Get.toNamed(AppRoutes.call, arguments: {'id': args['id'], 'video': false})),
+            IconButton(tooltip: 'Video call'.tr, icon: const Icon(Icons.videocam_outlined), onPressed: () => Get.toNamed(AppRoutes.call, arguments: {'id': args['id'], 'video': true})),
+          ],
         ],
       ),
       body: Obx(() {
@@ -154,7 +152,7 @@ class ChatView extends StatelessWidget {
         return Column(children: [
           Expanded(
             child: c.messages.isEmpty
-                ? const Center(child: Text('Mulai percakapan dengan menyapa 👋'))
+                ? Center(child: Text('Mulai percakapan dengan menyapa 👋'.tr))
                 : ListView.builder(
                     controller: c.scroll,
                     padding: const EdgeInsets.all(12),
@@ -174,7 +172,7 @@ class ChatView extends StatelessWidget {
                     maxLines: 4,
                     textCapitalization: TextCapitalization.sentences,
                     onChanged: c.onChanged,
-                    decoration: InputDecoration(hintText: 'Tulis pesan…', filled: true, contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none)),
+                    decoration: InputDecoration(hintText: 'Tulis pesan…'.tr, filled: true, contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none)),
                   ),
                 ),
                 const SizedBox(width: 6),

@@ -3,56 +3,61 @@ import 'package:get/get.dart';
 
 import '../app/theme/app_colors.dart';
 import 'api_client.dart';
+import 'translations.dart';
 
 void showSuccess(String msg) => _snack('Berhasil', msg, AppColors.primaryColor);
 void showError(Object e) => _snack('Gagal', e is ApiException ? e.message : e.toString(), AppColors.errorColor);
 void showInfo(String msg) => _snack('Info', msg, Colors.blueGrey);
 
-void _snack(String title, String msg, Color color) {
+/// Seam for tests: they replace this to capture messages instead of mounting real snackbars.
+void Function(String title, String message, Color color) snackPresenter = _showSnackbar;
+
+void _snack(String title, String msg, Color color) => snackPresenter(title.tr, localizeMessage(msg), color);
+
+void _showSnackbar(String title, String msg, Color color) {
   if (Get.isSnackbarOpen) Get.closeCurrentSnackbar();
   Get.snackbar(title, msg,
       backgroundColor: color, colorText: Colors.white, margin: const EdgeInsets.all(12), duration: const Duration(seconds: 3), snackPosition: SnackPosition.BOTTOM);
 }
 
 /// Loading / error / empty / content switcher used by list screens.
-class AsyncBody extends StatelessWidget {
-  const AsyncBody({super.key, required this.loading, this.error, required this.isEmpty, required this.onRetry, required this.child, this.emptyText = 'Belum ada data', this.emptyIcon = Icons.inbox_outlined});
-  final bool loading;
-  final String? error;
-  final bool isEmpty;
-  final VoidCallback onRetry;
-  final Widget child;
-  final String emptyText;
-  final IconData emptyIcon;
-
-  @override
-  Widget build(BuildContext context) {
-    if (loading) return const Center(child: CircularProgressIndicator());
-    if (error != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(Icons.cloud_off_outlined, size: 48, color: AppColors.textSecondary),
-            const SizedBox(height: 12),
-            Text(error!, textAlign: TextAlign.center),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: const Text('Coba lagi')),
-          ]),
-        ),
-      );
-    }
-    if (isEmpty) {
-      return Center(
+///
+/// A function (not a widget) on purpose: [builder] runs synchronously inside the caller's `Obx`,
+/// so Rx reads in it stay reactive, yet it is only invoked once data exists, so `data.value!` is safe.
+Widget asyncBody({
+  required bool loading,
+  String? error,
+  required bool isEmpty,
+  required VoidCallback onRetry,
+  required Widget Function() builder,
+  String emptyText = 'Belum ada data',
+  IconData emptyIcon = Icons.inbox_outlined,
+}) {
+  if (loading) return const Center(child: CircularProgressIndicator());
+  if (error != null) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(emptyIcon, size: 56, color: AppColors.textSecondary.withValues(alpha: 0.6)),
-          const SizedBox(height: 8),
-          Text(emptyText, style: const TextStyle(color: AppColors.textSecondary)),
+          const Icon(Icons.cloud_off_outlined, size: 48, color: AppColors.textSecondary),
+          const SizedBox(height: 12),
+          Text(localizeMessage(error), textAlign: TextAlign.center),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: Text('Coba lagi'.tr)),
         ]),
-      );
-    }
-    return child;
+      ),
+    );
   }
+  if (isEmpty) {
+    return Center(
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        Icon(emptyIcon, size: 56, color: AppColors.textSecondary.withValues(alpha: 0.6)),
+        const SizedBox(height: 8),
+        Text(emptyText.tr, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
+      ]),
+    );
+  }
+  return builder();
 }
 
 /// Base controller for screens that load one thing from the API.
@@ -106,7 +111,7 @@ class StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
-      child: Text(label, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
+      child: Text(label.tr, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
     );
   }
 }
@@ -139,19 +144,19 @@ class SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
         child: Row(children: [
-          Expanded(child: Text(text, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
-          if (action != null) TextButton(onPressed: onAction, child: Text(action!)),
+          Expanded(child: Text(text.tr, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
+          if (action != null) TextButton(onPressed: onAction, child: Text(action!.tr)),
         ]),
       );
 }
 
 Future<bool> confirm(String title, String message, {String ok = 'Ya'}) async {
   final res = await Get.dialog<bool>(AlertDialog(
-    title: Text(title),
-    content: Text(message),
+    title: Text(title.tr),
+    content: Text(message.tr),
     actions: [
-      TextButton(onPressed: () => Get.back(result: false), child: const Text('Batal')),
-      FilledButton(onPressed: () => Get.back(result: true), child: Text(ok)),
+      TextButton(onPressed: () => Get.back(result: false), child: Text('Batal'.tr)),
+      FilledButton(onPressed: () => Get.back(result: true), child: Text(ok.tr)),
     ],
   ));
   return res ?? false;

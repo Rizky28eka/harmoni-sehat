@@ -36,7 +36,7 @@ void main() {
 
   setUp(() async {
     await initStorage();
-    session = SessionService(box: GetStorage());
+    session = SessionService(box: MemoryStore());
     await session.init();
     await session.setSession(access: 'old-access', refresh: 'old-refresh', appUser: const AppUser(id: '1', email: 'a@b.c', role: 'pasien'));
     dio = Dio(BaseOptions(baseUrl: 'http://test'));

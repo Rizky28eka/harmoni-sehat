@@ -28,7 +28,9 @@ class SettingsController extends GetxController {
 
   void setLanguage(String code) {
     locale.value = code == 'en' ? const Locale('en', 'US') : const Locale('id', 'ID');
-    Get.updateLocale(locale.value);
+    // Reassembling mid-gesture can collide with the frame in progress; do it right after it.
+    WidgetsBinding.instance.addPostFrameCallback((_) => Get.updateLocale(locale.value));
+    WidgetsBinding.instance.scheduleFrame();
     _box.write('lang', code);
   }
 }

@@ -9,6 +9,7 @@ import '../../features/admin/admin_shell.dart';
 import '../../features/auth/auth_controller.dart';
 import '../../features/auth/auth_repository.dart';
 import '../../features/auth/auth_views.dart';
+import '../../features/common/call_view.dart';
 import '../../features/common/chat_view.dart';
 import '../../features/common/notifications_view.dart';
 import '../../features/doctor/doctor_shell.dart';
@@ -48,6 +49,7 @@ class AppPages {
     GetPage(name: AppRoutes.doctorDetail, page: () => const DoctorDetailView()),
     GetPage(name: AppRoutes.consultation, page: () => const ConsultationDetailView()),
     GetPage(name: AppRoutes.chat, page: () => const ChatView()),
+    GetPage(name: AppRoutes.call, page: () => const CallView(), fullscreenDialog: true),
     GetPage(name: AppRoutes.payment, page: () => const PaymentView()),
     GetPage(name: AppRoutes.shop, page: () => const ShopView()),
     GetPage(name: AppRoutes.cart, page: () => const CartView()),

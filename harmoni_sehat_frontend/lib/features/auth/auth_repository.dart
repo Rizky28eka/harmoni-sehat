@@ -1,4 +1,7 @@
+import 'package:get/get.dart';
+
 import '../../core/api_client.dart';
+import '../../core/reminder_scheduler.dart';
 import '../../core/format.dart';
 import '../../core/session.dart';
 import '../../core/socket_service.dart';
@@ -34,6 +37,7 @@ class AuthRepository {
       await _api.post('/auth/logout', data: {'refreshToken': _session.refreshToken});
     } catch (_) {/* best effort */}
     _socket.disconnect();
+    if (Get.isRegistered<ReminderScheduler>()) await Get.find<ReminderScheduler>().clear();
     await _session.clear();
   }
 

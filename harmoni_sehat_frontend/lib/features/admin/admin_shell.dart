@@ -81,12 +81,12 @@ class _Stats extends StatelessWidget {
   final AdminController c;
 
   @override
-  Widget build(BuildContext context) => Obx(() => AsyncBody(
+  Widget build(BuildContext context) => Obx(() => asyncBody(
         loading: c.loading.value,
         error: c.error.value,
         isEmpty: c.stats.value == null,
         onRetry: c.load,
-        child: RefreshIndicator(
+        builder: () => RefreshIndicator(
           onRefresh: c.load,
           child: ListView(padding: const EdgeInsets.all(16), children: [
             Wrap(spacing: 12, runSpacing: 12, children: [
@@ -109,7 +109,7 @@ class _Stats extends StatelessWidget {
       );
 
   Widget _breakdown(Map<String, dynamic> m) => m.isEmpty
-      ? const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Belum ada data', style: TextStyle(color: Colors.grey)))
+      ? Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Belum ada data'.tr, style: TextStyle(color: Colors.grey)))
       : Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Wrap(spacing: 8, runSpacing: 8, children: [for (final e in m.entries) Chip(avatar: StatusChip(e.key), label: Text('${e.value}'))]));
 }
 
@@ -123,14 +123,14 @@ class _Verifications extends StatelessWidget {
           for (final d in c.doctors) ('dokter', d, 'STR ${d.s('nomor_str')}'),
           for (final a in c.pharmacists) ('farmasi', a, 'SIPA ${a.s('nomor_sipa')}'),
         ];
-        return AsyncBody(
+        return asyncBody(
           loading: c.loading.value,
           error: c.error.value,
           isEmpty: items.isEmpty,
           emptyText: 'Tidak ada permintaan verifikasi',
           emptyIcon: Icons.verified_outlined,
           onRetry: c.load,
-          child: RefreshIndicator(
+          builder: () => RefreshIndicator(
             onRefresh: c.load,
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -141,12 +141,12 @@ class _Verifications extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(14),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Row(children: [Avatar(name: p.s('nama')), const SizedBox(width: 12), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(p.s('nama'), style: const TextStyle(fontWeight: FontWeight.bold)), Text(kind == 'dokter' ? 'Dokter • $license' : 'Apoteker • $license'), Text(asMap(p['user_id']).s('email'), style: const TextStyle(color: Colors.grey, fontSize: 12))]))]),
+                      Row(children: [Avatar(name: p.s('nama')), const SizedBox(width: 12), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(p.s('nama'), style: const TextStyle(fontWeight: FontWeight.bold)), Text(kind == 'dokter' ? '${'Dokter'.tr} • $license' : '${'Apoteker'.tr} • $license'), Text(asMap(p['user_id']).s('email'), style: const TextStyle(color: Colors.grey, fontSize: 12))]))]),
                       const SizedBox(height: 8),
                       Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                        TextButton(onPressed: () => c.verify(kind, p['_id'].toString(), false), child: const Text('Tolak', style: TextStyle(color: Colors.red))),
+                        TextButton(onPressed: () => c.verify(kind, p['_id'].toString(), false), child: Text('Tolak'.tr, style: TextStyle(color: Colors.red))),
                         const SizedBox(width: 8),
-                        FilledButton(onPressed: () => c.verify(kind, p['_id'].toString(), true), child: const Text('Setujui')),
+                        FilledButton(onPressed: () => c.verify(kind, p['_id'].toString(), true), child: Text('Setujui'.tr)),
                       ]),
                     ]),
                   ),

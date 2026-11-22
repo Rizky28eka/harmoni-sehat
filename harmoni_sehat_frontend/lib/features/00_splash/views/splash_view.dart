@@ -21,7 +21,7 @@ class SplashView extends GetView<SplashController> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Harmoni Sehat',
+              'Harmoni Sehat'.tr,
               style: GoogleFonts.lato(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -30,7 +30,7 @@ class SplashView extends GetView<SplashController> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Your Health, Our Priority',
+              'Your Health, Our Priority'.tr,
               style: GoogleFonts.lato(
                 fontSize: 16,
                 color: Colors.grey[600],

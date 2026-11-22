@@ -133,21 +133,21 @@ class OnboardingPage extends StatelessWidget {
         children: [
           AspectRatio(
             aspectRatio: 4 / 3,
-            child: SvgPicture.string(svgAsset, semanticsLabel: title),
+            child: SvgPicture.string(svgAsset, semanticsLabel: title.tr),
           ),
           const SizedBox(height: 48),
           Text(
-            title,
+            title.tr,
             textAlign: TextAlign.center,
             style: GoogleFonts.montserrat(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            description,
+            description.tr,
             textAlign: TextAlign.center,
             style: GoogleFonts.montserrat(
               fontSize: 16,

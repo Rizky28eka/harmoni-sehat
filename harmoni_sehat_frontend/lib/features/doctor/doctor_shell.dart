@@ -68,12 +68,12 @@ class _DoctorHome extends StatelessWidget {
             ),
           ),
         );
-    return Obx(() => AsyncBody(
+    return Obx(() => asyncBody(
           loading: c.loading.value,
           error: c.error.value,
           isEmpty: c.data.value == null,
           onRetry: c.load,
-          child: RefreshIndicator(
+          builder: () => RefreshIndicator(
             onRefresh: c.load,
             child: ListView(padding: const EdgeInsets.all(16), children: [
               Text(greeting(), style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
@@ -81,13 +81,13 @@ class _DoctorHome extends StatelessWidget {
               Row(children: [stat('Akan datang', '${c.data.value!.n('upcoming').toInt()}', Icons.event), stat('Selesai', '${c.data.value!.n('completed').toInt()}', Icons.task_alt)]),
               Row(children: [stat('Rating', c.data.value!.n('rating') == 0 ? '-' : c.data.value!.n('rating').toStringAsFixed(1), Icons.star_outline), stat('Pendapatan', rupiah(c.data.value!.n('pendapatan')), Icons.payments_outlined)]),
               const SectionTitle('Antrean hari ini'),
-              if (asList(c.data.value!['today']).isEmpty) const Padding(padding: EdgeInsets.all(16), child: Text('Tidak ada konsultasi hari ini.', style: TextStyle(color: Colors.grey))),
+              if (asList(c.data.value!['today']).isEmpty) Padding(padding: EdgeInsets.all(16), child: Text('Tidak ada konsultasi hari ini.'.tr, style: TextStyle(color: Colors.grey))),
               for (final x in asList(c.data.value!['today']))
                 Card(
                   child: ListTile(
                     leading: Avatar(name: asMap(x['pasien_id']).s('nama')),
                     title: Text(asMap(x['pasien_id']).s('nama')),
-                    subtitle: Text('${fmtTime(x['tanggal'])} WIB • ${x.s('keluhan')}', maxLines: 1, overflow: TextOverflow.ellipsis),
+                    subtitle: Text('${fmtTime(x['tanggal'])} ${'WIB'} • ${x.s('keluhan')}', maxLines: 1, overflow: TextOverflow.ellipsis),
                     trailing: StatusChip(x.s('status')),
                     onTap: () => Get.toNamed(AppRoutes.consultation, arguments: x['_id'].toString()),
                   ),
@@ -139,17 +139,17 @@ class ScheduleController extends LoadController<List<Map<String, dynamic>>> {
     String hhmm(TimeOfDay t) => '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
     final ok = await Get.dialog<bool>(StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
-        title: const Text('Tambah jadwal praktik'),
+        title: Text('Tambah jadwal praktik'.tr),
         content: SingleChildScrollView(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            DropdownButtonFormField<String>(initialValue: clinic, decoration: const InputDecoration(labelText: 'Klinik'), items: [for (final k in clinics) DropdownMenuItem(value: k['_id'].toString(), child: Text('${k['nama']}'))], onChanged: (v) => clinic = v),
-            DropdownButtonFormField<String>(initialValue: day, decoration: const InputDecoration(labelText: 'Hari'), items: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(), onChanged: (v) => day = v ?? day),
-            ListTile(contentPadding: EdgeInsets.zero, title: const Text('Mulai'), trailing: Text(start.format(ctx)), onTap: () async { final t = await showTimePicker(context: ctx, initialTime: start); if (t != null) setState(() => start = t); }),
-            ListTile(contentPadding: EdgeInsets.zero, title: const Text('Selesai'), trailing: Text(end.format(ctx)), onTap: () async { final t = await showTimePicker(context: ctx, initialTime: end); if (t != null) setState(() => end = t); }),
-            DropdownButtonFormField<int>(initialValue: duration, decoration: const InputDecoration(labelText: 'Durasi per sesi'), items: [15, 20, 30, 45, 60].map((d) => DropdownMenuItem(value: d, child: Text('$d menit'))).toList(), onChanged: (v) => duration = v ?? 30),
+            DropdownButtonFormField<String>(initialValue: clinic, decoration: InputDecoration(labelText: 'Klinik'.tr), items: [for (final k in clinics) DropdownMenuItem(value: k['_id'].toString(), child: Text('${k['nama']}'))], onChanged: (v) => clinic = v),
+            DropdownButtonFormField<String>(initialValue: day, decoration: InputDecoration(labelText: 'Hari'.tr), items: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(), onChanged: (v) => day = v ?? day),
+            ListTile(contentPadding: EdgeInsets.zero, title: Text('Mulai'.tr), trailing: Text(start.format(ctx)), onTap: () async { final t = await showTimePicker(context: ctx, initialTime: start); if (t != null) setState(() => start = t); }),
+            ListTile(contentPadding: EdgeInsets.zero, title: Text('Selesai'.tr), trailing: Text(end.format(ctx)), onTap: () async { final t = await showTimePicker(context: ctx, initialTime: end); if (t != null) setState(() => end = t); }),
+            DropdownButtonFormField<int>(initialValue: duration, decoration: InputDecoration(labelText: 'Durasi per sesi'.tr), items: [15, 20, 30, 45, 60].map((d) => DropdownMenuItem(value: d, child: Text('$d menit'))).toList(), onChanged: (v) => duration = v ?? 30),
           ]),
         ),
-        actions: [TextButton(onPressed: () => Get.back(result: false), child: const Text('Batal')), FilledButton(onPressed: () => Get.back(result: true), child: const Text('Simpan'))],
+        actions: [TextButton(onPressed: () => Get.back(result: false), child: Text('Batal'.tr)), FilledButton(onPressed: () => Get.back(result: true), child: Text('Simpan'.tr))],
       ),
     ));
     if (ok != true) return;
@@ -170,15 +170,15 @@ class ScheduleTab extends StatelessWidget {
     final c = Get.put(ScheduleController());
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: FloatingActionButton.extended(onPressed: () => c.add(context), icon: const Icon(Icons.add), label: const Text('Jadwal')),
-      body: Obx(() => AsyncBody(
+      floatingActionButton: FloatingActionButton.extended(onPressed: () => c.add(context), icon: const Icon(Icons.add), label: Text('Jadwal'.tr)),
+      body: Obx(() => asyncBody(
             loading: c.loading.value,
             error: c.error.value,
             isEmpty: (c.data.value ?? []).isEmpty,
             emptyText: 'Belum ada jadwal praktik.\nTambahkan agar pasien dapat memesan.',
             emptyIcon: Icons.calendar_today_outlined,
             onRetry: c.load,
-            child: ListView.builder(
+            builder: () => ListView.builder(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 90),
               itemCount: c.data.value!.length,
               itemBuilder: (_, i) {
@@ -192,7 +192,7 @@ class ScheduleTab extends StatelessWidget {
                   child: Card(
                     child: SwitchListTile(
                       title: Text('${s.s('hari')} • ${s.s('jam_mulai')}–${s.s('jam_selesai')}'),
-                      subtitle: Text('${asMap(s['klinik_id']).s('nama')} • ${s.n('durasi_menit', 30).toInt()} menit/sesi'),
+                      subtitle: Text('${asMap(s['klinik_id']).s('nama')} • ${s.n('durasi_menit', 30).toInt()} ${'menit/sesi'.tr}'),
                       value: s['is_active'] == true,
                       onChanged: (v) => c.toggle(s, v),
                     ),
@@ -233,12 +233,12 @@ class CompleteConsultationController extends GetxController {
 
     await doSearch();
     final picked = await Get.dialog<Map<String, dynamic>>(AlertDialog(
-      title: const Text('Pilih obat'),
+      title: Text('Pilih obat'.tr),
       content: SizedBox(
         width: double.maxFinite,
         height: 360,
         child: Column(children: [
-          TextField(controller: search, onChanged: (_) => doSearch(), decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Cari obat')),
+          TextField(controller: search, onChanged: (_) => doSearch(), decoration: InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Cari obat'.tr)),
           Expanded(child: Obx(() => ListView(children: [for (final d in results) ListTile(title: Text(d.s('nama')), subtitle: Text('${d.s('kategori')}${d['butuh_resep'] == true ? ' • Resep' : ''}'), onTap: () => Get.back(result: d))]))),
         ]),
       ),
@@ -250,11 +250,11 @@ class CompleteConsultationController extends GetxController {
     final ok = await Get.dialog<bool>(AlertDialog(
       title: Text(picked.s('nama')),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        TextField(controller: dose, decoration: const InputDecoration(labelText: 'Dosis')),
-        TextField(controller: qty, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: 'Jumlah (${picked.s('satuan')})')),
-        TextField(controller: rule, decoration: const InputDecoration(labelText: 'Aturan pakai')),
+        TextField(controller: dose, decoration: InputDecoration(labelText: 'Dosis'.tr)),
+        TextField(controller: qty, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: '${'Jumlah'.tr} (${picked.s('satuan')})')),
+        TextField(controller: rule, decoration: InputDecoration(labelText: 'Aturan pakai'.tr)),
       ]),
-      actions: [TextButton(onPressed: () => Get.back(result: false), child: const Text('Batal')), FilledButton(onPressed: () => Get.back(result: true), child: const Text('Tambah'))],
+      actions: [TextButton(onPressed: () => Get.back(result: false), child: Text('Batal'.tr)), FilledButton(onPressed: () => Get.back(result: true), child: Text('Tambah'.tr))],
     ));
     if (ok != true) return;
     items.add({'obat_id': picked['_id'].toString(), 'nama': picked.s('nama'), 'dosis': dose.text.trim(), 'jumlah': int.tryParse(qty.text) ?? 1, 'aturan_pakai': rule.text.trim()});
@@ -306,7 +306,7 @@ class CompleteConsultationView extends StatelessWidget {
     final c = Get.put(CompleteConsultationController(Get.arguments as String));
     Widget f(TextEditingController t, String label, {int lines = 1, TextInputType? type}) => Padding(padding: const EdgeInsets.only(bottom: 12), child: TextField(controller: t, maxLines: lines, keyboardType: type, decoration: InputDecoration(labelText: label, alignLabelWithHint: true)));
     return Scaffold(
-      appBar: AppBar(title: const Text('Selesaikan Konsultasi')),
+      appBar: AppBar(title: Text('Selesaikan Konsultasi'.tr)),
       body: ListView(padding: const EdgeInsets.all(16), children: [
         f(c.diagnosis, 'Diagnosa *', lines: 2),
         f(c.action, 'Tindakan'),
@@ -320,16 +320,16 @@ class CompleteConsultationView extends StatelessWidget {
                 Card(
                   child: ListTile(
                     title: Text(c.items[i]['nama'].toString()),
-                    subtitle: Text('${c.items[i]['dosis']} • ${c.items[i]['jumlah']} unit • ${c.items[i]['aturan_pakai']}'),
+                    subtitle: Text('${c.items[i]['dosis']} • ${c.items[i]['jumlah']} ${'unit'.tr} • ${c.items[i]['aturan_pakai']}'),
                     trailing: IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => c.items.removeAt(i)),
                   ),
                 ),
             ])),
-        OutlinedButton.icon(onPressed: c.addDrug, icon: const Icon(Icons.add), label: const Text('Tambah obat')),
+        OutlinedButton.icon(onPressed: c.addDrug, icon: const Icon(Icons.add), label: Text('Tambah obat'.tr)),
         const SizedBox(height: 12),
         f(c.prescriptionNote, 'Catatan resep (opsional)'),
         const SizedBox(height: 8),
-        Obx(() => FilledButton(onPressed: c.saving.value ? null : c.submit, style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)), child: c.saving.value ? const CircularProgressIndicator() : const Text('Simpan & selesai'))),
+        Obx(() => FilledButton(onPressed: c.saving.value ? null : c.submit, style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)), child: c.saving.value ? const CircularProgressIndicator() : Text('Simpan & selesai'.tr))),
       ]),
     );
   }

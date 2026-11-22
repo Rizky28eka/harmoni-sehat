@@ -2,6 +2,34 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+/// Minimal key/value store so session persistence can be swapped for an in-memory one in tests.
+abstract class KeyValueStore {
+  dynamic read(String key);
+  Future<void> write(String key, dynamic value);
+  Future<void> remove(String key);
+}
+
+class GetStorageStore implements KeyValueStore {
+  GetStorageStore([GetStorage? box]) : _box = box ?? GetStorage();
+  final GetStorage _box;
+  @override
+  dynamic read(String key) => _box.read(key);
+  @override
+  Future<void> write(String key, dynamic value) => _box.write(key, value);
+  @override
+  Future<void> remove(String key) => _box.remove(key);
+}
+
+class MemoryStore implements KeyValueStore {
+  final _m = <String, dynamic>{};
+  @override
+  dynamic read(String key) => _m[key];
+  @override
+  Future<void> write(String key, dynamic value) async => _m[key] = value;
+  @override
+  Future<void> remove(String key) async => _m.remove(key);
+}
+
 class AppUser {
   final String id;
   final String email;
@@ -28,11 +56,11 @@ class SessionService extends GetxService {
   static const _kUser = 'session_user';
 
   final FlutterSecureStorage _secure;
-  final GetStorage _box;
+  final KeyValueStore _box;
 
-  SessionService({FlutterSecureStorage? secure, GetStorage? box})
+  SessionService({FlutterSecureStorage? secure, KeyValueStore? box})
       : _secure = secure ?? const FlutterSecureStorage(),
-        _box = box ?? GetStorage();
+        _box = box ?? GetStorageStore();
 
   final Rxn<AppUser> user = Rxn<AppUser>();
   /// Role-specific profile document (Pasien / Dokter / Apoteker) from /auth/me.

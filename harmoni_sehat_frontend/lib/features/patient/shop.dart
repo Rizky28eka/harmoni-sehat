@@ -83,24 +83,24 @@ class ShopView extends StatelessWidget {
     final body = Column(children: [
       Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-        child: TextField(controller: c.search, onChanged: c.onSearch, decoration: const InputDecoration(hintText: 'Cari obat', prefixIcon: Icon(Icons.search))),
+        child: TextField(controller: c.search, onChanged: c.onSearch, decoration: InputDecoration(hintText: 'Cari obat'.tr, prefixIcon: Icon(Icons.search))),
       ),
       SizedBox(
         height: 52,
         child: Obx(() => ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), children: [
-              Padding(padding: const EdgeInsets.only(right: 8), child: ChoiceChip(label: const Text('Semua'), selected: c.category.value == null, onSelected: (_) { c.category.value = null; c.load(); })),
+              Padding(padding: const EdgeInsets.only(right: 8), child: ChoiceChip(label: Text('Semua'.tr), selected: c.category.value == null, onSelected: (_) { c.category.value = null; c.load(); })),
               for (final k in c.categories) Padding(padding: const EdgeInsets.only(right: 8), child: ChoiceChip(label: Text(k), selected: c.category.value == k, onSelected: (_) { c.category.value = k; c.load(); })),
             ])),
       ),
       Expanded(
-        child: Obx(() => AsyncBody(
+        child: Obx(() => asyncBody(
               loading: c.loading.value,
               error: c.error.value,
               isEmpty: c.drugs.isEmpty,
               emptyText: 'Obat tidak ditemukan',
               emptyIcon: Icons.medication_outlined,
               onRetry: c.load,
-              child: RefreshIndicator(
+              builder: () => RefreshIndicator(
                 onRefresh: () async { await c.load(); await c.refreshCart(); },
                 child: ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 90),
@@ -116,10 +116,10 @@ class ShopView extends StatelessWidget {
         : FloatingActionButton.extended(
             onPressed: () => Get.toNamed(AppRoutes.cart)?.then((_) { c.refreshCart(); c.load(); }),
             icon: Badge(label: Text('${c.cartCount.value}'), child: const Icon(Icons.shopping_cart_outlined)),
-            label: const Text('Keranjang'),
+            label: Text('Keranjang'.tr),
           ));
     if (embedded) return Stack(children: [body, Positioned(right: 16, bottom: 16, child: fab)]);
-    return Scaffold(appBar: AppBar(title: const Text('Apotek')), body: body, floatingActionButton: fab);
+    return Scaffold(appBar: AppBar(title: Text('Apotek'.tr)), body: body, floatingActionButton: fab);
   }
 }
 
@@ -141,16 +141,17 @@ class _DrugTile extends StatelessWidget {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(drug.s('nama'), style: const TextStyle(fontWeight: FontWeight.w600)),
-              Text('${drug.s('kategori')} • per ${drug.s('satuan')}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              Text('${drug.s('kategori')} • ${'per'.tr} ${drug.s('satuan')}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
               const SizedBox(height: 4),
               Row(children: [
                 Text(rupiah(drug.n('harga')), style: const TextStyle(fontWeight: FontWeight.bold)),
-                if (drug['butuh_resep'] == true) ...[const SizedBox(width: 8), const Chip(label: Text('Resep', style: TextStyle(fontSize: 10)), visualDensity: VisualDensity.compact, padding: EdgeInsets.zero)],
+                if (drug['butuh_resep'] == true) ...[const SizedBox(width: 8), Chip(label: Text('Resep'.tr, style: TextStyle(fontSize: 10)), visualDensity: VisualDensity.compact, padding: EdgeInsets.zero)],
               ]),
-              if (drug.n('stok') < 10) Text('Sisa ${drug.n('stok').toInt()}', style: const TextStyle(color: Colors.orange, fontSize: 11)),
+              if (drug.n('stok') < 10) Text('${'Sisa'.tr} ${drug.n('stok').toInt()}', style: const TextStyle(color: Colors.orange, fontSize: 11)),
             ]),
           ),
           Obx(() {
+            c.cartQty.length; // subscribes this Obx: RxMap's [] operator alone does not
             final q = c.cartQty[id] ?? 0;
             if (q == 0) return IconButton.filledTonal(onPressed: () => c.setQty(drug, 1), icon: const Icon(Icons.add_shopping_cart));
             return Row(mainAxisSize: MainAxisSize.min, children: [
@@ -222,17 +223,17 @@ class CartView extends StatelessWidget {
     final resepId = args['resep_id']?.toString();
     final c = Get.put(CartController(resepId));
     return Scaffold(
-      appBar: AppBar(title: const Text('Keranjang')),
+      appBar: AppBar(title: Text('Keranjang'.tr)),
       body: Obx(() {
         final items = asList(c.data.value?['items']);
-        return AsyncBody(
+        return asyncBody(
           loading: c.loading.value,
           error: c.error.value,
           isEmpty: items.isEmpty && resepId == null,
           emptyText: 'Keranjang kosong',
           emptyIcon: Icons.shopping_cart_outlined,
           onRetry: c.load,
-          child: Column(children: [
+          builder: () => Column(children: [
             Expanded(
               child: ListView(padding: const EdgeInsets.all(16), children: [
                 if (resepId != null)
@@ -240,13 +241,13 @@ class CartView extends StatelessWidget {
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
-                    child: const Text('Pesanan ini akan ditebus menggunakan resep dokter. Obat resep hanya dapat dibeli sesuai jumlah pada resep.'),
+                    child: Text('Pesanan ini akan ditebus menggunakan resep dokter. Obat resep hanya dapat dibeli sesuai jumlah pada resep.'.tr),
                   ),
                 for (final i in items)
                   Card(
                     child: ListTile(
                       title: Text(asMap(i['obat']).s('nama')),
-                      subtitle: Text('${rupiah(asMap(i['obat']).n('harga'))} × ${i.n('jumlah').toInt()}${i['tersedia'] == false ? '\n⚠ Stok tidak mencukupi' : ''}'),
+                      subtitle: Text('${rupiah(asMap(i['obat']).n('harga'))} × ${i.n('jumlah').toInt()}${i['tersedia'] == false ? '\n⚠ ${'Stok tidak mencukupi'.tr}' : ''}'),
                       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                         IconButton(icon: const Icon(Icons.remove_circle_outline), onPressed: () => c.setQty(asMap(i['obat'])['_id'].toString(), i.n('jumlah').toInt() - 1)),
                         Text('${i.n('jumlah').toInt()}'),
@@ -255,18 +256,18 @@ class CartView extends StatelessWidget {
                     ),
                   ),
                 const SizedBox(height: 12),
-                TextField(controller: c.address, maxLines: 2, decoration: const InputDecoration(labelText: 'Alamat pengiriman')),
+                TextField(controller: c.address, maxLines: 2, decoration: InputDecoration(labelText: 'Alamat pengiriman'.tr)),
                 const SizedBox(height: 12),
-                TextField(controller: c.note, decoration: const InputDecoration(labelText: 'Catatan untuk kurir (opsional)')),
+                TextField(controller: c.note, decoration: InputDecoration(labelText: 'Catatan untuk kurir (opsional)'.tr)),
               ]),
             ),
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Row(children: [const Text('Total'), const Spacer(), Text(rupiah(c.data.value?['total'] as num?), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))]),
+                  Row(children: [Text('Total'.tr), const Spacer(), Text(rupiah(c.data.value?['total'] as num?), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))]),
                   const SizedBox(height: 12),
-                  FilledButton(onPressed: c.placing.value || items.isEmpty ? null : c.checkout, style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)), child: c.placing.value ? const CircularProgressIndicator() : const Text('Checkout')),
+                  FilledButton(onPressed: c.placing.value || items.isEmpty ? null : c.checkout, style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)), child: c.placing.value ? const CircularProgressIndicator() : Text('Checkout'.tr)),
                 ]),
               ),
             ),
@@ -289,14 +290,14 @@ class OrdersTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.put(OrdersController());
-    return Obx(() => AsyncBody(
+    return Obx(() => asyncBody(
           loading: c.loading.value,
           error: c.error.value,
           isEmpty: (c.data.value ?? []).isEmpty,
           emptyText: 'Belum ada pesanan',
           emptyIcon: Icons.receipt_long_outlined,
           onRetry: c.load,
-          child: RefreshIndicator(
+          builder: () => RefreshIndicator(
             onRefresh: c.load,
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
@@ -344,9 +345,9 @@ class OrderDetailController extends LoadController<Map<String, dynamic>> {
   Future<void> ship() async {
     final resi = TextEditingController();
     final ok = await Get.dialog<bool>(AlertDialog(
-      title: const Text('Kirim pesanan'),
-      content: TextField(controller: resi, decoration: const InputDecoration(labelText: 'Nomor resi (opsional)')),
-      actions: [TextButton(onPressed: () => Get.back(result: false), child: const Text('Batal')), FilledButton(onPressed: () => Get.back(result: true), child: const Text('Kirim'))],
+      title: Text('Kirim pesanan'.tr),
+      content: TextField(controller: resi, decoration: InputDecoration(labelText: 'Nomor resi (opsional)'.tr)),
+      actions: [TextButton(onPressed: () => Get.back(result: false), child: Text('Batal'.tr)), FilledButton(onPressed: () => Get.back(result: true), child: Text('Kirim'.tr))],
     ));
     if (ok == true) await act('advance', body: {if (resi.text.trim().isNotEmpty) 'no_resi': resi.text.trim()}, successMsg: 'Pesanan dikirim');
   }
@@ -361,13 +362,13 @@ class OrderDetailView extends StatelessWidget {
     final c = Get.put(OrderDetailController(id), tag: id);
     final role = Get.find<SessionService>().role;
     return Scaffold(
-      appBar: AppBar(title: const Text('Detail Pesanan')),
-      body: Obx(() => AsyncBody(
+      appBar: AppBar(title: Text('Detail Pesanan'.tr)),
+      body: Obx(() => asyncBody(
             loading: c.loading.value,
             error: c.error.value,
             isEmpty: c.data.value == null,
             onRetry: c.load,
-            child: RefreshIndicator(onRefresh: c.load, child: _body(context, c, role ?? '')),
+            builder: () => RefreshIndicator(onRefresh: c.load, child: _body(context, c, role ?? '')),
           )),
     );
   }
@@ -387,21 +388,21 @@ class OrderDetailView extends StatelessWidget {
       for (final d in asList(o['detail']))
         ListTile(contentPadding: EdgeInsets.zero, title: Text(asMap(d['obat_id']).s('nama')), subtitle: Text('${d.n('jumlah').toInt()} × ${rupiah(d.n('harga_satuan'))}'), trailing: Text(rupiah(d.n('subtotal')))),
       const Divider(),
-      Row(children: [const Text('Total', style: TextStyle(fontWeight: FontWeight.bold)), const Spacer(), Text(rupiah(o.n('total_harga')), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))]),
+      Row(children: [Text('Total'.tr, style: TextStyle(fontWeight: FontWeight.bold)), const Spacer(), Text(rupiah(o.n('total_harga')), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18))]),
       const SizedBox(height: 16),
       ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.location_on_outlined), title: Text(o.s('alamat_pengiriman')), subtitle: Text(isPharmacist && pasien.isNotEmpty ? '${pasien.s('nama')} • ${pasien.s('no_telepon')}' : o.s('catatan_pengiriman'))),
-      if (o.s('no_resi').isNotEmpty) ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.local_shipping_outlined), title: Text('Resi: ${o.s('no_resi')}')),
+      if (o.s('no_resi').isNotEmpty) ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.local_shipping_outlined), title: Text('${'Resi'.tr}: ${o.s('no_resi')}')),
       const SizedBox(height: 16),
       if (!paid && status == 'pending' && tx['status'] == 'pending' && !isPharmacist)
-        FilledButton.icon(onPressed: () => Get.toNamed(AppRoutes.payment, arguments: {'order_id': tx['order_id'], 'next': 'order', 'next_id': c.id}), icon: const Icon(Icons.payment), label: const Text('Bayar sekarang'), style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(50))),
-      if (isPharmacist && status == 'processing') FilledButton.icon(onPressed: c.busy.value ? null : c.ship, icon: const Icon(Icons.local_shipping), label: const Text('Kirim pesanan'), style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(50))),
-      if (isPharmacist && status == 'shipped') const Text('Menunggu pasien mengonfirmasi penerimaan.', textAlign: TextAlign.center),
-      if (!isPharmacist && status == 'shipped') FilledButton.icon(onPressed: c.busy.value ? null : () => c.act('advance', successMsg: 'Pesanan diterima'), icon: const Icon(Icons.check_circle_outline), label: const Text('Pesanan diterima'), style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(50), backgroundColor: Colors.green)),
+        FilledButton.icon(onPressed: () => Get.toNamed(AppRoutes.payment, arguments: {'order_id': tx['order_id'], 'next': 'order', 'next_id': c.id}), icon: const Icon(Icons.payment), label: Text('Bayar sekarang'.tr), style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(50))),
+      if (isPharmacist && status == 'processing') FilledButton.icon(onPressed: c.busy.value ? null : c.ship, icon: const Icon(Icons.local_shipping), label: Text('Kirim pesanan'.tr), style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(50))),
+      if (isPharmacist && status == 'shipped') Text('Menunggu pasien mengonfirmasi penerimaan.'.tr, textAlign: TextAlign.center),
+      if (!isPharmacist && status == 'shipped') FilledButton.icon(onPressed: c.busy.value ? null : () => c.act('advance', successMsg: 'Pesanan diterima'), icon: const Icon(Icons.check_circle_outline), label: Text('Pesanan diterima'.tr), style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(50), backgroundColor: Colors.green)),
       if ((status == 'pending' && !isPharmacist) || (isPharmacist && (status == 'processing' || status == 'pending')))
         TextButton.icon(
           onPressed: c.busy.value ? null : () async { if (await confirm('Batalkan pesanan', 'Stok akan dikembalikan.', ok: 'Batalkan')) c.act('cancel', body: {'reason': isPharmacist ? 'Dibatalkan apotek' : 'Dibatalkan pasien'}, successMsg: 'Pesanan dibatalkan'); },
           icon: const Icon(Icons.cancel_outlined, color: Colors.red),
-          label: const Text('Batalkan pesanan', style: TextStyle(color: Colors.red)),
+          label: Text('Batalkan pesanan'.tr, style: TextStyle(color: Colors.red)),
         ),
     ]);
   }

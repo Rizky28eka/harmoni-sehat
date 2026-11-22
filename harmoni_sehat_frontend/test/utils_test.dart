@@ -61,7 +61,7 @@ void main() {
     testWidgets('AsyncBody shows loading, error with retry, empty and content', (tester) async {
       var retried = false;
       Widget host({bool loading = false, String? error, bool empty = false}) => MaterialApp(
-            home: Scaffold(body: AsyncBody(loading: loading, error: error, isEmpty: empty, onRetry: () => retried = true, emptyText: 'Kosong', child: const Text('Konten'))),
+            home: Scaffold(body: asyncBody(loading: loading, error: error, isEmpty: empty, onRetry: () => retried = true, emptyText: 'Kosong', builder: () => const Text('Konten'))),
           );
 
       await tester.pumpWidget(host(loading: true));

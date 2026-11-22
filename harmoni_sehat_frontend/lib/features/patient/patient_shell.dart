@@ -83,7 +83,7 @@ class _HomeTab extends StatelessWidget {
       onRefresh: c.load,
       child: ListView(children: [
         Padding(padding: const EdgeInsets.fromLTRB(16, 16, 16, 4), child: Text(greeting(), style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold))),
-        const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Bagaimana kesehatan Anda hari ini?', style: TextStyle(color: Colors.grey))),
+        Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Bagaimana kesehatan Anda hari ini?'.tr, style: TextStyle(color: Colors.grey))),
         const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -110,7 +110,7 @@ class _HomeTab extends StatelessWidget {
           if (c.loading.value) return const Padding(padding: EdgeInsets.all(24), child: Center(child: CircularProgressIndicator()));
           final upcoming = asList(c.data.value?['upcoming']);
           if (upcoming.isEmpty) {
-            return Card(margin: const EdgeInsets.symmetric(horizontal: 16), child: ListTile(leading: const Icon(Icons.event_available_outlined), title: const Text('Belum ada jadwal'), subtitle: const Text('Temukan dokter dan buat janji'), trailing: const Icon(Icons.chevron_right), onTap: () => Get.toNamed(AppRoutes.doctors)));
+            return Card(margin: const EdgeInsets.symmetric(horizontal: 16), child: ListTile(leading: const Icon(Icons.event_available_outlined), title: Text('Belum ada jadwal'.tr), subtitle: Text('Temukan dokter dan buat janji'.tr), trailing: const Icon(Icons.chevron_right), onTap: () => Get.toNamed(AppRoutes.doctors)));
           }
           return Column(children: [
             for (final x in upcoming)

@@ -1,10 +1,12 @@
 import 'package:get/get.dart';
 
 import '../../core/api_client.dart';
+import '../../core/reminder_scheduler.dart';
 import '../../core/session.dart';
 import '../../core/socket_service.dart';
 import '../../core/theme_controller.dart';
 import '../../features/auth/auth_repository.dart';
+import '../../features/common/call_view.dart';
 
 /// Services that live for the whole app. SessionService is created (and initialised) in main().
 class InitialBinding extends Bindings {
@@ -14,6 +16,8 @@ class InitialBinding extends Bindings {
     Get.put(ApiClient(session), permanent: true);
     Get.put(SocketService(session), permanent: true);
     Get.put(SettingsController(), permanent: true);
+    Get.put(CallService(Get.find<SocketService>()), permanent: true);
+    Get.put(ReminderScheduler(), permanent: true);
     Get.put(AuthRepository(Get.find(), session, Get.find()), permanent: true);
   }
 }

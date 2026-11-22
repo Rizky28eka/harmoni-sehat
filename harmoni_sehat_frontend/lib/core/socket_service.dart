@@ -20,6 +20,16 @@ class SocketService extends GetxService {
   final _typing = StreamController<Map<String, dynamic>>.broadcast();
   final _read = StreamController<Map<String, dynamic>>.broadcast();
 
+  final _callIncoming = StreamController<Map<String, dynamic>>.broadcast();
+  final _callAccepted = StreamController<Map<String, dynamic>>.broadcast();
+  final _callSignal = StreamController<Map<String, dynamic>>.broadcast();
+  final _callEnded = StreamController<Map<String, dynamic>>.broadcast();
+
+  Stream<Map<String, dynamic>> get callIncoming => _callIncoming.stream;
+  Stream<Map<String, dynamic>> get callAccepted => _callAccepted.stream;
+  Stream<Map<String, dynamic>> get callSignals => _callSignal.stream;
+  Stream<Map<String, dynamic>> get callEnded => _callEnded.stream;
+
   Stream<Map<String, dynamic>> get chatMessages => _chat.stream;
   Stream<Map<String, dynamic>> get notifications => _notif.stream;
   Stream<Map<String, dynamic>> get typing => _typing.stream;
@@ -40,6 +50,10 @@ class SocketService extends GetxService {
     s.on('chat:message', (d) => _chat.add(Map<String, dynamic>.from(d as Map)));
     s.on('chat:typing', (d) => _typing.add(Map<String, dynamic>.from(d as Map)));
     s.on('chat:read', (d) => _read.add(Map<String, dynamic>.from(d as Map)));
+    s.on('call:incoming', (d) => _callIncoming.add(Map<String, dynamic>.from(d as Map)));
+    s.on('call:accepted', (d) => _callAccepted.add(Map<String, dynamic>.from(d as Map)));
+    s.on('call:signal', (d) => _callSignal.add(Map<String, dynamic>.from(d as Map)));
+    s.on('call:ended', (d) => _callEnded.add(Map<String, dynamic>.from(d as Map)));
     s.on('notification', (d) {
       unread.value++;
       _notif.add(Map<String, dynamic>.from(d as Map));
@@ -73,6 +87,12 @@ class SocketService extends GetxService {
   Future<Map<String, dynamic>> sendMessage(String consultationId, String text, {String type = 'text', String? fileUrl}) =>
       _emit('chat:send', {'konsultasiId': consultationId, 'isi': text, 'tipe': type, if (fileUrl != null) 'file_url': fileUrl});
 
+  Future<Map<String, dynamic>> callInvite(String id, {bool video = true}) => _emit('call:invite', {'konsultasiId': id, 'video': video});
+  Future<Map<String, dynamic>> callAccept(String id) => _emit('call:accept', {'konsultasiId': id});
+  void callReject(String id) => _socket?.emit('call:reject', {'konsultasiId': id});
+  void callEnd(String id) => _socket?.emit('call:end', {'konsultasiId': id});
+  void callSignal(String id, String type, Map<String, dynamic> data) => _socket?.emit('call:signal', {'konsultasiId': id, 'type': type, 'data': data});
+
   void markRead(String consultationId) => _socket?.emit('chat:read', {'konsultasiId': consultationId});
   void setTyping(String consultationId, bool typing) => _socket?.emit('chat:typing', {'konsultasiId': consultationId, 'typing': typing});
 
@@ -83,6 +103,10 @@ class SocketService extends GetxService {
     _notif.close();
     _typing.close();
     _read.close();
+    _callIncoming.close();
+    _callAccepted.close();
+    _callSignal.close();
+    _callEnded.close();
     super.onClose();
   }
 }

@@ -31,7 +31,7 @@ class ProfileTab extends StatelessWidget {
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(color: Colors.orange.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
-          child: const Row(children: [Icon(Icons.hourglass_top, color: Colors.orange), SizedBox(width: 12), Expanded(child: Text('Akun Anda sedang menunggu verifikasi admin.'))]),
+          child: Row(children: [Icon(Icons.hourglass_top, color: Colors.orange), SizedBox(width: 12), Expanded(child: Text('Akun Anda sedang menunggu verifikasi admin.'.tr))]),
         ),
       const Divider(height: 32),
       Obx(() => SwitchListTile(secondary: const Icon(Icons.dark_mode_outlined), title: Text('Mode gelap'.tr), value: settings.themeMode.value == ThemeMode.dark, onChanged: settings.setDark)),
@@ -41,11 +41,11 @@ class ProfileTab extends StatelessWidget {
             trailing: DropdownButton<String>(
               value: settings.locale.value.languageCode,
               underline: const SizedBox(),
-              items: const [DropdownMenuItem(value: 'id', child: Text('Indonesia')), DropdownMenuItem(value: 'en', child: Text('English'))],
+              items: [DropdownMenuItem(value: 'id', child: Text('Indonesia'.tr)), DropdownMenuItem(value: 'en', child: Text('English'.tr))],
               onChanged: (v) => settings.setLanguage(v ?? 'id'),
             ),
           )),
-      ListTile(leading: const Icon(Icons.lock_outline), title: const Text('Ubah password'), onTap: () => _changePassword(repo)),
+      ListTile(leading: const Icon(Icons.lock_outline), title: Text('Ubah password'.tr), onTap: () => _changePassword(repo)),
       ListTile(
         leading: const Icon(Icons.logout),
         title: Text('Keluar'.tr),
@@ -59,8 +59,8 @@ class ProfileTab extends StatelessWidget {
       if (role != 'admin' && role != 'superadmin')
         ListTile(
           leading: const Icon(Icons.delete_forever_outlined, color: Colors.red),
-          title: const Text('Hapus akun', style: TextStyle(color: Colors.red)),
-          subtitle: const Text('Data identitas dihapus permanen sesuai UU PDP'),
+          title: Text('Hapus akun'.tr, style: TextStyle(color: Colors.red)),
+          subtitle: Text('Data identitas dihapus permanen sesuai UU PDP'.tr),
           onTap: () => _deleteAccount(repo),
         ),
       const SizedBox(height: 32),
@@ -71,16 +71,16 @@ class ProfileTab extends StatelessWidget {
     final current = TextEditingController();
     final next = TextEditingController();
     final ok = await Get.dialog<bool>(AlertDialog(
-      title: const Text('Ubah password'),
+      title: Text('Ubah password'.tr),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        TextField(controller: current, obscureText: true, decoration: const InputDecoration(labelText: 'Password saat ini')),
+        TextField(controller: current, obscureText: true, decoration: InputDecoration(labelText: 'Password saat ini'.tr)),
         const SizedBox(height: 12),
-        TextField(controller: next, obscureText: true, decoration: const InputDecoration(labelText: 'Password baru')),
+        TextField(controller: next, obscureText: true, decoration: InputDecoration(labelText: 'Password baru'.tr)),
       ]),
-      actions: [TextButton(onPressed: () => Get.back(result: false), child: const Text('Batal')), FilledButton(onPressed: () => Get.back(result: true), child: const Text('Simpan'))],
+      actions: [TextButton(onPressed: () => Get.back(result: false), child: Text('Batal'.tr)), FilledButton(onPressed: () => Get.back(result: true), child: Text('Simpan'.tr))],
     ));
     if (ok != true) return;
-    if (validatePassword(next.text) != null) return showError('Password baru: ${validatePassword(next.text)}');
+    if (validatePassword(next.text) != null) return showError('${'Password baru'.tr}: ${validatePassword(next.text)!.tr}');
     try {
       await repo.changePassword(current.text, next.text);
       showSuccess('Password diperbarui. Silakan masuk kembali.');
@@ -94,12 +94,12 @@ class ProfileTab extends StatelessWidget {
   Future<void> _deleteAccount(AuthRepository repo) async {
     final pw = TextEditingController();
     final ok = await Get.dialog<bool>(AlertDialog(
-      title: const Text('Hapus akun?'),
+      title: Text('Hapus akun?'.tr),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
-        const Text('Tindakan ini tidak dapat dibatalkan. Masukkan password untuk konfirmasi.'),
-        TextField(controller: pw, obscureText: true, decoration: const InputDecoration(labelText: 'Password')),
+        Text('Tindakan ini tidak dapat dibatalkan. Masukkan password untuk konfirmasi.'.tr),
+        TextField(controller: pw, obscureText: true, decoration: InputDecoration(labelText: 'Password'.tr)),
       ]),
-      actions: [TextButton(onPressed: () => Get.back(result: false), child: const Text('Batal')), FilledButton(style: FilledButton.styleFrom(backgroundColor: Colors.red), onPressed: () => Get.back(result: true), child: const Text('Hapus'))],
+      actions: [TextButton(onPressed: () => Get.back(result: false), child: Text('Batal'.tr)), FilledButton(style: FilledButton.styleFrom(backgroundColor: Colors.red), onPressed: () => Get.back(result: true), child: Text('Hapus'.tr))],
     ));
     if (ok != true) return;
     try {

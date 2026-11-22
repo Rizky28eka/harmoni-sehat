@@ -18,6 +18,7 @@ class AppRoutes {
   static const doctorDetail = '/doctors/detail';
   static const consultation = '/consultation';
   static const chat = '/chat';
+  static const call = '/call';
   static const payment = '/payment';
   static const shop = '/shop';
   static const cart = '/cart';

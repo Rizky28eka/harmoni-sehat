@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:harmoni_sehat_frontend/app/theme/app_colors.dart';
 
 class CustomTextFormField extends StatelessWidget {
@@ -38,16 +37,14 @@ class CustomTextFormField extends StatelessWidget {
       onTap: onTap,
       readOnly: readOnly,
       maxLines: obscureText ? 1 : maxLines,
-      style: GoogleFonts.montserrat(color: AppColors.textPrimary),
       decoration: InputDecoration(
         labelText: labelText,
-        labelStyle: GoogleFonts.montserrat(color: AppColors.textSecondary),
         prefixIcon: prefixIcon != null
             ? Icon(prefixIcon, color: AppColors.textSecondary)
             : null,
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: AppColors.borderColor),

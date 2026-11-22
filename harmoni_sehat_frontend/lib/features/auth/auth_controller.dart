@@ -18,9 +18,9 @@ String homeRouteFor(String? role) => switch (role) {
 const _passwordHint = 'Min. 8 karakter dengan huruf besar, kecil, angka & simbol (@\$!%*?&)';
 final _passwordRule = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$');
 
-String? validateEmail(String? v) => (v == null || !RegExp(r'^\S+@\S+\.\S+$').hasMatch(v.trim())) ? 'Email tidak valid' : null;
-String? validatePassword(String? v) => (v == null || !_passwordRule.hasMatch(v)) ? _passwordHint : null;
-String? validateRequired(String? v, [String label = 'Field']) => (v == null || v.trim().isEmpty) ? '$label wajib diisi' : null;
+String? validateEmail(String? v) => (v == null || !RegExp(r'^\S+@\S+\.\S+$').hasMatch(v.trim())) ? 'Email tidak valid'.tr : null;
+String? validatePassword(String? v) => (v == null || !_passwordRule.hasMatch(v)) ? _passwordHint.tr : null;
+String? validateRequired(String? v, [String label = 'Field']) => (v == null || v.trim().isEmpty) ? '${label.tr} ${'wajib diisi'.tr}' : null;
 
 class AuthController extends GetxController {
   AuthController(this._repo);

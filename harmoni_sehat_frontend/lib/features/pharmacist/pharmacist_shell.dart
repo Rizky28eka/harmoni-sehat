@@ -65,7 +65,7 @@ class _OrdersQueue extends StatelessWidget {
       Padding(
         padding: const EdgeInsets.all(12),
         child: Obx(() => SegmentedButton<String>(
-              segments: const [ButtonSegment(value: 'processing', label: Text('Diproses')), ButtonSegment(value: 'shipped', label: Text('Dikirim')), ButtonSegment(value: 'delivered,cancelled', label: Text('Selesai'))],
+              segments: [ButtonSegment(value: 'processing', label: Text('Diproses'.tr)), ButtonSegment(value: 'shipped', label: Text('Dikirim'.tr)), ButtonSegment(value: 'delivered,cancelled', label: Text('Selesai'.tr))],
               selected: {c.filter.value},
               onSelectionChanged: (s) {
                 c.filter.value = s.first;
@@ -74,14 +74,14 @@ class _OrdersQueue extends StatelessWidget {
             )),
       ),
       Expanded(
-        child: Obx(() => AsyncBody(
+        child: Obx(() => asyncBody(
               loading: c.loading.value,
               error: c.error.value,
               isEmpty: (c.data.value ?? []).isEmpty,
               emptyText: 'Tidak ada pesanan',
               emptyIcon: Icons.inbox_outlined,
               onRetry: c.load,
-              child: RefreshIndicator(
+              builder: () => RefreshIndicator(
                 onRefresh: c.load,
                 child: ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
@@ -135,19 +135,19 @@ class StockController extends LoadController<List<Map<String, dynamic>>> {
         title: Text(isNew ? 'Obat baru' : 'Ubah obat'),
         content: SingleChildScrollView(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'Nama')),
-            TextField(controller: category, decoration: const InputDecoration(labelText: 'Kategori')),
-            TextField(controller: code, decoration: const InputDecoration(labelText: 'Kode obat')),
-            Row(children: [Expanded(child: TextField(controller: unit, decoration: const InputDecoration(labelText: 'Satuan'))), const SizedBox(width: 8), Expanded(child: TextField(controller: price, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Harga')))]),
-            TextField(controller: stock, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Stok')),
-            TextField(controller: expiry, readOnly: true, decoration: const InputDecoration(labelText: 'Kedaluwarsa (YYYY-MM-DD)'), onTap: () async {
+            TextField(controller: name, decoration: InputDecoration(labelText: 'Nama'.tr)),
+            TextField(controller: category, decoration: InputDecoration(labelText: 'Kategori'.tr)),
+            TextField(controller: code, decoration: InputDecoration(labelText: 'Kode obat'.tr)),
+            Row(children: [Expanded(child: TextField(controller: unit, decoration: InputDecoration(labelText: 'Satuan'.tr))), const SizedBox(width: 8), Expanded(child: TextField(controller: price, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: 'Harga'.tr)))]),
+            TextField(controller: stock, keyboardType: TextInputType.number, decoration: InputDecoration(labelText: 'Stok'.tr)),
+            TextField(controller: expiry, readOnly: true, decoration: InputDecoration(labelText: 'Kedaluwarsa (YYYY-MM-DD)'.tr), onTap: () async {
               final d = await showDatePicker(context: ctx, initialDate: DateTime.now().add(const Duration(days: 365)), firstDate: DateTime.now(), lastDate: DateTime(2100));
               if (d != null) expiry.text = d.toIso8601String().split('T').first;
             }),
-            SwitchListTile(contentPadding: EdgeInsets.zero, title: const Text('Wajib resep'), value: needsRx, onChanged: (v) => setState(() => needsRx = v)),
+            SwitchListTile(contentPadding: EdgeInsets.zero, title: Text('Wajib resep'.tr), value: needsRx, onChanged: (v) => setState(() => needsRx = v)),
           ]),
         ),
-        actions: [TextButton(onPressed: () => Get.back(result: false), child: const Text('Batal')), FilledButton(onPressed: () => Get.back(result: true), child: const Text('Simpan'))],
+        actions: [TextButton(onPressed: () => Get.back(result: false), child: Text('Batal'.tr)), FilledButton(onPressed: () => Get.back(result: true), child: Text('Simpan'.tr))],
       ),
     ));
     if (ok != true) return;
@@ -179,20 +179,20 @@ class StockTab extends StatelessWidget {
     final c = Get.put(StockController());
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: FloatingActionButton.extended(onPressed: () => c.edit(context), icon: const Icon(Icons.add), label: const Text('Obat')),
+      floatingActionButton: FloatingActionButton.extended(onPressed: () => c.edit(context), icon: const Icon(Icons.add), label: Text('Obat'.tr)),
       body: Column(children: [
-        Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 4), child: TextField(onChanged: (v) => c.query.value = v, decoration: const InputDecoration(hintText: 'Cari obat', prefixIcon: Icon(Icons.search)))),
+        Padding(padding: const EdgeInsets.fromLTRB(16, 12, 16, 4), child: TextField(onChanged: (v) => c.query.value = v, decoration: InputDecoration(hintText: 'Cari obat'.tr, prefixIcon: Icon(Icons.search)))),
         Expanded(
           child: Obx(() {
             c.query.value;
             final list = c.filtered;
-            return AsyncBody(
+            return asyncBody(
               loading: c.loading.value,
               error: c.error.value,
               isEmpty: list.isEmpty,
               emptyText: 'Tidak ada obat',
               onRetry: c.load,
-              child: RefreshIndicator(
+              builder: () => RefreshIndicator(
                 onRefresh: c.load,
                 child: ListView.builder(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 90),
@@ -204,7 +204,7 @@ class StockTab extends StatelessWidget {
                     return Card(
                       child: ListTile(
                         title: Text(d.s('nama')),
-                        subtitle: Text('${rupiah(d.n('harga'))} • Kedaluwarsa ${fmtDate(d['tgl_kadaluarsa'])}${expired ? ' ⚠' : ''}'),
+                        subtitle: Text('${rupiah(d.n('harga'))} • ${'Kedaluwarsa'.tr} ${fmtDate(d['tgl_kadaluarsa'])}${expired ? ' ⚠' : ''}'),
                         trailing: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.end, children: [Text('${d.n('stok').toInt()}', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: low ? Colors.red : null)), Text(d.s('satuan'), style: const TextStyle(fontSize: 11, color: Colors.grey))]),
                         onTap: () => c.edit(context, d),
                       ),
