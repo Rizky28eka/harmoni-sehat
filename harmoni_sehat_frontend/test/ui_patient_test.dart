@@ -77,7 +77,10 @@ void main() {
       Get.toNamed('/doctors/detail', arguments: 'd1');
       await tester.pumpAndSettle();
       expect(find.text('dr. Andi Pratama'), findsOneWidget);
+      // Reviews sit below the booking form in a lazy list; scroll to them.
+      await tester.scrollUntilVisible(find.text('Ramah sekali'), 300, scrollable: find.byType(Scrollable).first);
       expect(find.text('Ramah sekali'), findsOneWidget);
+      await tester.scrollUntilVisible(find.widgetWithText(ChoiceChip, '09:30'), -300, scrollable: find.byType(Scrollable).first);
 
       // 09:00 is selectable, 09:30 (taken) is disabled.
       final taken = tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '09:30'));
@@ -187,7 +190,7 @@ void main() {
       expect(find.byIcon(Icons.call_outlined), findsOneWidget);
 
       await tester.enterText(find.byType(TextField), 'Demam dok');
-      await tester.tap(find.byIcon(Icons.send));
+      await tester.tap(find.byIcon(Icons.send_rounded));
       await tester.pumpAndSettle();
       expect(env.socket.sent.single, {'id': 'c1', 'text': 'Demam dok', 'type': 'text'});
 

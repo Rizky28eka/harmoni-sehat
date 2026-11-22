@@ -25,7 +25,7 @@ class AppColors {
   // Typography & Content
   static const Color textPrimary = Color(0xFF0F172A); // Dark Slate
   static const Color textSecondary = Color(0xFF64748B); // Medium Slate
-  static const Color textMuted = Color(0xFF94A3B8); // Light Slate
+  static const Color textMuted = Color(0xFF6B7A90); // Light Slate
 
   // Feedback & State
   static const Color errorColor = Color(0xFFEF4444); // Red-500

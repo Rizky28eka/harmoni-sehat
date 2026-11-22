@@ -103,10 +103,12 @@ void main() {
     await wait(t, 1);
     await tapIcon(t, Icons.local_pharmacy_outlined);
     await shot(t, 'patient-shop', 3);
-    await t.tap(find.text('Pesanan Saya'));
+    await t.tap(find.text('My Orders'));
     await shot(t, 'patient-orders', 3);
-    await tapIcon(t, Icons.folder_outlined);
-    await shot(t, 'patient-records');
+    Get.toNamed(AppRoutes.medicalRecords);
+    await shot(t, 'patient-records', 2.5);
+    Get.back();
+    await wait(t, 1);
     Get.toNamed(AppRoutes.aiChat);
     await shot(t, 'patient-ai');
     Get.back();

@@ -40,17 +40,34 @@ void main() {
       Get.toNamed('/doctor/complete', arguments: 'c1');
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(find.text('Simpan & selesai'));
+      // The form is a lazy list of sections: bring a widget on screen by scrolling whichever way it is.
+      Future<void> reveal(Finder f) async {
+        final scroll = find.byType(Scrollable).first;
+        for (final dy in [300.0, -300.0]) {
+          try {
+            await tester.scrollUntilVisible(f, dy, scrollable: scroll, maxScrolls: 20);
+            await tester.ensureVisible(f); // fully on screen, not just barely visible
+            await tester.pump();
+            return;
+          } catch (_) {}
+        }
+        fail('Could not reveal $f');
+      }
+
+      await reveal(find.text('Simpan & selesai'));
       await tester.tap(find.text('Simpan & selesai'));
       await tester.pump();
       expect(env.snackShown('Diagnosa wajib diisi'), isTrue);
       expect(env.api.calls.where((c) => c.contains('/complete')), isEmpty);
 
-      await tester.enterText(find.widgetWithText(TextField, 'Diagnosa *'), 'Demam viral');
-      await tester.enterText(find.widgetWithText(TextField, 'Suhu (°C)'), '38.5');
-      await tester.enterText(find.widgetWithText(TextField, 'Alergi (pisahkan dengan koma)'), 'Penisilin, Debu');
-      await tester.ensureVisible(find.text('Simpan & selesai'));
-      await tester.tap(find.text('Simpan & selesai'));
+      for (final (label, text) in [('Diagnosa *', 'Demam viral'), ('Suhu (°C)', '38.5'), ('Alergi (pisahkan dengan koma)', 'Penisilin, Debu')]) {
+        await reveal(find.widgetWithText(TextField, label));
+        await tester.enterText(find.widgetWithText(TextField, label), text);
+      }
+      await reveal(find.text('Simpan & selesai'));
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, -150)); // clear the bottom edge
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Simpan & selesai'));
       await tester.pumpAndSettle();
       final body = env.api.bodies['POST /booking/consultations/c1/complete']!.single!;
       expect(body['diagnosa'], 'Demam viral');

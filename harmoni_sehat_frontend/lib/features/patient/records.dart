@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/theme/app_colors.dart';
+import '../../app/theme/pastel.dart';
+import '../../shared/widgets/kit.dart';
 
 import '../../core/api_client.dart';
 import '../../core/reminder_scheduler.dart';
@@ -35,46 +37,43 @@ class RecordsTab extends StatelessWidget {
           error: c.error.value,
           isEmpty: (c.data.value ?? []).isEmpty,
           emptyText: 'Belum ada rekam medis.\nRekam medis dibuat dokter setelah konsultasi.',
-          emptyIcon: Icons.folder_open_outlined,
+          emptyIcon: Icons.folder_open_rounded,
           onRetry: c.load,
           builder: () => RefreshIndicator(
             onRefresh: c.load,
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
               itemCount: c.data.value!.length,
               itemBuilder: (_, i) {
                 final r = c.data.value![i];
                 final dokter = asMap(r['dokter_id']);
-                final vitals = [
+                final tone = const [Tone.sky, Tone.mint, Tone.lilac, Tone.peach][i % 4];
+                final ink = toneOf(context, tone).ink;
+                final vitalPills = [
                   if (r['tekanan_darah'] != null) 'TD ${r['tekanan_darah']}',
                   if (r['suhu_tubuh'] != null) '${r['suhu_tubuh']}°C',
                   if (r['berat_badan'] != null) '${r['berat_badan']} kg',
-                ].join(' • ');
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
+                ];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: SoftCard(
+                    tone: tone,
+                    variant: i,
+                    radius: 28,
+                    padding: const EdgeInsets.all(18),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Row(children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          margin: const EdgeInsets.only(right: 10),
-                          decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(10)),
-                          child: const Icon(Icons.description_outlined, color: AppColors.primaryDark, size: 20),
-                        ),
-                        Expanded(child: Text(r.s('diagnosis'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                        IconButton(tooltip: 'Ekspor PDF'.tr, icon: const Icon(Icons.picture_as_pdf_outlined, color: AppColors.primaryColor), onPressed: () => c.exportPdf(r['_id'].toString())),
+                        ToneIcon(Icons.description_rounded, tone: tone, size: 44),
+                        const SizedBox(width: 12),
+                        Expanded(child: Text(r.s('diagnosis'), style: TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: ink, letterSpacing: -0.3))),
+                        IconButton(tooltip: 'Ekspor PDF'.tr, icon: Icon(Icons.picture_as_pdf_rounded, color: ink), onPressed: () => c.exportPdf(r['_id'].toString())),
                       ]),
-                      Text('${fmtDate(r['tanggal_rekam_medis'])}${dokter.isNotEmpty ? ' • ${dokter.s('nama')}' : ''}', style: const TextStyle(color: Colors.grey)),
-                      if (vitals.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Text(vitals)),
-                      if (r.s('catatan_dokter').isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Text(r.s('catatan_dokter'))),
+                      const SizedBox(height: 6),
+                      Text('${fmtDate(r['tanggal_rekam_medis'])}${dokter.isNotEmpty ? ' • ${dokter.s('nama')}' : ''}', style: TextStyle(color: ink.withValues(alpha: 0.8), fontWeight: FontWeight.w500, fontSize: 13)),
+                      if (vitalPills.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Wrap(spacing: 8, runSpacing: 6, children: [for (final v in vitalPills) Pill(v, tone: tone)])),
+                      if (r.s('catatan_dokter').isNotEmpty) Padding(padding: const EdgeInsets.only(top: 12), child: Text(r.s('catatan_dokter'), style: TextStyle(color: ink.withValues(alpha: 0.9), height: 1.4))),
                       if ((r['alergi'] as List?)?.isNotEmpty ?? false)
-                        Container(
-                          margin: const EdgeInsets.only(top: 8),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(color: AppColors.accentRoseLight, borderRadius: BorderRadius.circular(8)),
-                          child: Text('${'Alergi'.tr}: ${(r['alergi'] as List).join(', ')}', style: const TextStyle(color: AppColors.accentRose, fontWeight: FontWeight.w600, fontSize: 12)),
-                        ),
+                        Padding(padding: const EdgeInsets.only(top: 12), child: Pill('${'Alergi'.tr}: ${(r['alergi'] as List).join(', ')}', tone: Tone.rose, icon: Icons.warning_amber_rounded)),
                     ]),
                   ),
                 );
@@ -176,21 +175,41 @@ class RemindersView extends StatelessWidget {
             emptyIcon: Icons.alarm_off_outlined,
             onRetry: c.load,
             builder: () => ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 90),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
               itemCount: c.data.value!.length,
               itemBuilder: (_, i) {
                 final r = c.data.value![i];
+                final active = r['is_active'] == true;
                 return Dismissible(
                   key: ValueKey(r['_id']),
                   direction: DismissDirection.endToStart,
-                  background: Container(color: Colors.red, alignment: Alignment.centerRight, padding: const EdgeInsets.only(right: 20), child: const Icon(Icons.delete, color: Colors.white)),
+                  background: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(color: AppColors.errorColor, borderRadius: BorderRadius.circular(26)),
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 24),
+                    child: const Icon(Icons.delete_rounded, color: Colors.white, size: 26),
+                  ),
                   onDismissed: (_) => c.remove(r['_id'].toString()),
-                  child: Card(
-                    child: SwitchListTile(
-                      title: Text('${r.s('nama_obat')}${r.s('dosis').isNotEmpty ? ' • ${r.s('dosis')}' : ''}'),
-                      subtitle: Text((r['jam'] as List? ?? []).join('  ·  ')),
-                      value: r['is_active'] == true,
-                      onChanged: (v) => c.toggle(r, v),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: SoftCard(
+                      tone: active ? Tone.butter : Tone.slate,
+                      variant: i,
+                      radius: 26,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      child: Row(children: [
+                        ToneIcon(Icons.alarm_rounded, tone: active ? Tone.butter : Tone.slate, size: 46),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text('${r.s('nama_obat')}${r.s('dosis').isNotEmpty ? ' • ${r.s('dosis')}' : ''}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5)),
+                            const SizedBox(height: 6),
+                            Wrap(spacing: 6, runSpacing: 4, children: [for (final t in (r['jam'] as List? ?? [])) Pill('$t', tone: active ? Tone.peach : Tone.slate, dense: true)]),
+                          ]),
+                        ),
+                        Switch(value: active, onChanged: (v) => c.toggle(r, v)),
+                      ]),
                     ),
                   ),
                 );

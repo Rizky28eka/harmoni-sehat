@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 
 import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
-import '../../core/api_client.dart';
+import '../../app/theme/pastel.dart';
+import '../../shared/widgets/kit.dart';
 import '../../core/session.dart';
 import '../../core/theme_controller.dart';
 import '../../core/ui.dart';
@@ -20,144 +21,106 @@ class ProfileTab extends StatelessWidget {
     final settings = Get.find<SettingsController>();
     final repo = Get.find<AuthRepository>();
     final role = session.role ?? '';
+    final mint = toneOf(context, Tone.mint);
+    Widget row({required IconData icon, required Tone tone, required String title, String? subtitle, Widget? trailing, VoidCallback? onTap, Color? titleColor}) => ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          leading: ToneIcon(icon, tone: tone, size: 42),
+          title: Text(title, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5, color: titleColor)),
+          subtitle: subtitle == null ? null : Text(subtitle, style: const TextStyle(fontSize: 12)),
+          trailing: trailing ?? (onTap == null ? null : const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted)),
+          onTap: onTap,
+        );
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
       children: [
-        // Profile Info Card
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardTheme.color ?? Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: AppColors.borderColor, width: 0.9),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              Center(child: Avatar(name: session.displayName, url: session.profile.value?['foto']?.toString(), radius: 44)),
-              const SizedBox(height: 14),
-              Text(session.displayName, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
-              const SizedBox(height: 4),
-              Text(session.user.value?.email ?? '', style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryLight,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  role.toUpperCase(),
-                  style: const TextStyle(color: AppColors.primaryDark, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 0.5),
-                ),
-              ),
-            ],
-          ),
+        SoftCard(
+          tone: Tone.mint,
+          radius: 32,
+          padding: const EdgeInsets.fromLTRB(20, 26, 20, 22),
+          child: Column(children: [
+            Avatar(name: session.displayName, url: session.profile.value?['foto']?.toString(), radius: 44),
+            const SizedBox(height: 14),
+            Text(session.displayName, textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: mint.ink, letterSpacing: -0.5)),
+            const SizedBox(height: 3),
+            Text(session.user.value?.email ?? '', style: TextStyle(color: mint.ink.withValues(alpha: 0.8), fontSize: 13)),
+            const SizedBox(height: 12),
+            Pill(role.toUpperCase(), tone: Tone.mint, icon: Icons.verified_user_rounded),
+          ]),
         ),
         if ((role == 'dokter' || role == 'farmasi') && session.profile.value?['is_verified'] != true)
-          Container(
-            margin: const EdgeInsets.only(top: 16),
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.accentAmberLight,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.accentAmber.withValues(alpha: 0.3)),
+          Padding(
+            padding: const EdgeInsets.only(top: 14),
+            child: SoftCard(
+              tone: Tone.butter,
+              radius: 22,
+              padding: const EdgeInsets.all(14),
+              child: Row(children: [
+                Icon(Icons.hourglass_top_rounded, color: toneOf(context, Tone.butter).ink),
+                const SizedBox(width: 12),
+                Expanded(child: Text('Akun Anda sedang menunggu verifikasi admin.'.tr, style: TextStyle(fontSize: 13, color: toneOf(context, Tone.butter).ink, fontWeight: FontWeight.w600))),
+              ]),
             ),
-            child: Row(children: [
-              const Icon(Icons.hourglass_top, color: AppColors.accentAmber),
-              const SizedBox(width: 12),
-              Expanded(child: Text('Akun Anda sedang menunggu verifikasi admin.'.tr, style: const TextStyle(fontSize: 13))),
-            ]),
           ),
-        const SizedBox(height: 20),
-
-        // Settings Preferences Card
-        Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: AppColors.borderColor, width: 0.9)),
-          child: Column(
-            children: [
-              Obx(() => SwitchListTile(
-                    secondary: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: AppColors.accentIndigoLight, borderRadius: BorderRadius.circular(10)),
-                      child: const Icon(Icons.dark_mode_outlined, color: AppColors.accentIndigo, size: 20),
-                    ),
-                    title: Text('Mode gelap'.tr, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                    value: settings.themeMode.value == ThemeMode.dark,
-                    onChanged: settings.setDark,
-                  )),
-              const Divider(height: 1),
-              Obx(() => ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: AppColors.secondaryLight, borderRadius: BorderRadius.circular(10)),
-                      child: const Icon(Icons.language, color: AppColors.secondaryColor, size: 20),
-                    ),
-                    title: Text('Bahasa'.tr, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                    trailing: DropdownButton<String>(
-                      value: settings.locale.value.languageCode,
-                      underline: const SizedBox(),
-                      items: [
-                        DropdownMenuItem(value: 'id', child: Text('Indonesia'.tr)),
-                        DropdownMenuItem(value: 'en', child: Text('English'.tr)),
-                      ],
-                      onChanged: (v) => settings.setLanguage(v ?? 'id'),
-                    ),
-                  )),
-              const Divider(height: 1),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(10)),
-                  child: const Icon(Icons.lock_outline, color: AppColors.primaryColor, size: 20),
-                ),
-                title: Text('Ubah password'.tr, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
-                onTap: () => _changePassword(repo),
-              ),
-              const Divider(height: 1),
-              ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: AppColors.accentRoseLight, borderRadius: BorderRadius.circular(10)),
-                  child: const Icon(Icons.logout, color: AppColors.accentRose, size: 20),
-                ),
-                title: Text('Keluar'.tr, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: AppColors.accentRose)),
-                trailing: const Icon(Icons.chevron_right, size: 18, color: AppColors.textSecondary),
-                onTap: () async {
-                  if (await confirm('Keluar', 'Anda yakin ingin keluar?', ok: 'Keluar')) {
-                    await repo.logout();
-                    Get.offAllNamed(AppRoutes.login);
-                  }
-                },
-              ),
+        const SizedBox(height: 18),
+        SoftCard(
+          radius: 26,
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(children: [
+            Obx(() => SwitchListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  secondary: const ToneIcon(Icons.dark_mode_rounded, tone: Tone.lilac, size: 42),
+                  title: Text('Mode gelap'.tr, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5)),
+                  value: settings.themeMode.value == ThemeMode.dark,
+                  onChanged: settings.setDark,
+                )),
+            Obx(() => row(
+                  icon: Icons.language_rounded,
+                  tone: Tone.sky,
+                  title: 'Bahasa'.tr,
+                  trailing: DropdownButton<String>(
+                    value: settings.locale.value.languageCode,
+                    underline: const SizedBox(),
+                    borderRadius: BorderRadius.circular(18),
+                    items: [DropdownMenuItem(value: 'id', child: Text('Indonesia'.tr)), DropdownMenuItem(value: 'en', child: Text('English'.tr))],
+                    onChanged: (v) => settings.setLanguage(v ?? 'id'),
+                  ),
+                )),
+            row(icon: Icons.lock_rounded, tone: Tone.mint, title: 'Ubah password'.tr, onTap: () => _changePassword(repo)),
+            if (role == 'pasien') ...[
+              row(icon: Icons.folder_rounded, tone: Tone.sky, title: 'Rekam medis'.tr, onTap: () => Get.toNamed(AppRoutes.medicalRecords)),
+              row(icon: Icons.alarm_rounded, tone: Tone.butter, title: 'Pengingat obat'.tr, onTap: () => Get.toNamed(AppRoutes.reminders)),
+              row(icon: Icons.receipt_long_rounded, tone: Tone.peach, title: 'Pesanan obat'.tr, onTap: () => Get.toNamed(AppRoutes.orders)),
             ],
-          ),
+          ]),
         ),
-
-        if (role != 'admin' && role != 'superadmin') ...[
-          const SizedBox(height: 16),
-          Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18), side: const BorderSide(color: AppColors.borderColor, width: 0.9)),
-            child: ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppColors.accentRoseLight, borderRadius: BorderRadius.circular(10)),
-                child: const Icon(Icons.delete_forever_outlined, color: Colors.red, size: 20),
-              ),
-              title: Text('Hapus akun'.tr, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.red)),
-              subtitle: Text('Data identitas dihapus permanen sesuai UU PDP'.tr, style: const TextStyle(fontSize: 12)),
-              onTap: () => _deleteAccount(repo),
+        const SizedBox(height: 14),
+        SoftCard(
+          radius: 26,
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(children: [
+            row(
+              icon: Icons.logout_rounded,
+              tone: Tone.rose,
+              title: 'Keluar'.tr,
+              titleColor: toneOf(context, Tone.rose).ink,
+              onTap: () async {
+                if (await confirm('Keluar', 'Anda yakin ingin keluar?', ok: 'Keluar')) {
+                  await repo.logout();
+                  Get.offAllNamed(AppRoutes.login);
+                }
+              },
             ),
-          ),
-        ],
-        const SizedBox(height: 32),
+            if (role != 'admin' && role != 'superadmin')
+              row(
+                icon: Icons.delete_forever_rounded,
+                tone: Tone.rose,
+                title: 'Hapus akun'.tr,
+                subtitle: 'Data identitas dihapus permanen sesuai UU PDP'.tr,
+                titleColor: AppColors.errorColor,
+                onTap: () => _deleteAccount(repo),
+              ),
+          ]),
+        ),
       ],
     );
   }

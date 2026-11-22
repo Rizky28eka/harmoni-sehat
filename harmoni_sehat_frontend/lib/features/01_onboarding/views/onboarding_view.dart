@@ -1,211 +1,142 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+
 import '../../../app/theme/app_colors.dart';
+import '../../../app/theme/pastel.dart';
+import '../../../shared/widgets/kit.dart';
 import '../controllers/onboarding_controller.dart';
 
 class OnboardingView extends GetView<OnboardingController> {
   const OnboardingView({super.key});
 
+  static const _pages = <OnboardingSlide>[
+    OnboardingSlide(
+      tone: Tone.mint,
+      icon: Icons.favorite_rounded,
+      orbit: [Icons.monitor_heart_rounded, Icons.spa_rounded, Icons.self_improvement_rounded],
+      title: 'Selamat Datang di Harmoni Sehat',
+      description: 'Solusi kesehatan terpadu untuk Anda dan keluarga, langsung dari genggaman Anda.',
+    ),
+    OnboardingSlide(
+      tone: Tone.sky,
+      icon: Icons.videocam_rounded,
+      orbit: [Icons.chat_bubble_rounded, Icons.medical_services_rounded, Icons.schedule_rounded],
+      title: 'Konsultasi Dokter Profesional',
+      description: 'Dapatkan saran medis dari dokter ahli kapan saja, di mana saja tanpa perlu antre.',
+    ),
+    OnboardingSlide(
+      tone: Tone.peach,
+      icon: Icons.local_pharmacy_rounded,
+      orbit: [Icons.medication_rounded, Icons.vaccines_rounded, Icons.local_shipping_rounded],
+      title: 'Pesan Obat dengan Mudah',
+      description: 'Tersedia berbagai macam obat dan vitamin, siap diantar langsung ke rumah Anda.',
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBackground,
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: PageView(
-                controller: controller.pageController,
-                onPageChanged: controller.onPageChanged,
-                children: const [
-                  OnboardingPage(
-                    svgAsset: _onboarding1,
-                    title: 'Selamat Datang di Harmoni Sehat',
-                    description:
-                        'Solusi kesehatan terpadu untuk Anda dan keluarga, langsung dari genggaman Anda.',
-                  ),
-                  OnboardingPage(
-                    svgAsset: _onboarding2,
-                    title: 'Konsultasi Dokter Profesional',
-                    description:
-                        'Dapatkan saran medis dari dokter ahli kapan saja, di mana saja tanpa perlu antre.',
-                  ),
-                  OnboardingPage(
-                    svgAsset: _onboarding3,
-                    title: 'Pesan Obat dengan Mudah',
-                    description:
-                        'Tersedia berbagai macam obat dan vitamin, siap diantar langsung ke rumah Anda.',
-                  ),
-                ],
-              ),
+        child: Column(children: [
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(padding: const EdgeInsets.fromLTRB(0, 8, 12, 0), child: TextButton(onPressed: controller.completeOnboarding, child: Text('Lewati'.tr))),
+          ),
+          Expanded(
+            child: PageView(
+              controller: controller.pageController,
+              onPageChanged: controller.onPageChanged,
+              children: [for (final p in _pages) OnboardingPage(page: p)],
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-              child: Obx(
-                () => Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        3,
-                        (index) => AnimatedDot(
-                          isActive: index == controller.currentPage.value,
-                        ),
-                      ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(28, 8, 28, 28),
+            child: Obx(() => Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                  Row(children: List.generate(3, (i) => AnimatedDot(isActive: i == controller.currentPage.value))),
+                  SizedBox(
+                    height: 58,
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        if (controller.isLastPage) {
+                          controller.completeOnboarding();
+                        } else {
+                          controller.pageController.nextPage(duration: const Duration(milliseconds: 380), curve: Curves.easeOutCubic);
+                        }
+                      },
+                      iconAlignment: IconAlignment.end,
+                      icon: const Icon(Icons.arrow_forward_rounded),
+                      label: Text((controller.isLastPage ? 'Mulai' : 'Lanjut').tr),
                     ),
-                    Container(
-                      height: 52,
-                      width: 52,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primaryColor.withValues(alpha: 0.35),
-                            blurRadius: 14,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (controller.isLastPage) {
-                            controller.completeOnboarding();
-                          } else {
-                            controller.pageController.nextPage(
-                              duration: const Duration(milliseconds: 400),
-                              curve: Curves.easeInOut,
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          shape: const CircleBorder(),
-                          padding: EdgeInsets.zero,
-                          elevation: 0,
-                          backgroundColor: AppColors.primaryColor,
-                        ),
-                        child: const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+                  ),
+                ])),
+          ),
+        ]),
       ),
+    );
+  }
+}
+
+class OnboardingSlide {
+  const OnboardingSlide({required this.tone, required this.icon, required this.orbit, required this.title, required this.description});
+  final Tone tone;
+  final IconData icon;
+  final List<IconData> orbit;
+  final String title;
+  final String description;
+}
+
+class OnboardingPage extends StatelessWidget {
+  const OnboardingPage({super.key, required this.page});
+  final OnboardingSlide page;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = toneOf(context, page.tone);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 26),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Expanded(
+          child: SoftCard(
+            tone: page.tone,
+            radius: 44,
+            padding: EdgeInsets.zero,
+            child: LayoutBuilder(builder: (context, box) {
+              final w = box.maxWidth;
+              final h = box.maxHeight;
+              Widget bubble(IconData icon, Offset at, double size, double alpha) => Positioned(
+                    left: at.dx * w - size / 2,
+                    top: at.dy * h - size / 2,
+                    child: Container(width: size, height: size, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: alpha)), child: Icon(icon, color: c.ink, size: size * 0.46)),
+                  );
+              return Stack(children: [
+                Center(child: Container(width: w * 0.62, height: w * 0.62, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.55)), child: Icon(page.icon, size: w * 0.3, color: c.ink))),
+                bubble(page.orbit[0], const Offset(0.2, 0.2), 64, 0.75),
+                bubble(page.orbit[1], const Offset(0.82, 0.3), 54, 0.65),
+                bubble(page.orbit[2], const Offset(0.7, 0.82), 70, 0.8),
+              ]);
+            }),
+          ),
+        ),
+        const SizedBox(height: 30),
+        Text(page.title.tr, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -1, height: 1.1)),
+        const SizedBox(height: 12),
+        Text(page.description.tr, style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary, height: 1.5)),
+        const SizedBox(height: 16),
+      ]),
     );
   }
 }
 
 class AnimatedDot extends StatelessWidget {
   const AnimatedDot({super.key, required this.isActive});
-
   final bool isActive;
 
   @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.only(right: 8),
-      height: 8,
-      width: isActive ? 26 : 8,
-      decoration: BoxDecoration(
-        color: isActive ? AppColors.primaryColor : AppColors.borderColor,
-        borderRadius: BorderRadius.circular(4),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => AnimatedContainer(
+        duration: const Duration(milliseconds: 280),
+        margin: const EdgeInsets.only(right: 8),
+        height: 8,
+        width: isActive ? 28 : 8,
+        decoration: BoxDecoration(color: isActive ? AppColors.primaryColor : AppColors.textMuted.withValues(alpha: 0.35), borderRadius: BorderRadius.circular(8)),
+      );
 }
-
-class OnboardingPage extends StatelessWidget {
-  final String svgAsset;
-  final String title;
-  final String description;
-
-  const OnboardingPage({
-    super.key,
-    required this.svgAsset,
-    required this.title,
-    required this.description,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(28),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(32),
-              border: Border.all(color: AppColors.borderColor, width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primaryColor.withValues(alpha: 0.08),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: AspectRatio(
-              aspectRatio: 1.3,
-              child: SvgPicture.string(svgAsset, semanticsLabel: title.tr),
-            ),
-          ),
-          const SizedBox(height: 40),
-          Text(
-            title.tr,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
-              letterSpacing: -0.3,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            description.tr,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textSecondary,
-              height: 1.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// SVG Illustrations (as strings)
-const String _onboarding1 = '''
-<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M512 1024C229.248 1024 0 794.752 0 512S229.248 0 512 0s512 229.248 512 512-229.248 512-512 512z m0-960C264.576 64 64 264.576 64 512s200.576 448 448 448 448-200.576 448-448S759.424 64 512 64z" fill="#0E9F6E"/><path d="M742.4 364.8c-12.8-12.8-32-12.8-44.8 0L499.2 563.2 326.4 390.4c-12.8-12.8-32-12.8-44.8 0-12.8 12.8-12.8 32 0 44.8l185.6 185.6c12.8 12.8 32 12.8 44.8 0L742.4 409.6c12.8-12.8 12.8-32 0-44.8z" fill="#FFFFFF"/></svg>
-''';
-
-const String _onboarding2 = '''
-<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#0E9F6E"/>
-<path d="M12.5 15H11v-4h1.5v4zm0-5.5h-1.5V8h1.5v1.5z" fill="#0E9F6E"/>
-<path d="M17 12h-2v-2h2v2zm-4 0h-2v-2h2v2zm-4 0H7v-2h2v2z" fill="#0E9F6E"/>
-</svg>
-''';
-
-const String _onboarding3 = '''
-<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="#0E9F6E"/>
-<path d="M13 17h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#FFFFFF"/>
-</svg>
-''';

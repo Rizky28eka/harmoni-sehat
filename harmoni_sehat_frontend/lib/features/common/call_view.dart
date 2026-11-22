@@ -5,6 +5,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:get/get.dart' hide navigator;
 
 import '../../app/routes/app_routes.dart';
+import '../../app/theme/app_colors.dart';
 import '../../core/api_client.dart';
 import '../../core/call_state.dart';
 import '../../core/format.dart';
@@ -287,35 +288,99 @@ class CallView extends StatelessWidget {
         if (!didPop) c.hangUp();
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
-        body: SafeArea(
-          child: Obx(() {
-            final phase = c.phase.value;
-            final live = phase == CallPhase.active || phase == CallPhase.connecting;
-            return Stack(children: [
-              if (c.video && live) Positioned.fill(child: RTCVideoView(c.remoteRenderer, objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover)) else const SizedBox.shrink(),
-              if (!(c.video && phase == CallPhase.active))
-                Center(
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Avatar(name: c.peerName.value, radius: 52),
-                    const SizedBox(height: 16),
-                    Text(c.peerName.value, style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    Text(_status(c), style: const TextStyle(color: Colors.white70)),
-                  ]),
-                ),
-              if (c.video && live)
+        backgroundColor: const Color(0xFF0F172A),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF0F172A), Color(0xFF020617)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: SafeArea(
+            child: Obx(() {
+              final phase = c.phase.value;
+              final live = phase == CallPhase.active || phase == CallPhase.connecting;
+              return Stack(children: [
+                if (c.video && live) Positioned.fill(child: RTCVideoView(c.remoteRenderer, objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover)) else const SizedBox.shrink(),
+                if (!(c.video && phase == CallPhase.active))
+                  Center(
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primaryColor.withValues(alpha: 0.25),
+                              blurRadius: 36,
+                              spreadRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: Avatar(name: c.peerName.value, radius: 56),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(c.peerName.value, style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: -0.3)),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(_status(c), style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500)),
+                      ),
+                    ]),
+                  ),
+                if (c.video && live)
+                  Positioned(
+                    right: 16,
+                    top: 16,
+                    width: 110,
+                    height: 150,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        decoration: BoxDecoration(border: Border.all(color: Colors.white24, width: 2), borderRadius: BorderRadius.circular(16)),
+                        child: ClipRRect(borderRadius: BorderRadius.circular(14), child: RTCVideoView(c.localRenderer, mirror: true, objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover)),
+                      ),
+                    ),
+                  ),
+                if (phase == CallPhase.active)
+                  Positioned(
+                    top: 16,
+                    left: 16,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(color: Colors.black45, borderRadius: BorderRadius.circular(12)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.successColor, shape: BoxShape.circle)),
+                          const SizedBox(width: 6),
+                          Text(_clock(c.seconds.value), style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ),
                 Positioned(
+                  left: 16,
                   right: 16,
-                  top: 16,
-                  width: 110,
-                  height: 150,
-                  child: ClipRRect(borderRadius: BorderRadius.circular(12), child: RTCVideoView(c.localRenderer, mirror: true, objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover)),
+                  bottom: 24,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(32),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                    ),
+                    child: _controls(c, phase),
+                  ),
                 ),
-              if (phase == CallPhase.active) Positioned(top: 16, left: 16, child: Text(_clock(c.seconds.value), style: const TextStyle(color: Colors.white, fontSize: 16))),
-              Positioned(left: 0, right: 0, bottom: 24, child: _controls(c, phase)),
-            ]);
-          }),
+              ]);
+            }),
+          ),
         ),
       ),
     );

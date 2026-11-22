@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../app/routes/app_routes.dart';
 
+import '../../app/theme/pastel.dart';
+import '../../shared/widgets/kit.dart';
 import '../../app/theme/app_colors.dart';
 import '../../core/api_client.dart';
 import '../../core/format.dart';
@@ -133,38 +135,57 @@ class ChatView extends StatelessWidget {
   Widget build(BuildContext context) {
     final args = Get.arguments as Map<String, dynamic>;
     final c = Get.put(ChatController(args['id'] as String, args['title']?.toString() ?? 'Konsultasi'), tag: args['id'] as String);
+    final scheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: Obx(() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(c.title, style: const TextStyle(fontSize: 16)),
-              if (c.peerTyping.value) Text('sedang mengetik…'.tr, style: TextStyle(fontSize: 11)),
-            ])),
+        titleSpacing: 0,
+        title: Row(children: [
+          Avatar(name: c.title, radius: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Obx(() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(c.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                  Text(c.peerTyping.value ? 'sedang mengetik…'.tr : 'Aktif'.tr, style: TextStyle(fontSize: 11.5, color: c.peerTyping.value ? AppColors.primaryColor : AppColors.textMuted, fontWeight: FontWeight.w600)),
+                ])),
+          ),
+        ]),
         actions: [
           if (args['canCall'] == true) ...[
-            IconButton(tooltip: 'Panggilan suara'.tr, icon: const Icon(Icons.call_outlined), onPressed: () => Get.toNamed(AppRoutes.call, arguments: {'id': args['id'], 'video': false})),
-            IconButton(tooltip: 'Video call'.tr, icon: const Icon(Icons.videocam_outlined), onPressed: () => Get.toNamed(AppRoutes.call, arguments: {'id': args['id'], 'video': true})),
+            IconButton.filledTonal(tooltip: 'Panggilan suara'.tr, icon: const Icon(Icons.call_outlined), onPressed: () => Get.toNamed(AppRoutes.call, arguments: {'id': args['id'], 'video': false})),
+            IconButton.filledTonal(tooltip: 'Video call'.tr, icon: const Icon(Icons.videocam_outlined), onPressed: () => Get.toNamed(AppRoutes.call, arguments: {'id': args['id'], 'video': true})),
+            const SizedBox(width: 8),
           ],
         ],
       ),
       body: Obx(() {
-        if (c.loading.value) return const Center(child: CircularProgressIndicator());
-        if (c.error.value != null) return Center(child: Text(c.error.value!));
+        if (c.loading.value) return const SkeletonList(count: 5, itemHeight: 56);
+        if (c.error.value != null) return Center(child: Padding(padding: const EdgeInsets.all(24), child: Text(c.error.value!, textAlign: TextAlign.center)));
         return Column(children: [
           Expanded(
             child: c.messages.isEmpty
-                ? Center(child: Text('Mulai percakapan dengan menyapa 👋'.tr))
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(mainAxisSize: MainAxisSize.min, children: [
+                        GlowAvatar(size: 96, tone: Tone.sky, child: Icon(Icons.waving_hand_rounded, size: 40, color: toneOf(context, Tone.sky).ink)),
+                        const SizedBox(height: 16),
+                        Text('Mulai percakapan dengan menyapa 👋'.tr, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                      ]),
+                    ),
+                  )
                 : ListView.builder(
                     controller: c.scroll,
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                     itemCount: c.messages.length,
                     itemBuilder: (_, i) => _Bubble(m: c.messages[i], mine: c.messages[i]['pengirim_id']?.toString() == c.me),
                   ),
           ),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+              padding: const EdgeInsets.fromLTRB(12, 4, 12, 10),
               child: Row(children: [
-                IconButton(icon: const Icon(Icons.image_outlined), onPressed: c.attachImage),
+                IconButton.filledTonal(icon: const Icon(Icons.add_photo_alternate_outlined), onPressed: c.attachImage),
+                const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
                     controller: c.input,
@@ -172,11 +193,17 @@ class ChatView extends StatelessWidget {
                     maxLines: 4,
                     textCapitalization: TextCapitalization.sentences,
                     onChanged: c.onChanged,
-                    decoration: InputDecoration(hintText: 'Tulis pesan…'.tr, filled: true, contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10), border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none)),
+                    decoration: InputDecoration(
+                      hintText: 'Tulis pesan…'.tr,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(28), borderSide: BorderSide.none),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(28), borderSide: BorderSide.none),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(28), borderSide: BorderSide(color: scheme.primary, width: 1.6)),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 6),
-                Obx(() => IconButton.filled(onPressed: c.sending.value ? null : () => c.send(), icon: const Icon(Icons.send))),
+                const SizedBox(width: 8),
+                Obx(() => IconButton.filled(style: IconButton.styleFrom(minimumSize: const Size(52, 52)), onPressed: c.sending.value ? null : () => c.send(), icon: const Icon(Icons.send_rounded))),
               ]),
             ),
           ),
@@ -194,24 +221,25 @@ class _Bubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isImage = m['tipe'] == 'image' && m['file_url'] != null;
-    final bg = mine ? AppColors.primaryColor : Theme.of(context).colorScheme.surfaceContainerHighest;
+    final theirs = toneOf(context, Tone.slate);
     final fg = mine ? Colors.white : Theme.of(context).colorScheme.onSurface;
+    final radius = BorderRadius.only(topLeft: const Radius.circular(22), topRight: const Radius.circular(22), bottomLeft: Radius.circular(mine ? 22 : 6), bottomRight: Radius.circular(mine ? 6 : 22));
     return Align(
       alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 3),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
-        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(14)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
+        padding: isImage ? const EdgeInsets.all(4) : const EdgeInsets.fromLTRB(16, 10, 14, 8),
+        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
+        decoration: BoxDecoration(color: mine ? null : theirs.bg, gradient: mine ? const LinearGradient(colors: [Color(0xFF14B885), AppColors.primaryColor], begin: Alignment.topLeft, end: Alignment.bottomRight) : null, borderRadius: radius),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.end, mainAxisSize: MainAxisSize.min, children: [
           if (isImage)
-            ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.network(m['file_url'].toString(), width: 220, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.broken_image)))
+            ClipRRect(borderRadius: BorderRadius.circular(18), child: Image.network(m['file_url'].toString(), width: 230, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Padding(padding: EdgeInsets.all(24), child: Icon(Icons.broken_image_rounded))))
           else
-            Text(m['isi']?.toString() ?? '', style: TextStyle(color: fg)),
-          const SizedBox(height: 2),
+            Align(alignment: Alignment.centerLeft, child: Text(m['isi']?.toString() ?? '', style: TextStyle(color: fg, height: 1.35, fontSize: 15))),
+          const SizedBox(height: 3),
           Row(mainAxisSize: MainAxisSize.min, children: [
-            Text(fmtTime(m['timestamp']), style: TextStyle(color: fg.withValues(alpha: 0.7), fontSize: 10)),
-            if (mine) ...[const SizedBox(width: 4), Icon(m['is_read'] == true ? Icons.done_all : Icons.done, size: 12, color: fg.withValues(alpha: 0.8))],
+            Text(fmtTime(m['timestamp']), style: TextStyle(color: fg.withValues(alpha: 0.7), fontSize: 10.5)),
+            if (mine) ...[const SizedBox(width: 4), Icon(m['is_read'] == true ? Icons.done_all_rounded : Icons.done_rounded, size: 14, color: Colors.white.withValues(alpha: 0.9))],
           ]),
         ]),
       ),

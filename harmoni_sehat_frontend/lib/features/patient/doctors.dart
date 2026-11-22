@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 
 import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
+import '../../app/theme/pastel.dart';
+import '../../shared/widgets/kit.dart';
 import '../../core/api_client.dart';
 import '../../core/format.dart';
 import '../../core/ui.dart';
@@ -96,15 +98,15 @@ class DoctorListView extends StatelessWidget {
       appBar: AppBar(title: Text('Cari dokter'.tr)),
       body: Column(children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
           child: TextField(
             controller: c.search,
             onChanged: c.onSearch,
             decoration: InputDecoration(
               hintText: 'Cari nama dokter'.tr,
-              prefixIcon: const Icon(Icons.search),
+              prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: PopupMenuButton<String>(
-                icon: const Icon(Icons.sort),
+                icon: const Icon(Icons.tune_rounded),
                 onSelected: (v) {
                   c.sort.value = v;
                   c.load();
@@ -120,8 +122,8 @@ class DoctorListView extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 52,
-          child: Obx(() => ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), children: [
+          height: 50,
+          child: Obx(() => ListView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6), children: [
                 Padding(padding: const EdgeInsets.only(right: 8), child: ChoiceChip(label: Text('Semua'.tr), selected: c.selectedSpec.value == null, onSelected: (_) { c.selectedSpec.value = null; c.load(); })),
                 for (final s in c.specs)
                   Padding(
@@ -136,15 +138,15 @@ class DoctorListView extends StatelessWidget {
                 error: c.error.value,
                 isEmpty: c.doctors.isEmpty,
                 emptyText: 'Dokter tidak ditemukan',
-                emptyIcon: Icons.person_search_outlined,
+                emptyIcon: Icons.person_search_rounded,
                 onRetry: c.load,
                 builder: () => RefreshIndicator(
                   onRefresh: c.load,
                   child: ListView.builder(
                     controller: c.scroll,
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(20, 6, 20, 28),
                     itemCount: c.doctors.length + (c.loadingMore.value ? 1 : 0),
-                    itemBuilder: (_, i) => i >= c.doctors.length ? const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator())) : DoctorCard(d: c.doctors[i]),
+                    itemBuilder: (_, i) => i >= c.doctors.length ? const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator())) : DoctorCard(d: c.doctors[i], index: i),
                   ),
                 ),
               )),
@@ -155,56 +157,43 @@ class DoctorListView extends StatelessWidget {
 }
 
 class DoctorCard extends StatelessWidget {
-  const DoctorCard({super.key, required this.d});
+  const DoctorCard({super.key, required this.d, this.index = 0});
   final Map<String, dynamic> d;
+  final int index;
+
+  static const _tones = [Tone.mint, Tone.sky, Tone.peach, Tone.lilac, Tone.rose, Tone.butter];
 
   @override
   Widget build(BuildContext context) {
     final spec = asMap(d['spesialisasi_id']);
     final rating = (d['rating'] as num?)?.toDouble() ?? 0;
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+    final tone = _tones[index % _tones.length];
+    final ink = toneOf(context, tone).ink;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: SoftCard(
+        tone: tone,
+        variant: index,
+        radius: 28,
+        padding: const EdgeInsets.all(16),
         onTap: () => Get.toNamed(AppRoutes.doctorDetail, arguments: d['_id'].toString()),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(children: [
-            Avatar(name: d['nama']?.toString() ?? '', url: d['foto']?.toString(), radius: 30),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(d['nama']?.toString() ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                const SizedBox(height: 2),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(6)),
-                  child: Text(spec['nama']?.toString() ?? 'Dokter', style: const TextStyle(color: AppColors.primaryDark, fontSize: 11, fontWeight: FontWeight.w600)),
-                ),
-                const SizedBox(height: 8),
-                Row(children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(color: AppColors.accentAmberLight, borderRadius: BorderRadius.circular(6)),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.star, color: AppColors.accentAmber, size: 14),
-                        const SizedBox(width: 2),
-                        Text(
-                          ' ${rating == 0 ? 'Baru'.tr : rating.toStringAsFixed(1)}${(d['jumlah_ulasan'] ?? 0) > 0 ? ' (${d['jumlah_ulasan']})' : ''}',
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFB45309)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(rupiah(d['biaya_konsultasi'] as num?), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.primaryColor)),
-                ]),
+        child: Row(children: [
+          Avatar(name: d['nama']?.toString() ?? '', url: d['foto']?.toString(), radius: 34),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(d['nama']?.toString() ?? '', maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16.5, color: ink, letterSpacing: -0.3)),
+              const SizedBox(height: 2),
+              Text(spec['nama']?.toString() ?? 'Dokter', style: TextStyle(color: ink.withValues(alpha: 0.8), fontWeight: FontWeight.w500, fontSize: 13)),
+              const SizedBox(height: 10),
+              Row(children: [
+                Flexible(child: Pill(' ${rating == 0 ? 'Baru'.tr : rating.toStringAsFixed(1)}${(d['jumlah_ulasan'] ?? 0) > 0 ? ' (${d['jumlah_ulasan']})' : ''}', tone: Tone.butter, icon: Icons.star_rounded, dense: true)),
+                const SizedBox(width: 8),
+                Expanded(child: Align(alignment: Alignment.centerRight, child: FittedBox(fit: BoxFit.scaleDown, child: Text(rupiah(d['biaya_konsultasi'] as num?), style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5, color: ink))))),
               ]),
-            ),
-          ]),
-        ),
+            ]),
+          ),
+        ]),
       ),
     );
   }
@@ -299,6 +288,31 @@ class DoctorDetailView extends StatelessWidget {
             onRetry: c.load,
             builder: () => _content(context, c),
           )),
+      bottomNavigationBar: Obx(() {
+        final d = c.data.value;
+        if (d == null) return const SizedBox.shrink();
+        final fee = d.n('biaya_konsultasi');
+        return SafeArea(
+          child: Container(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+            decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface, border: Border(top: BorderSide(color: Theme.of(context).colorScheme.outline))),
+            child: Row(children: [
+              Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Biaya konsultasi'.tr, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                Text(fee > 0 ? rupiah(fee) : 'Gratis'.tr, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              ]),
+              const SizedBox(width: 18),
+              Expanded(
+                child: FilledButton.icon(
+                  onPressed: c.booking.value ? null : c.book,
+                  icon: c.booking.value ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.event_available_rounded),
+                  label: Text(fee > 0 ? '${'Pesan & Bayar'.tr} ${rupiah(fee)}' : 'Pesan Konsultasi'.tr, overflow: TextOverflow.ellipsis),
+                ),
+              ),
+            ]),
+          ),
+        );
+      }),
     );
   }
 
@@ -307,130 +321,114 @@ class DoctorDetailView extends StatelessWidget {
     final spec = asMap(d['spesialisasi_id']);
     final reviews = asList(d['ulasan']);
     final days = List.generate(14, (i) => DateTime.now().add(Duration(days: i + (DateTime.now().hour >= 20 ? 1 : 0))));
-    return ListView(padding: const EdgeInsets.all(16), children: [
-      Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(children: [
-                Avatar(name: d.s('nama'), url: d['foto']?.toString(), radius: 36),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(d.s('nama'), style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 3),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(6)),
-                      child: Text(spec['nama']?.toString() ?? 'Dokter', style: const TextStyle(color: AppColors.primaryDark, fontSize: 11, fontWeight: FontWeight.w600)),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 16),
-                      Text(' ${d.n('rating') == 0 ? 'Baru'.tr : d.n('rating').toStringAsFixed(1)} • ${d.n('jumlah_ulasan').toInt()} ${'ulasan'.tr}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                    ]),
-                  ]),
-                ),
-              ]),
-              if (d.s('bio').isNotEmpty) ...[
-                const Divider(height: 24),
-                Text(d.s('bio'), style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.4)),
-              ],
-            ],
-          ),
+    final mint = toneOf(context, Tone.mint);
+    return ListView(padding: const EdgeInsets.only(bottom: 24), children: [
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: SoftCard(
+          tone: Tone.mint,
+          radius: 32,
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+          child: Column(children: [
+            Avatar(name: d.s('nama'), url: d['foto']?.toString(), radius: 46),
+            const SizedBox(height: 14),
+            Text(d.s('nama'), textAlign: TextAlign.center, style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: mint.ink, letterSpacing: -0.4)),
+            const SizedBox(height: 4),
+            Text(spec['nama']?.toString() ?? 'Dokter', style: TextStyle(color: mint.ink.withValues(alpha: 0.8), fontWeight: FontWeight.w500)),
+            const SizedBox(height: 18),
+            Row(children: [
+              _stat(context, Icons.star_rounded, d.n('rating') == 0 ? 'Baru'.tr : d.n('rating').toStringAsFixed(1), 'Rating'.tr),
+              _stat(context, Icons.chat_rounded, '${d.n('jumlah_ulasan').toInt()}', 'ulasan'.tr),
+              _stat(context, Icons.payments_rounded, rupiah(d.n('biaya_konsultasi')).replaceAll('Rp ', ''), 'Biaya konsultasi'.tr),
+            ]),
+          ]),
         ),
       ),
-      const SizedBox(height: 12),
-      Card(
-        child: ListTile(
-          leading: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(10)),
-            child: const Icon(Icons.payments_outlined, color: AppColors.primaryColor, size: 22),
-          ),
-          title: Text('Biaya konsultasi'.tr, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-          trailing: Text(rupiah(d.n('biaya_konsultasi')), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.primaryColor)),
-        ),
-      ),
-      const SizedBox(height: 16),
-      Text('Pilih tanggal'.tr, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-      const SizedBox(height: 10),
+      if (d.s('bio').isNotEmpty) Padding(padding: const EdgeInsets.fromLTRB(24, 18, 24, 0), child: Text(d.s('bio'), style: const TextStyle(height: 1.5, color: AppColors.textSecondary))),
+      SectionHeading('Pilih tanggal'.tr),
       SizedBox(
-        height: 72,
+        height: 84,
         child: Obx(() {
           final selectedDay = c.selectedDate.value; // read here: item builders run outside this Obx's scope
           return ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: days.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (_, i) {
-                final day = days[i];
-                final sel = DateUtils.isSameDay(day, selectedDay);
-                return GestureDetector(
-                  onTap: () => c.pickDate(day),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 58,
-                    decoration: BoxDecoration(
-                      color: sel ? AppColors.primaryColor : Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: sel ? AppColors.primaryColor : AppColors.borderColor, width: 1.2),
-                      boxShadow: sel ? [BoxShadow(color: AppColors.primaryColor.withValues(alpha: 0.28), blurRadius: 8, offset: const Offset(0, 3))] : null,
-                    ),
-                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      Text(DateFormat('E', 'id_ID').format(day), style: TextStyle(color: sel ? Colors.white : AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w500)),
-                      const SizedBox(height: 2),
-                      Text('${day.day}', style: TextStyle(color: sel ? Colors.white : AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18)),
-                    ]),
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            itemCount: days.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (_, i) {
+              final day = days[i];
+              final sel = DateUtils.isSameDay(day, selectedDay);
+              return GestureDetector(
+                onTap: () => c.pickDate(day),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  width: 58,
+                  decoration: BoxDecoration(
+                    color: sel ? AppColors.primaryColor : Theme.of(context).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(22),
+                    boxShadow: sel ? [BoxShadow(color: AppColors.primaryColor.withValues(alpha: 0.35), blurRadius: 14, offset: const Offset(0, 6))] : null,
                   ),
-                );
-              },
-            );
+                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Text(DateFormat('E', Get.locale?.languageCode == 'en' ? 'en_US' : 'id_ID').format(day), style: TextStyle(color: sel ? Colors.white70 : AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 4),
+                    Text('${day.day}', style: TextStyle(color: sel ? Colors.white : null, fontWeight: FontWeight.w800, fontSize: 20)),
+                  ]),
+                ),
+              );
+            },
+          );
         }),
       ),
-      const SizedBox(height: 16),
-      Text('Pilih jam (WIB)'.tr, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-      const SizedBox(height: 8),
-      Obx(() {
-        if (c.slotsLoading.value) return const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()));
-        if (c.slots.isEmpty) return Padding(padding: const EdgeInsets.all(12), child: Text('Tidak ada jadwal praktik pada tanggal ini.'.tr, style: const TextStyle(color: Colors.grey)));
-        return Wrap(spacing: 8, runSpacing: 8, children: [
-          for (final s in c.slots)
-            ChoiceChip(
-              label: Text(DateFormat('HH:mm').format(DateTime.parse(s['start'] as String).toUtc().add(const Duration(hours: 7)))),
-              selected: c.selectedSlot.value == s,
-              onSelected: s['available'] == true ? (_) => c.selectedSlot.value = s : null,
-            ),
-        ]);
-      }),
-      const SizedBox(height: 16),
-      TextField(controller: c.complaint, maxLines: 3, decoration: InputDecoration(labelText: 'Keluhan Anda'.tr, alignLabelWithHint: true)),
-      const SizedBox(height: 16),
-      Obx(() => FilledButton.icon(
-            onPressed: c.booking.value ? null : c.book,
-            icon: c.booking.value ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.event_available),
-            label: Text(d.n('biaya_konsultasi') > 0 ? '${'Pesan & Bayar'.tr} ${rupiah(d.n('biaya_konsultasi'))}' : 'Pesan Konsultasi'.tr),
-            style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-          )),
+      SectionHeading('Pilih jam (WIB)'.tr),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: Obx(() {
+          if (c.slotsLoading.value) return const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()));
+          if (c.slots.isEmpty) return SoftCard(tone: Tone.slate, blobs: false, radius: 20, child: Text('Tidak ada jadwal praktik pada tanggal ini.'.tr, style: const TextStyle(color: AppColors.textSecondary)));
+          return Wrap(spacing: 10, runSpacing: 10, children: [
+            for (final s in c.slots)
+              ChoiceChip(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                label: Text(DateFormat('HH:mm').format(DateTime.parse(s['start'] as String).toUtc().add(const Duration(hours: 7)))),
+                selected: c.selectedSlot.value == s,
+                onSelected: s['available'] == true ? (_) => c.selectedSlot.value = s : null,
+              ),
+          ]);
+        }),
+      ),
+      const SizedBox(height: 18),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: TextField(controller: c.complaint, maxLines: 3, decoration: InputDecoration(labelText: 'Keluhan Anda'.tr, alignLabelWithHint: true)),
+      ),
       if (reviews.isNotEmpty) ...[
-        const SizedBox(height: 24),
-        Text('Ulasan pasien'.tr, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-        const SizedBox(height: 8),
+        SectionHeading('Ulasan pasien'.tr),
         for (final r in reviews)
-          Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+            child: SoftCard(
+              radius: 22,
+              padding: const EdgeInsets.all(14),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Row(children: [for (var i = 0; i < 5; i++) Icon(i < (r['rating'] as num) ? Icons.star : Icons.star_border, color: Colors.amber, size: 16)]),
-                const SizedBox(height: 4),
-                Text('${r['komentar'] ?? ''}${r['balasan'] != null ? '\n↳ ${'Dokter'.tr}: ${r['balasan']}' : ''}', style: const TextStyle(fontSize: 13, height: 1.3)),
+                Row(children: [for (var i = 0; i < 5; i++) Icon(i < (r['rating'] as num) ? Icons.star_rounded : Icons.star_border_rounded, color: AppColors.accentAmber, size: 18)]),
+                if ((r['komentar'] ?? '').toString().isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Text('${r['komentar']}')),
+                if (r['balasan'] != null) Padding(padding: const EdgeInsets.only(top: 6), child: Text('↳ ${'Dokter'.tr}: ${r['balasan']}', style: const TextStyle(color: AppColors.textSecondary))),
               ]),
             ),
           ),
       ],
     ]);
+  }
+
+  Widget _stat(BuildContext context, IconData icon, String value, String label) {
+    final ink = toneOf(context, Tone.mint).ink;
+    return Expanded(
+      child: Column(children: [
+        Icon(icon, color: ink, size: 22),
+        const SizedBox(height: 4),
+        Text(value, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: ink)),
+        Text(label, style: TextStyle(fontSize: 11, color: ink.withValues(alpha: 0.75))),
+      ]),
+    );
   }
 }

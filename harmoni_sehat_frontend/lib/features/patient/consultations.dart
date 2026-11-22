@@ -6,6 +6,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
+import '../../app/theme/pastel.dart';
+import '../../shared/widgets/kit.dart';
 import '../../core/api_client.dart';
 import '../../core/format.dart';
 import '../../core/session.dart';
@@ -23,6 +25,15 @@ class ConsultationListController extends LoadController<List<Map<String, dynamic
   }
 }
 
+Tone _toneForStatus(String s) => switch (s) {
+      'scheduled' => Tone.sky,
+      'ongoing' => Tone.mint,
+      'completed' => Tone.slate,
+      'pending' => Tone.butter,
+      'cancelled' => Tone.rose,
+      _ => Tone.slate,
+    };
+
 /// Consultation list — used as a tab by both patients and doctors.
 class ConsultationsTab extends StatelessWidget {
   const ConsultationsTab({super.key});
@@ -33,15 +44,16 @@ class ConsultationsTab extends StatelessWidget {
     final isDoctor = Get.find<SessionService>().role == 'dokter';
     return Column(children: [
       Padding(
-        padding: const EdgeInsets.all(12),
-        child: Obx(() => SegmentedButton<String>(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
+        child: Obx(() => SizedBox(width: double.infinity, child: SegmentedButton<String>(
+              showSelectedIcon: false,
               segments: [ButtonSegment(value: 'all', label: Text('Semua'.tr)), ButtonSegment(value: 'upcoming', label: Text('Aktif'.tr)), ButtonSegment(value: 'done', label: Text('Selesai'.tr))],
               selected: {c.filter.value},
               onSelectionChanged: (s) {
                 c.filter.value = s.first;
                 c.load();
               },
-            )),
+            ))),
       ),
       Expanded(
         child: Obx(() => asyncBody(
@@ -49,29 +61,42 @@ class ConsultationsTab extends StatelessWidget {
               error: c.error.value,
               isEmpty: (c.data.value ?? []).isEmpty,
               emptyText: 'Belum ada konsultasi',
-              emptyIcon: Icons.event_busy_outlined,
+              emptyIcon: Icons.event_busy_rounded,
               onRetry: c.load,
               builder: () => RefreshIndicator(
                 onRefresh: c.load,
                 child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                   itemCount: c.data.value!.length,
                   itemBuilder: (_, i) {
                     final x = c.data.value![i];
                     final other = asMap(isDoctor ? x['pasien_id'] : x['dokter_id']);
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                        leading: Avatar(name: other.s('nama'), url: other['foto']?.toString(), radius: 24),
-                        title: Text(other.s('nama', 'Pengguna'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text('${fmtDateTime(x['tanggal'])}\n${x.s('keluhan')}', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
-                        ),
-                        isThreeLine: true,
-                        trailing: StatusChip(x.s('status')),
+                    final tone = _toneForStatus(x.s('status'));
+                    final ink = toneOf(context, tone).ink;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: SoftCard(
+                        tone: tone,
+                        variant: i,
+                        radius: 26,
+                        padding: const EdgeInsets.all(16),
                         onTap: () => Get.toNamed(AppRoutes.consultation, arguments: x['_id'].toString())?.then((_) => c.load(silent: true)),
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Row(children: [
+                            Avatar(name: other.s('nama'), url: other['foto']?.toString(), radius: 24),
+                            const SizedBox(width: 12),
+                            Expanded(child: Text(other.s('nama', 'Pengguna'), maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: ink, letterSpacing: -0.3))),
+                            StatusChip(x.s('status')),
+                          ]),
+                          const SizedBox(height: 12),
+                          Row(children: [
+                            Icon(Icons.schedule_rounded, size: 16, color: ink),
+                            const SizedBox(width: 6),
+                            Expanded(child: Text(fmtDateTime(x['tanggal']), style: TextStyle(color: ink, fontWeight: FontWeight.w700, fontSize: 13))),
+                          ]),
+                          const SizedBox(height: 6),
+                          Text(x.s('keluhan'), maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: ink.withValues(alpha: 0.8), height: 1.3)),
+                        ]),
                       ),
                     );
                   },
@@ -167,22 +192,44 @@ class ConsultationDetailView extends StatelessWidget {
     final chatActive = status == 'scheduled' || status == 'ongoing';
     final chatArgs = {'id': x['_id'].toString(), 'title': other.s('nama', 'Konsultasi'), 'canCall': chatActive};
 
-    return ListView(padding: const EdgeInsets.all(16), children: [
-      Row(children: [
-        Avatar(name: other.s('nama'), url: other['foto']?.toString(), radius: 28),
-        const SizedBox(width: 12),
-        Expanded(child: Text(other.s('nama'), style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
-        StatusChip(status),
-      ]),
-      const SizedBox(height: 16),
-      _row(Icons.event, 'Jadwal', '${fmtDateTime(x['tanggal'])} WIB'),
-      _row(Icons.sick_outlined, 'Keluhan', x.s('keluhan')),
-      if (x.n('biaya') > 0) _row(Icons.payments_outlined, 'Biaya', rupiah(x.n('biaya'))),
-      if (tx.isNotEmpty) _row(Icons.receipt_long_outlined, 'Pembayaran', tx.s('status')),
-      if (x.s('cancel_reason').isNotEmpty) _row(Icons.info_outline, 'Alasan batal', x.s('cancel_reason')),
-      if (x.s('diagnosa').isNotEmpty) _row(Icons.medical_information_outlined, 'Diagnosa', x.s('diagnosa')),
-      if (x.s('catatan_dokter').isNotEmpty) _row(Icons.notes, 'Catatan dokter', x.s('catatan_dokter')),
-      const SizedBox(height: 16),
+    final tone = _toneForStatus(status);
+    final ink = toneOf(context, tone).ink;
+    return ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 28), children: [
+      SoftCard(
+        tone: tone,
+        radius: 32,
+        padding: const EdgeInsets.all(22),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(children: [Expanded(child: Text(isDoctor ? 'Pasien'.tr : 'Dokter'.tr, style: TextStyle(color: ink.withValues(alpha: 0.75), fontWeight: FontWeight.w600))), StatusChip(status)]),
+          const SizedBox(height: 14),
+          Row(children: [
+            Avatar(name: other.s('nama'), url: other['foto']?.toString(), radius: 34),
+            const SizedBox(width: 14),
+            Expanded(child: Text(other.s('nama'), style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800, color: ink, letterSpacing: -0.4))),
+          ]),
+          const SizedBox(height: 18),
+          Row(children: [Icon(Icons.event_rounded, size: 18, color: ink), const SizedBox(width: 8), Expanded(child: Text('${fmtDateTime(x['tanggal'])} WIB', style: TextStyle(color: ink, fontWeight: FontWeight.w700)))]),
+        ]),
+      ),
+      if (status == 'pending' && x['expires_at'] != null && !isDoctor)
+        Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: SoftCard(tone: Tone.butter, blobs: false, radius: 20, padding: const EdgeInsets.all(14), child: Row(children: [Icon(Icons.timer_rounded, color: toneOf(context, Tone.butter).ink), const SizedBox(width: 10), Expanded(child: Text('${'Selesaikan pembayaran sebelum'.tr} ${fmtTime(x['expires_at'])}', style: TextStyle(fontWeight: FontWeight.w700, color: toneOf(context, Tone.butter).ink)))])),
+        ),
+      const SizedBox(height: 14),
+      SoftCard(
+        radius: 24,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        child: Column(children: [
+          _row(context, Icons.sick_rounded, Tone.rose, 'Keluhan', x.s('keluhan')),
+          if (x.n('biaya') > 0) _row(context, Icons.payments_rounded, Tone.mint, 'Biaya', rupiah(x.n('biaya'))),
+          if (tx.isNotEmpty) _row(context, Icons.receipt_long_rounded, Tone.sky, 'Pembayaran', tx.s('status').tr),
+          if (x.s('cancel_reason').isNotEmpty) _row(context, Icons.info_rounded, Tone.butter, 'Alasan batal', x.s('cancel_reason')),
+          if (x.s('diagnosa').isNotEmpty) _row(context, Icons.medical_information_rounded, Tone.lilac, 'Diagnosa', x.s('diagnosa')),
+          if (x.s('catatan_dokter').isNotEmpty) _row(context, Icons.notes_rounded, Tone.slate, 'Catatan dokter', x.s('catatan_dokter')),
+        ]),
+      ),
+      const SizedBox(height: 18),
       if (status == 'pending' && !isDoctor && tx['status'] == 'pending')
         FilledButton.icon(onPressed: () => Get.toNamed(AppRoutes.payment, arguments: {'order_id': tx['order_id'], 'next': 'consultation', 'next_id': c.id}), icon: const Icon(Icons.payment), label: Text('Bayar sekarang'.tr), style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(50))),
       if (chatActive) ...[
@@ -209,14 +256,26 @@ class ConsultationDetailView extends StatelessWidget {
       if (status == 'completed' || (x['status'] == 'cancelled' && false))
         OutlinedButton.icon(onPressed: () => Get.toNamed(AppRoutes.chat, arguments: chatArgs), icon: const Icon(Icons.history), label: Text('Lihat riwayat obrolan'.tr), style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50))),
       if (resep != null) ...[
-        const SizedBox(height: 16),
-        Text('Resep dokter'.tr, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+        SectionHeading('Resep dokter'.tr, padding: const EdgeInsets.fromLTRB(2, 18, 2, 10)),
         for (final o in asList(resep['obat']))
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: const Icon(Icons.medication_outlined),
-            title: Text(asMap(o['obat_id']).s('nama', 'Obat')),
-            subtitle: Text('${o.s('dosis')} • ${o.n('jumlah').toInt()} ${'unit'.tr} • ${o.s('aturan_pakai')}'),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: SoftCard(
+              tone: Tone.peach,
+              variant: 1,
+              radius: 22,
+              padding: const EdgeInsets.all(14),
+              child: Row(children: [
+                const ToneIcon(Icons.medication_rounded, tone: Tone.peach, size: 44),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(asMap(o['obat_id']).s('nama', 'Obat'), style: const TextStyle(fontWeight: FontWeight.w800)),
+                    Text('${o.s('dosis')} • ${o.n('jumlah').toInt()} ${'unit'.tr} • ${o.s('aturan_pakai')}', style: const TextStyle(fontSize: 12.5, height: 1.3)),
+                  ]),
+                ),
+              ]),
+            ),
           ),
         if (!isDoctor)
           FilledButton.icon(
@@ -229,13 +288,18 @@ class ConsultationDetailView extends StatelessWidget {
     ]);
   }
 
-  Widget _row(IconData icon, String label, String value) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
+  Widget _row(BuildContext context, IconData icon, Tone tone, String label, String value) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Icon(icon, size: 20, color: Colors.grey),
+          ToneIcon(icon, tone: tone, size: 38),
           const SizedBox(width: 12),
-          SizedBox(width: 96, child: Text(label, style: const TextStyle(color: Colors.grey))),
-          Expanded(child: Text(value)),
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(label.tr, style: const TextStyle(color: AppColors.textMuted, fontSize: 12, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 1),
+              Text(value, style: const TextStyle(fontWeight: FontWeight.w600, height: 1.3)),
+            ]),
+          ),
         ]),
       );
 }
@@ -329,27 +393,39 @@ class PaymentView extends StatelessWidget {
         final t = c.tx.value;
         if (t == null) return Center(child: Text('Transaksi tidak ditemukan'.tr));
         final isMock = (t['payment_url']?.toString() ?? '').contains('/simulate');
-        return Padding(
-          padding: const EdgeInsets.all(24),
+        final ink = toneOf(context, Tone.mint).ink;
+        return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
           child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            const SizedBox(height: 16),
-            const Icon(Icons.account_balance_wallet_outlined, size: 64),
-            const SizedBox(height: 16),
-            Text(rupiah(t.n('total_biaya')), textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
-            Text('No. ${t.s('order_id')}', textAlign: TextAlign.center, style: const TextStyle(color: Colors.grey)),
-            const SizedBox(height: 8),
-            Center(child: StatusChip(t.s('status'))),
-            const SizedBox(height: 32),
+            SoftCard(
+              tone: Tone.mint,
+              radius: 32,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+              child: Column(children: [
+                GlowAvatar(size: 84, child: Icon(Icons.account_balance_wallet_rounded, size: 40, color: ink)),
+                const SizedBox(height: 18),
+                Text(rupiah(t.n('total_biaya')), textAlign: TextAlign.center, style: TextStyle(fontSize: 34, fontWeight: FontWeight.w800, color: ink, letterSpacing: -1)),
+                const SizedBox(height: 8),
+                Pill('No. ${t.s('order_id')}', tone: Tone.slate),
+                const SizedBox(height: 14),
+                StatusChip(t.s('status')),
+              ]),
+            ),
+            const SizedBox(height: 22),
             if (isMock) ...[
-              Text('Mode sandbox: belum ada gateway pembayaran yang terhubung. Simulasikan hasil pembayaran:'.tr, textAlign: TextAlign.center),
+              SoftCard(tone: Tone.sky, blobs: false, radius: 20, padding: const EdgeInsets.all(14), child: Row(children: [
+                Icon(Icons.science_rounded, color: toneOf(context, Tone.sky).ink),
+                const SizedBox(width: 12),
+                Expanded(child: Text('Mode sandbox: belum ada gateway pembayaran yang terhubung. Simulasikan hasil pembayaran:'.tr, style: TextStyle(fontSize: 13, height: 1.4, color: toneOf(context, Tone.sky).ink))),
+              ])),
               const SizedBox(height: 16),
               FilledButton(onPressed: c.busy.value ? null : () => c.simulate(true), child: Text('Simulasikan pembayaran berhasil'.tr)),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
               OutlinedButton(onPressed: c.busy.value ? null : () => c.simulate(false), child: Text('Simulasikan gagal'.tr)),
             ] else ...[
-              FilledButton.icon(onPressed: c.openGateway, icon: const Icon(Icons.open_in_new), label: Text('Buka halaman pembayaran'.tr), style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52))),
-              const SizedBox(height: 12),
-              Text('Setelah membayar, kembali ke aplikasi. Status akan diperbarui otomatis.'.tr, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey)),
+              FilledButton.icon(onPressed: c.openGateway, icon: const Icon(Icons.open_in_new_rounded), label: Text('Buka halaman pembayaran'.tr)),
+              const SizedBox(height: 14),
+              Text('Setelah membayar, kembali ke aplikasi. Status akan diperbarui otomatis.'.tr, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12.5, height: 1.4)),
             ],
           ]),
         );

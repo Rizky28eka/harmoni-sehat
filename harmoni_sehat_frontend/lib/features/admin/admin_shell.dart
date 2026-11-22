@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../app/theme/app_colors.dart';
+import '../../app/theme/pastel.dart';
+import '../../shared/widgets/kit.dart';
 import '../../core/api_client.dart';
 import '../../core/format.dart';
 import '../../core/ui.dart';
@@ -62,17 +64,20 @@ class _AdminShellState extends State<AdminShell> {
   Widget build(BuildContext context) {
     final c = Get.put(AdminController());
     return Scaffold(
-      appBar: AppBar(title: Text(['Statistik', 'Verifikasi', 'Profil'][_index]), actions: const [NotificationBell()]),
+      appBar: AppBar(title: Text(['Statistik', 'Verifikasi', 'Profil'][_index].tr), actions: const [NotificationBell(), SizedBox(width: 8)]),
       body: IndexedStack(index: _index, children: [_Stats(c), _Verifications(c), const ProfileTab()]),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: [
-          const NavigationDestination(icon: Icon(Icons.insights_outlined), selectedIcon: Icon(Icons.insights), label: 'Statistik'),
-          NavigationDestination(icon: Obx(() => Badge(isLabelVisible: c.doctors.length + c.pharmacists.length > 0, label: Text('${c.doctors.length + c.pharmacists.length}'), child: const Icon(Icons.verified_user_outlined))), label: 'Verifikasi'),
-          NavigationDestination(icon: const Icon(Icons.person_outline), selectedIcon: const Icon(Icons.person), label: 'Profil'.tr),
-        ],
-      ),
+      bottomNavigationBar: Obx(() {
+        final pending = c.doctors.length + c.pharmacists.length;
+        return FloatingNavBar(
+          index: _index,
+          onChanged: (i) => setState(() => _index = i),
+          items: [
+            NavItem(Icons.insights_outlined, Icons.insights_rounded, 'Statistik'.tr),
+            NavItem(Icons.verified_user_outlined, Icons.verified_user_rounded, 'Verifikasi'.tr, badge: pending),
+            NavItem(Icons.person_outline, Icons.person_rounded, 'Profil'.tr),
+          ],
+        );
+      }),
     );
   }
 }
@@ -89,13 +94,21 @@ class _Stats extends StatelessWidget {
         onRetry: c.load,
         builder: () => RefreshIndicator(
           onRefresh: c.load,
-          child: ListView(padding: const EdgeInsets.all(16), children: [
-            Wrap(spacing: 12, runSpacing: 12, children: [
-              _tile(context, 'Pasien', '${c.stats.value!.n('pasien').toInt()}', Icons.people_outline, AppColors.secondaryColor, AppColors.secondaryLight),
-              _tile(context, 'Dokter aktif', '${c.stats.value!.n('dokter').toInt()}', Icons.medical_services_outlined, AppColors.primaryColor, AppColors.primaryLight),
-              _tile(context, 'Apoteker aktif', '${c.stats.value!.n('apoteker').toInt()}', Icons.local_pharmacy_outlined, AppColors.accentAmber, AppColors.accentAmberLight),
-              _tile(context, 'Pendapatan', rupiah(c.stats.value!.n('pendapatan')), Icons.payments_outlined, AppColors.accentIndigo, AppColors.accentIndigoLight),
-            ]),
+          child: ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 24), children: [
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 1.3,
+              children: [
+                _tile(context, 'Pasien', '${c.stats.value!.n('pasien').toInt()}', Icons.people_rounded, Tone.sky, 0),
+                _tile(context, 'Dokter aktif', '${c.stats.value!.n('dokter').toInt()}', Icons.medical_services_rounded, Tone.mint, 1),
+                _tile(context, 'Apoteker aktif', '${c.stats.value!.n('apoteker').toInt()}', Icons.local_pharmacy_rounded, Tone.butter, 2),
+                _tile(context, 'Pendapatan', rupiah(c.stats.value!.n('pendapatan')), Icons.payments_rounded, Tone.lilac, 0),
+              ],
+            ),
             const SectionTitle('Konsultasi'),
             _breakdown(c.stats.value!.m('konsultasi')),
             const SectionTitle('Pesanan obat'),
@@ -104,32 +117,22 @@ class _Stats extends StatelessWidget {
         ),
       ));
 
-  Widget _tile(BuildContext context, String label, String value, IconData icon, Color color, Color bg) => SizedBox(
-        width: (MediaQuery.of(context).size.width - 44) / 2,
-        child: Card(
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
-                  child: Icon(icon, color: color, size: 20),
-                ),
-                const SizedBox(height: 10),
-                Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 2),
-                Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-              ],
-            ),
-          ),
-        ),
+  Widget _tile(BuildContext context, String label, String value, IconData icon, Tone tone, int variant) => SoftCard(
+        tone: tone,
+        variant: variant,
+        radius: 26,
+        padding: const EdgeInsets.all(16),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Icon(icon, color: toneOf(context, tone).ink, size: 26),
+          const Spacer(),
+          Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: toneOf(context, tone).ink, letterSpacing: -0.5)),
+          Text(label.tr, style: TextStyle(color: toneOf(context, tone).ink.withValues(alpha: 0.8), fontSize: 12.5, fontWeight: FontWeight.w600)),
+        ]),
       );
 
   Widget _breakdown(Map<String, dynamic> m) => m.isEmpty
-      ? Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Text('Belum ada data'.tr, style: TextStyle(color: Colors.grey)))
-      : Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Wrap(spacing: 8, runSpacing: 8, children: [for (final e in m.entries) Chip(avatar: StatusChip(e.key), label: Text('${e.value}'))]));
+      ? Padding(padding: const EdgeInsets.symmetric(horizontal: 22), child: Text('Belum ada data'.tr, style: const TextStyle(color: AppColors.textMuted)))
+      : Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Wrap(spacing: 10, runSpacing: 10, children: [for (final e in m.entries) SoftCard(radius: 18, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), child: Row(mainAxisSize: MainAxisSize.min, children: [StatusChip(e.key), const SizedBox(width: 8), Text('${e.value}', style: const TextStyle(fontWeight: FontWeight.w800))]))]));
 }
 
 class _Verifications extends StatelessWidget {
@@ -147,23 +150,38 @@ class _Verifications extends StatelessWidget {
           error: c.error.value,
           isEmpty: items.isEmpty,
           emptyText: 'Tidak ada permintaan verifikasi',
-          emptyIcon: Icons.verified_outlined,
+          emptyIcon: Icons.verified_rounded,
           onRetry: c.load,
           builder: () => RefreshIndicator(
             onRefresh: c.load,
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
               itemCount: items.length,
               itemBuilder: (_, i) {
                 final (kind, p, license) = items[i];
-                return Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(14),
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: SoftCard(
+                    tone: kind == 'dokter' ? Tone.mint : Tone.peach,
+                    variant: i,
+                    radius: 28,
+                    padding: const EdgeInsets.all(16),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Row(children: [Avatar(name: p.s('nama')), const SizedBox(width: 12), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(p.s('nama'), style: const TextStyle(fontWeight: FontWeight.bold)), Text(kind == 'dokter' ? '${'Dokter'.tr} • $license' : '${'Apoteker'.tr} • $license'), Text(asMap(p['user_id']).s('email'), style: const TextStyle(color: Colors.grey, fontSize: 12))]))]),
-                      const SizedBox(height: 8),
+                      Row(children: [
+                        Avatar(name: p.s('nama'), radius: 26),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text(p.s('nama'), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                            const SizedBox(height: 2),
+                            Text(kind == 'dokter' ? '${'Dokter'.tr} • $license' : '${'Apoteker'.tr} • $license', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                            Text(asMap(p['user_id']).s('email'), style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                          ]),
+                        ),
+                      ]),
+                      const SizedBox(height: 12),
                       Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                        TextButton(onPressed: () => c.verify(kind, p['_id'].toString(), false), child: Text('Tolak'.tr, style: TextStyle(color: Colors.red))),
+                        TextButton(onPressed: () => c.verify(kind, p['_id'].toString(), false), style: TextButton.styleFrom(foregroundColor: AppColors.errorColor), child: Text('Tolak'.tr)),
                         const SizedBox(width: 8),
                         FilledButton(onPressed: () => c.verify(kind, p['_id'].toString(), true), child: Text('Setujui'.tr)),
                       ]),

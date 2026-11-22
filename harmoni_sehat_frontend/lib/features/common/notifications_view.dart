@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 
 import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
+import '../../app/theme/pastel.dart';
 import '../../core/api_client.dart';
+import '../../shared/widgets/kit.dart';
 import '../../core/format.dart';
 import '../../core/session.dart';
 import '../../core/socket_service.dart';
@@ -58,46 +60,46 @@ class NotificationsView extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Get.put(NotificationsController());
     return Scaffold(
-      appBar: AppBar(title: Text('Notifikasi'.tr), actions: [IconButton(tooltip: 'Tandai semua dibaca'.tr, icon: const Icon(Icons.done_all), onPressed: c.readAll)]),
+      appBar: AppBar(title: Text('Notifikasi'.tr), actions: [IconButton(tooltip: 'Tandai semua dibaca'.tr, icon: const Icon(Icons.done_all_rounded), onPressed: c.readAll), const SizedBox(width: 8)]),
       body: Obx(() => asyncBody(
             loading: c.loading.value,
             error: c.error.value,
             isEmpty: (c.data.value ?? []).isEmpty,
             emptyText: 'Belum ada notifikasi',
-            emptyIcon: Icons.notifications_none,
+            emptyIcon: Icons.notifications_none_rounded,
             onRetry: c.load,
             builder: () => RefreshIndicator(
               onRefresh: c.load,
               child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                 itemCount: c.data.value!.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                separatorBuilder: (_, __) => const SizedBox(height: 10),
                 itemBuilder: (_, i) {
                   final n = c.data.value![i];
                   final unread = n['is_read'] != true;
-                  final (icon, color, bg) = switch (n['tipe']) {
-                    'success' => (Icons.check_circle_outline, AppColors.successColor, AppColors.primaryLight),
-                    'warning' => (Icons.warning_amber, AppColors.warningColor, AppColors.accentAmberLight),
-                    'error' => (Icons.error_outline, AppColors.errorColor, AppColors.accentRoseLight),
-                    _ => (Icons.info_outline, AppColors.secondaryColor, AppColors.secondaryLight),
+                  final (icon, tone) = switch (n['tipe']) {
+                    'success' => (Icons.check_circle_rounded, Tone.mint),
+                    'warning' => (Icons.warning_amber_rounded, Tone.butter),
+                    'error' => (Icons.error_rounded, Tone.rose),
+                    _ => (Icons.notifications_rounded, Tone.sky),
                   };
-                  return Card(
-                    color: unread ? AppColors.primaryLight.withValues(alpha: 0.15) : null,
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
-                        child: Icon(icon, color: color, size: 22),
+                  return SoftCard(
+                    tone: unread ? tone : null,
+                    blobs: unread,
+                    radius: 22,
+                    padding: const EdgeInsets.all(14),
+                    onTap: () => c.open(n),
+                    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      ToneIcon(icon, tone: tone, size: 42),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(n['judul']?.toString() ?? '', style: TextStyle(fontWeight: unread ? FontWeight.w800 : FontWeight.w600)),
+                          if ((n['isi'] ?? '').toString().isNotEmpty) Padding(padding: const EdgeInsets.only(top: 2), child: Text('${n['isi']}', style: const TextStyle(color: AppColors.textSecondary, height: 1.3))),
+                          Padding(padding: const EdgeInsets.only(top: 6), child: Text(fmtDateTime(n['createdAt']), style: const TextStyle(fontSize: 11, color: AppColors.textMuted))),
+                        ]),
                       ),
-                      title: Text(n['judul']?.toString() ?? '', style: TextStyle(fontWeight: unread ? FontWeight.bold : FontWeight.w600, fontSize: 14)),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text('${n['isi'] ?? ''}\n${fmtDateTime(n['createdAt'])}', style: const TextStyle(fontSize: 12)),
-                      ),
-                      isThreeLine: true,
-                      onTap: () => c.open(n),
-                    ),
+                    ]),
                   );
                 },
               ),
@@ -114,9 +116,16 @@ class NotificationBell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final socket = Get.find<SocketService>();
-    return Obx(() => IconButton(
-          onPressed: () => Get.toNamed(AppRoutes.notifications),
-          icon: Badge(isLabelVisible: socket.unread.value > 0, label: Text('${socket.unread.value}'), child: const Icon(Icons.notifications_none_outlined)),
+    return Obx(() => Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: Material(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            shape: const CircleBorder(),
+            child: IconButton(
+              onPressed: () => Get.toNamed(AppRoutes.notifications),
+              icon: Badge(isLabelVisible: socket.unread.value > 0, label: Text('${socket.unread.value}'), child: const Icon(Icons.notifications_none_rounded)),
+            ),
+          ),
         ));
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:harmoni_sehat_frontend/core/format.dart';
 import 'package:harmoni_sehat_frontend/core/session.dart';
 import 'package:harmoni_sehat_frontend/core/ui.dart';
+import 'package:harmoni_sehat_frontend/shared/widgets/kit.dart';
 import 'package:harmoni_sehat_frontend/features/auth/auth_controller.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -65,7 +66,7 @@ void main() {
           );
 
       await tester.pumpWidget(host(loading: true));
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(SkeletonList), findsOneWidget);
 
       await tester.pumpWidget(host(error: 'Gagal'));
       expect(find.text('Gagal'), findsOneWidget);

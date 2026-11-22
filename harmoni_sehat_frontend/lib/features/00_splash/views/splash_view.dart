@@ -9,7 +9,6 @@ class SplashView extends GetView<SplashController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.lightBackground,
       body: Stack(
         children: [
           // Ambient soft background circles
@@ -45,7 +44,7 @@ class SplashView extends GetView<SplashController> {
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(28),
                     border: Border.all(color: AppColors.borderColor, width: 1),
                     boxShadow: [

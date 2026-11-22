@@ -2,14 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../app/routes/app_routes.dart';
+import '../../app/theme/app_colors.dart';
+import '../../app/theme/pastel.dart';
+import '../../shared/widgets/kit.dart';
 import '../../core/api_client.dart';
 import '../../core/format.dart';
+import '../../core/session.dart';
 import '../../core/socket_service.dart';
 import '../../core/ui.dart';
-import '../../app/theme/app_colors.dart';
 import '../common/notifications_view.dart';
 import '../common/settings_view.dart';
 import '../patient/consultations.dart';
+import '../patient/patient_shell.dart' show greetingPart;
 
 class DoctorHomeController extends LoadController<Map<String, dynamic>> {
   final _api = Get.find<ApiClient>();
@@ -39,16 +43,16 @@ class _DoctorShellState extends State<DoctorShell> {
   Widget build(BuildContext context) {
     final titles = ['Beranda', 'Konsultasi', 'Jadwal', 'Profil'];
     return Scaffold(
-      appBar: AppBar(title: Text(titles[_index].tr), actions: const [NotificationBell()]),
+      appBar: _index == 0 ? null : AppBar(title: Text(titles[_index].tr), actions: const [NotificationBell(), SizedBox(width: 8)]),
       body: IndexedStack(index: _index, children: const [_DoctorHome(), ConsultationsTab(), ScheduleTab(), ProfileTab()]),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: [
-          NavigationDestination(icon: const Icon(Icons.dashboard_outlined), selectedIcon: const Icon(Icons.dashboard), label: 'Beranda'.tr),
-          NavigationDestination(icon: const Icon(Icons.chat_bubble_outline), selectedIcon: const Icon(Icons.chat_bubble), label: 'Konsultasi'.tr),
-          NavigationDestination(icon: const Icon(Icons.calendar_month_outlined), selectedIcon: const Icon(Icons.calendar_month), label: 'Jadwal'.tr),
-          NavigationDestination(icon: const Icon(Icons.person_outline), selectedIcon: const Icon(Icons.person), label: 'Profil'.tr),
+      bottomNavigationBar: FloatingNavBar(
+        index: _index,
+        onChanged: (i) => setState(() => _index = i),
+        items: [
+          NavItem(Icons.dashboard_outlined, Icons.dashboard_rounded, 'Beranda'.tr),
+          NavItem(Icons.chat_bubble_outline, Icons.chat_bubble_rounded, 'Konsultasi'.tr),
+          NavItem(Icons.calendar_month_outlined, Icons.calendar_month_rounded, 'Jadwal'.tr),
+          NavItem(Icons.person_outline, Icons.person_rounded, 'Profil'.tr),
         ],
       ),
     );
@@ -61,62 +65,84 @@ class _DoctorHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.put(DoctorHomeController());
-    Widget stat(String label, String value, IconData icon, Color color, Color bg) => Expanded(
-          child: Card(
-            margin: const EdgeInsets.all(4),
-            child: Padding(
-              padding: const EdgeInsets.all(14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
-                    child: Icon(icon, color: color, size: 20),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 2),
-                  Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-                ],
-              ),
-            ),
-          ),
+    final session = Get.find<SessionService>();
+    Widget stat(String label, String value, IconData icon, Tone tone, int variant) => SoftCard(
+          tone: tone,
+          variant: variant,
+          radius: 26,
+          padding: const EdgeInsets.all(16),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Icon(icon, color: toneOf(context, tone).ink, size: 26),
+            const SizedBox(height: 14),
+            Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: toneOf(context, tone).ink, letterSpacing: -0.5)),
+            const SizedBox(height: 2),
+            Text(label.tr, style: TextStyle(color: toneOf(context, tone).ink.withValues(alpha: 0.8), fontSize: 12.5, fontWeight: FontWeight.w600)),
+          ]),
         );
-    return Obx(() => asyncBody(
-          loading: c.loading.value,
-          error: c.error.value,
-          isEmpty: c.data.value == null,
-          onRetry: c.load,
-          builder: () => RefreshIndicator(
-            onRefresh: c.load,
-            child: ListView(padding: const EdgeInsets.all(16), children: [
-              Text(greeting(), style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              Row(children: [
-                stat('Akan datang', '${c.data.value!.n('upcoming').toInt()}', Icons.event, AppColors.secondaryColor, AppColors.secondaryLight),
-                stat('Selesai', '${c.data.value!.n('completed').toInt()}', Icons.task_alt, AppColors.successColor, AppColors.primaryLight),
-              ]),
-              const SizedBox(height: 4),
-              Row(children: [
-                stat('Rating', c.data.value!.n('rating') == 0 ? '-' : c.data.value!.n('rating').toStringAsFixed(1), Icons.star_outline, AppColors.accentAmber, AppColors.accentAmberLight),
-                stat('Pendapatan', rupiah(c.data.value!.n('pendapatan')), Icons.payments_outlined, AppColors.accentIndigo, AppColors.accentIndigoLight),
-              ]),
-              const SectionTitle('Antrean hari ini'),
-              if (asList(c.data.value!['today']).isEmpty) Padding(padding: EdgeInsets.all(16), child: Text('Tidak ada konsultasi hari ini.'.tr, style: TextStyle(color: Colors.grey))),
-              for (final x in asList(c.data.value!['today']))
-                Card(
-                  child: ListTile(
-                    leading: Avatar(name: asMap(x['pasien_id']).s('nama')),
-                    title: Text(asMap(x['pasien_id']).s('nama')),
-                    subtitle: Text('${fmtTime(x['tanggal'])} ${'WIB'} • ${x.s('keluhan')}', maxLines: 1, overflow: TextOverflow.ellipsis),
-                    trailing: StatusChip(x.s('status')),
-                    onTap: () => Get.toNamed(AppRoutes.consultation, arguments: x['_id'].toString()),
+    return SafeArea(
+      bottom: false,
+      child: Obx(() => asyncBody(
+            loading: c.loading.value,
+            error: c.error.value,
+            isEmpty: c.data.value == null,
+            onRetry: c.load,
+            builder: () {
+              final d = c.data.value!;
+              final today = asList(d['today']);
+              return RefreshIndicator(
+                onRefresh: c.load,
+                child: ListView(padding: const EdgeInsets.only(bottom: 24), children: [
+                  BigGreeting(lead: greetingPart(), title: session.displayName, trailing: const NotificationBell()),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 1.35,
+                      children: [
+                        stat('Akan datang', '${d.n('upcoming').toInt()}', Icons.event_rounded, Tone.sky, 0),
+                        stat('Selesai', '${d.n('completed').toInt()}', Icons.task_alt_rounded, Tone.mint, 1),
+                        stat('Rating', d.n('rating') == 0 ? '-' : d.n('rating').toStringAsFixed(1), Icons.star_rounded, Tone.butter, 2),
+                        stat('Pendapatan', rupiah(d.n('pendapatan')), Icons.payments_rounded, Tone.lilac, 0),
+                      ],
+                    ),
                   ),
-                ),
-            ]),
-          ),
-        ));
+                  const SectionTitle('Antrean hari ini'),
+                  if (today.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: SoftCard(tone: Tone.slate, blobs: false, radius: 24, padding: const EdgeInsets.all(20), child: Row(children: [Icon(Icons.free_breakfast_rounded, color: toneOf(context, Tone.slate).ink), const SizedBox(width: 12), Expanded(child: Text('Tidak ada konsultasi hari ini.'.tr, style: TextStyle(color: toneOf(context, Tone.slate).ink, fontWeight: FontWeight.w600)))])),
+                    ),
+                  for (final x in today)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                      child: SoftCard(
+                        radius: 24,
+                        padding: const EdgeInsets.all(14),
+                        onTap: () => Get.toNamed(AppRoutes.consultation, arguments: x['_id'].toString()),
+                        child: Row(children: [
+                          Avatar(name: asMap(x['pasien_id']).s('nama')),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                              Text(asMap(x['pasien_id']).s('nama'), style: const TextStyle(fontWeight: FontWeight.w800)),
+                              const SizedBox(height: 2),
+                              Text('${fmtTime(x['tanggal'])} ${'WIB'} • ${x.s('keluhan')}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+                            ]),
+                          ),
+                          StatusChip(x.s('status')),
+                        ]),
+                      ),
+                    ),
+                ]),
+              );
+            },
+          )),
+    );
   }
 }
 
@@ -192,7 +218,7 @@ class ScheduleTab extends StatelessWidget {
     final c = Get.put(ScheduleController());
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: FloatingActionButton.extended(onPressed: () => c.add(context), icon: const Icon(Icons.add), label: Text('Jadwal'.tr)),
+      floatingActionButton: FloatingActionButton.extended(onPressed: () => c.add(context), icon: const Icon(Icons.add), label: Text('Tambah jadwal'.tr)),
       body: Obx(() => asyncBody(
             loading: c.loading.value,
             error: c.error.value,
@@ -201,22 +227,36 @@ class ScheduleTab extends StatelessWidget {
             emptyIcon: Icons.calendar_today_outlined,
             onRetry: c.load,
             builder: () => ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 90),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
               itemCount: c.data.value!.length,
               itemBuilder: (_, i) {
                 final s = c.data.value![i];
+                final active = s['is_active'] == true;
                 return Dismissible(
                   key: ValueKey(s['_id']),
                   direction: DismissDirection.endToStart,
                   confirmDismiss: (_) => confirm('Hapus jadwal', 'Jadwal ini akan dihapus.', ok: 'Hapus'),
-                  background: Container(color: Colors.red, alignment: Alignment.centerRight, padding: const EdgeInsets.only(right: 20), child: const Icon(Icons.delete, color: Colors.white)),
+                  background: Container(margin: const EdgeInsets.only(bottom: 12), decoration: BoxDecoration(color: AppColors.errorColor, borderRadius: BorderRadius.circular(26)), alignment: Alignment.centerRight, padding: const EdgeInsets.only(right: 24), child: const Icon(Icons.delete_rounded, color: Colors.white)),
                   onDismissed: (_) => c.remove(s['_id'].toString()),
-                  child: Card(
-                    child: SwitchListTile(
-                      title: Text('${s.s('hari')} • ${s.s('jam_mulai')}–${s.s('jam_selesai')}'),
-                      subtitle: Text('${asMap(s['klinik_id']).s('nama')} • ${s.n('durasi_menit', 30).toInt()} ${'menit/sesi'.tr}'),
-                      value: s['is_active'] == true,
-                      onChanged: (v) => c.toggle(s, v),
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: SoftCard(
+                      tone: active ? Tone.sky : Tone.slate,
+                      variant: i,
+                      radius: 26,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      child: Row(children: [
+                        ToneIcon(Icons.calendar_month_rounded, tone: active ? Tone.sky : Tone.slate, size: 46),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text('${s.s('hari')} • ${s.s('jam_mulai')}–${s.s('jam_selesai')}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5)),
+                            const SizedBox(height: 3),
+                            Text('${asMap(s['klinik_id']).s('nama')} • ${s.n('durasi_menit', 30).toInt()} ${'menit/sesi'.tr}', style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+                          ]),
+                        ),
+                        Switch(value: active, onChanged: (v) => c.toggle(s, v)),
+                      ]),
                     ),
                   ),
                 );
@@ -327,31 +367,53 @@ class CompleteConsultationView extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = Get.put(CompleteConsultationController(Get.arguments as String));
     Widget f(TextEditingController t, String label, {int lines = 1, TextInputType? type}) => Padding(padding: const EdgeInsets.only(bottom: 12), child: TextField(controller: t, maxLines: lines, keyboardType: type, decoration: InputDecoration(labelText: label, alignLabelWithHint: true)));
+    Widget section(String title, IconData icon, Tone tone, List<Widget> children) => Padding(
+          padding: const EdgeInsets.only(bottom: 14),
+          child: SoftCard(
+            radius: 28,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [ToneIcon(icon, tone: tone, size: 38), const SizedBox(width: 10), Text(title.tr, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16))]),
+              const SizedBox(height: 14),
+              ...children,
+            ]),
+          ),
+        );
     return Scaffold(
       appBar: AppBar(title: Text('Selesaikan Konsultasi'.tr)),
-      body: ListView(padding: const EdgeInsets.all(16), children: [
-        f(c.diagnosis, 'Diagnosa *', lines: 2),
-        f(c.action, 'Tindakan'),
-        f(c.notes, 'Catatan dokter', lines: 3),
-        Row(children: [Expanded(child: f(c.bp, 'Tekanan darah')), const SizedBox(width: 12), Expanded(child: f(c.temp, 'Suhu (°C)', type: TextInputType.number))]),
-        Row(children: [Expanded(child: f(c.height, 'Tinggi (cm)', type: TextInputType.number)), const SizedBox(width: 12), Expanded(child: f(c.weight, 'Berat (kg)', type: TextInputType.number))]),
-        f(c.allergies, 'Alergi (pisahkan dengan koma)'),
-        const SectionTitle('Resep'),
-        Obx(() => Column(children: [
-              for (var i = 0; i < c.items.length; i++)
-                Card(
-                  child: ListTile(
-                    title: Text(c.items[i]['nama'].toString()),
-                    subtitle: Text('${c.items[i]['dosis']} • ${c.items[i]['jumlah']} ${'unit'.tr} • ${c.items[i]['aturan_pakai']}'),
-                    trailing: IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => c.items.removeAt(i)),
+      body: ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 28), children: [
+        section('Diagnosa', Icons.medical_information_rounded, Tone.lilac, [f(c.diagnosis, 'Diagnosa *', lines: 2), f(c.action, 'Tindakan'), f(c.notes, 'Catatan dokter', lines: 3)]),
+        section('Tanda vital', Icons.monitor_heart_rounded, Tone.rose, [
+          Row(children: [Expanded(child: f(c.bp, 'Tekanan darah')), const SizedBox(width: 12), Expanded(child: f(c.temp, 'Suhu (°C)', type: TextInputType.number))]),
+          Row(children: [Expanded(child: f(c.height, 'Tinggi (cm)', type: TextInputType.number)), const SizedBox(width: 12), Expanded(child: f(c.weight, 'Berat (kg)', type: TextInputType.number))]),
+          f(c.allergies, 'Alergi (pisahkan dengan koma)'),
+        ]),
+        section('Resep', Icons.medication_rounded, Tone.peach, [
+          Obx(() => Column(children: [
+                for (var i = 0; i < c.items.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: SoftCard(
+                      tone: Tone.peach,
+                      blobs: false,
+                      radius: 20,
+                      padding: const EdgeInsets.fromLTRB(14, 10, 4, 10),
+                      child: Row(children: [
+                        Expanded(
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text(c.items[i]['nama'].toString(), style: const TextStyle(fontWeight: FontWeight.w800)),
+                            Text('${c.items[i]['dosis']} • ${c.items[i]['jumlah']} ${'unit'.tr} • ${c.items[i]['aturan_pakai']}', style: const TextStyle(fontSize: 12.5)),
+                          ]),
+                        ),
+                        IconButton(icon: const Icon(Icons.delete_outline_rounded), onPressed: () => c.items.removeAt(i)),
+                      ]),
+                    ),
                   ),
-                ),
-            ])),
-        OutlinedButton.icon(onPressed: c.addDrug, icon: const Icon(Icons.add), label: Text('Tambah obat'.tr)),
-        const SizedBox(height: 12),
-        f(c.prescriptionNote, 'Catatan resep (opsional)'),
-        const SizedBox(height: 8),
-        Obx(() => FilledButton(onPressed: c.saving.value ? null : c.submit, style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)), child: c.saving.value ? const CircularProgressIndicator() : Text('Simpan & selesai'.tr))),
+              ])),
+          Padding(padding: const EdgeInsets.only(bottom: 12), child: OutlinedButton.icon(onPressed: c.addDrug, icon: const Icon(Icons.add_rounded), label: Text('Tambah obat'.tr))),
+          f(c.prescriptionNote, 'Catatan resep (opsional)'),
+        ]),
+        Obx(() => FilledButton(onPressed: c.saving.value ? null : c.submit, child: c.saving.value ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white)) : Text('Simpan & selesai'.tr))),
       ]),
     );
   }
