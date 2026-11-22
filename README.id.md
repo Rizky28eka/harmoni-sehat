@@ -40,6 +40,7 @@
 - Resep digital yang bisa ditebus di apotek, serta toko obat dan keranjang.
 - Pengingat minum obat dan asisten kesehatan berbasis AI (Google Gemini).
 - Pencatatan persetujuan (*consent*) dan penghapusan akun yang dikonfirmasi dengan password.
+- Antarmuka bahasa Indonesia dan Inggris, dengan tema terang dan gelap.
 
 **Dokter**
 - Jadwal praktik per klinik, booking, dan konsultasi.
@@ -59,9 +60,33 @@
 
 ## Tangkapan layar
 
-Aplikasi seluler dibangun dengan Flutter. Gambar di bawah menampilkan layar splash dan onboarding; antarmuka aplikasi berbahasa Indonesia.
+Aplikasi seluler memiliki antarmuka **bahasa Indonesia dan Inggris** (dapat diganti di Pengaturan), ditampilkan di sini dalam bahasa Inggris. Semua tangkapan layar berasal dari database lokal yang di-seed dengan **data demo fiktif**.
 
-![Splash dan onboarding](docs/screenshots/cover.jpg)
+**Pasien**
+
+| Beranda | Cari dokter | Detail dokter |
+|---|---|---|
+| ![Beranda](docs/screenshots/patient-home.jpg) | ![Cari dokter](docs/screenshots/patient-doctors.jpg) | ![Detail dokter](docs/screenshots/patient-doctor-detail.jpg) |
+
+| Konsultasi | Chat real-time | Apotek |
+|---|---|---|
+| ![Konsultasi](docs/screenshots/patient-consultation.jpg) | ![Chat](docs/screenshots/patient-chat.jpg) | ![Apotek](docs/screenshots/patient-shop.jpg) |
+
+| Pesanan | Rekam medis | Pengingat |
+|---|---|---|
+| ![Pesanan](docs/screenshots/patient-orders.jpg) | ![Rekam medis](docs/screenshots/patient-records.jpg) | ![Pengingat](docs/screenshots/patient-reminders.jpg) |
+
+**Dokter, apoteker, dan administrator**
+
+| Beranda dokter | Jadwal dokter | Pesanan apoteker |
+|---|---|---|
+| ![Beranda dokter](docs/screenshots/doctor-home.jpg) | ![Jadwal](docs/screenshots/doctor-schedule.jpg) | ![Pesanan](docs/screenshots/pharmacist-orders.jpg) |
+
+| Stok apoteker | Statistik admin | Verifikasi admin |
+|---|---|---|
+| ![Stok](docs/screenshots/pharmacist-stock.jpg) | ![Statistik](docs/screenshots/admin-stats.jpg) | ![Verifikasi](docs/screenshots/admin-verification.jpg) |
+
+**Lainnya:** [login](docs/screenshots/login.jpg) · [onboarding](docs/screenshots/onboarding.jpg) · [asisten AI](docs/screenshots/patient-ai.jpg) · [tema gelap](docs/screenshots/patient-home-dark.jpg)
 
 ## Arsitektur
 
@@ -118,6 +143,8 @@ flutter pub get
 flutter run --dart-define=API_BASE_URL=http://<IP_KOMPUTER_ANDA>:8000/api/v1
 ```
 
+Opsional: dengan API berjalan dan database ter-seed, `node harmoni_sehat_backend/scripts/demo-activity.js` menambahkan aktivitas fiktif (konsultasi berjalan dengan chat, konsultasi selesai dengan resep, pengingat, pesanan apotek, dan pendaftaran yang menunggu verifikasi) agar setiap layar ada isinya. Skrip menolak berjalan terhadap API non-lokal.
+
 Gunakan IP LAN komputer Anda untuk perangkat fisik. Di emulator Android pakai `10.0.2.2`; di simulator iOS cukup `127.0.0.1`.
 
 ### Akun demo
@@ -165,14 +192,39 @@ Referensi lengkap: [`docs/backend/api-reference.md`](docs/backend/api-reference.
 
 ## Pengujian
 
-Backend memiliki tes integrasi (Jest + Supertest) yang berjalan di MongoDB in-memory, sehingga tidak perlu menyiapkan database:
+Backend memiliki **54 tes integrasi** (Jest + Supertest) yang berjalan di MongoDB in-memory, sehingga tidak perlu menyiapkan database:
 
 ```bash
 cd harmoni_sehat_backend
 npm test
 ```
 
-Area yang dicakup: autentikasi, booking, alur toko, dan chat real-time. Aplikasi Flutter memiliki widget test (`flutter test`).
+Area yang dicakup antara lain autentikasi, booking, alur toko, pembayaran, dan chat real-time.
+
+Aplikasi Flutter memiliki **60 tes unit dan widget** (logika, terjemahan, serta layar pasien, dokter, apoteker, dan admin terhadap API palsu di memori):
+
+```bash
+cd harmoni_sehat_frontend
+flutter test
+```
+
+### Membuat ulang tangkapan layar
+
+Tangkapan layar dihasilkan oleh integration test yang login sebagai tiap peran ke backend lokal yang sudah di-seed:
+
+```bash
+# terminal 1: API dengan data demo
+cd harmoni_sehat_backend && npm run seed && npm run dev
+node scripts/demo-activity.js          # opsional, menambah transaksi demo
+
+# terminal 2: simulator iOS
+cd harmoni_sehat_frontend
+flutter drive \
+  --driver=test_driver/integration_test.dart \
+  --target=integration_test/screenshots_test.dart -d <id-simulator>
+```
+
+Gambar ditulis ke `harmoni_sehat_frontend/docs/screenshots/`.
 
 ## Struktur repositori
 
@@ -180,9 +232,12 @@ Area yang dicakup: autentikasi, booking, alur toko, dan chat real-time. Aplikasi
 .
 ├── harmoni_sehat_backend/    API Express + TypeScript
 │   ├── src/                  api/, models/, middlewares/, services/, sockets/, utils/
+│   ├── scripts/              Aktivitas demo untuk pengembangan lokal
 │   └── tests/                Tes integrasi
 ├── harmoni_sehat_frontend/   Aplikasi Flutter (Android, iOS)
-│   └── lib/                  features/ (patient, doctor, pharmacist, admin, auth), core/, shared/
+│   ├── lib/                  features/ (patient, doctor, pharmacist, admin, auth), core/, shared/
+│   ├── test/                 Tes unit dan widget
+│   └── integration_test/     Pipeline tangkapan layar
 ├── docs/
 │   ├── backend/              Pengantar, panduan setup, referensi API, skema database
 │   └── frontend/             Cara menjalankan aplikasi

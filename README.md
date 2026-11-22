@@ -40,6 +40,7 @@
 - E-prescriptions that can be redeemed at a pharmacy, plus a medicine shop and cart.
 - Medication reminders and an AI health assistant (Google Gemini).
 - Consent tracking and account deletion confirmed by password.
+- Indonesian and English interface, with light and dark themes.
 
 **Doctors**
 - Practice schedules per clinic, bookings, and consultations.
@@ -59,9 +60,33 @@
 
 ## Screenshots
 
-The mobile app is built with Flutter. The images below show the splash and onboarding screens; the application interface is in Indonesian.
+The mobile app has an **Indonesian and English** interface (switchable in Settings), shown here in English. All screenshots come from a local, seeded database with **fictional demo data**.
 
-![Splash and onboarding](docs/screenshots/cover.jpg)
+**Patient**
+
+| Home | Find a doctor | Doctor details |
+|---|---|---|
+| ![Home](docs/screenshots/patient-home.jpg) | ![Find a doctor](docs/screenshots/patient-doctors.jpg) | ![Doctor details](docs/screenshots/patient-doctor-detail.jpg) |
+
+| Consultation | Real-time chat | Pharmacy |
+|---|---|---|
+| ![Consultation](docs/screenshots/patient-consultation.jpg) | ![Chat](docs/screenshots/patient-chat.jpg) | ![Pharmacy](docs/screenshots/patient-shop.jpg) |
+
+| Orders | Medical records | Reminders |
+|---|---|---|
+| ![Orders](docs/screenshots/patient-orders.jpg) | ![Records](docs/screenshots/patient-records.jpg) | ![Reminders](docs/screenshots/patient-reminders.jpg) |
+
+**Doctor, pharmacist and administrator**
+
+| Doctor home | Doctor schedule | Pharmacist orders |
+|---|---|---|
+| ![Doctor home](docs/screenshots/doctor-home.jpg) | ![Schedule](docs/screenshots/doctor-schedule.jpg) | ![Orders](docs/screenshots/pharmacist-orders.jpg) |
+
+| Pharmacist stock | Admin statistics | Admin verification |
+|---|---|---|
+| ![Stock](docs/screenshots/pharmacist-stock.jpg) | ![Statistics](docs/screenshots/admin-stats.jpg) | ![Verification](docs/screenshots/admin-verification.jpg) |
+
+**Also:** [login](docs/screenshots/login.jpg) · [onboarding](docs/screenshots/onboarding.jpg) · [AI assistant](docs/screenshots/patient-ai.jpg) · [dark theme](docs/screenshots/patient-home-dark.jpg)
 
 ## Architecture
 
@@ -118,6 +143,8 @@ flutter pub get
 flutter run --dart-define=API_BASE_URL=http://<YOUR_IP>:8000/api/v1
 ```
 
+Optional: with the API running and the database seeded, `node harmoni_sehat_backend/scripts/demo-activity.js` adds fictional activity (a live consultation with chat, a completed one with a prescription, reminders, a pharmacy order, and registrations awaiting verification) so every screen has something to show. It refuses to run against a non-local API.
+
 Use your machine's LAN IP for a physical device. On the Android emulator use `10.0.2.2`; on the iOS simulator `127.0.0.1` works.
 
 ### Demo accounts
@@ -165,14 +192,39 @@ Full reference: [`docs/backend/api-reference.md`](docs/backend/api-reference.md)
 
 ## Testing
 
-The backend has integration tests (Jest + Supertest) that run against an in-memory MongoDB, so no database setup is needed:
+The backend has **54 integration tests** (Jest + Supertest) that run against an in-memory MongoDB, so no database setup is needed:
 
 ```bash
 cd harmoni_sehat_backend
 npm test
 ```
 
-Covered areas: authentication, booking, the shop flow, and real-time chat. The Flutter app has widget tests (`flutter test`).
+Covered areas include authentication, booking, the shop flow, payments, and real-time chat.
+
+The Flutter app has **60 unit and widget tests** (logic, translations, and the patient, doctor, pharmacist and admin screens against an in-memory fake API):
+
+```bash
+cd harmoni_sehat_frontend
+flutter test
+```
+
+### Regenerating the screenshots
+
+The screenshots are produced by an integration test that logs in as each role against a local, seeded backend:
+
+```bash
+# terminal 1: API with demo data
+cd harmoni_sehat_backend && npm run seed && npm run dev
+node scripts/demo-activity.js          # optional, adds demo transactions
+
+# terminal 2: iOS simulator
+cd harmoni_sehat_frontend
+flutter drive \
+  --driver=test_driver/integration_test.dart \
+  --target=integration_test/screenshots_test.dart -d <simulator-id>
+```
+
+Images are written to `harmoni_sehat_frontend/docs/screenshots/`.
 
 ## Repository structure
 
@@ -180,9 +232,12 @@ Covered areas: authentication, booking, the shop flow, and real-time chat. The F
 .
 ├── harmoni_sehat_backend/    Express + TypeScript API
 │   ├── src/                  api/, models/, middlewares/, services/, sockets/, utils/
+│   ├── scripts/              Demo activity for local development
 │   └── tests/                Integration tests
 ├── harmoni_sehat_frontend/   Flutter app (Android, iOS)
-│   └── lib/                  features/ (patient, doctor, pharmacist, admin, auth), core/, shared/
+│   ├── lib/                  features/ (patient, doctor, pharmacist, admin, auth), core/, shared/
+│   ├── test/                 Unit and widget tests
+│   └── integration_test/     Screenshot pipeline
 ├── docs/
 │   ├── backend/              Introduction, setup guide, API reference, database schema
 │   └── frontend/             How to run the app
