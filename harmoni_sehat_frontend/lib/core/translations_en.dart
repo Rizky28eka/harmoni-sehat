@@ -1,6 +1,18 @@
 /// Indonesian (source language, used as key) → English.
 /// Keep keys sorted; i18n_test.dart verifies every UI string has an entry.
 const Map<String, String> enStrings = {
+  'Tolak verifikasi': 'Reject verification',
+  'Alasan penolakan (dikirim ke pemohon)': 'Reason (sent to the applicant)',
+  'obat stok menipis': 'medicines low on stock',
+  'Tampilkan': 'Show',
+  'Hari ini': 'Today',
+  'Kemarin': 'Yesterday',
+  'Jadwal terdekat': 'Next available',
+  'Konfirmasi pesanan': 'Confirm booking',
+  'Lanjut': 'Continue',
+  'Tidak ada jadwal kosong dalam 14 hari ke depan': 'No free slots in the next 14 days',
+  'Ubah pengingat': 'Edit reminder',
+  'Anda sedang offline. Data mungkin tidak terbaru.': 'You are offline. Data may be out of date.',
   'Dokter aktif': 'Active doctors',
   'Apoteker aktif': 'Active pharmacists',
   'Tambah jadwal': 'Add schedule',
@@ -18,7 +30,6 @@ const Map<String, String> enStrings = {
   'Tanda vital': 'Vital signs',
   'Daftar sebagai': 'Sign up as',
   'Lewati': 'Skip',
-  'Lanjut': 'Next',
   'Rekam medis': 'Medical records',
   'Cari dokter, obat, artikel…': 'Search doctors, medicines, articles…',
   'Konsultasi berikutnya': 'Next consultation',

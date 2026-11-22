@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
@@ -44,7 +45,7 @@ class _DoctorShellState extends State<DoctorShell> {
     final titles = ['Beranda', 'Konsultasi', 'Jadwal', 'Profil'];
     return Scaffold(
       appBar: _index == 0 ? null : AppBar(title: Text(titles[_index].tr), actions: const [NotificationBell(), SizedBox(width: 8)]),
-      body: IndexedStack(index: _index, children: const [_DoctorHome(), ConsultationsTab(), ScheduleTab(), ProfileTab()]),
+      body: Column(children: [const OfflineBanner(), Expanded(child: IndexedStack(index: _index, children: const [_DoctorHome(), ConsultationsTab(), ScheduleTab(), ProfileTab()]))]),
       bottomNavigationBar: FloatingNavBar(
         index: _index,
         onChanged: (i) => setState(() => _index = i),
@@ -322,6 +323,24 @@ class CompleteConsultationController extends GetxController {
     items.add({'obat_id': picked['_id'].toString(), 'nama': picked.s('nama'), 'dosis': dose.text.trim(), 'jumlah': int.tryParse(qty.text) ?? 1, 'aturan_pakai': rule.text.trim()});
   }
 
+  /// The five most recently used diagnoses, offered as one-tap chips on the next form.
+  static const _recentKey = 'recent_diagnoses';
+  List<String> get recentDiagnoses {
+    try {
+      final v = GetStorage().read(_recentKey);
+      return v is List ? v.map((e) => e.toString()).toList() : <String>[];
+    } catch (_) {
+      return <String>[];
+    }
+  }
+
+  void _rememberDiagnosis(String d) {
+    if (d.isEmpty) return;
+    try {
+      GetStorage().write(_recentKey, [d, ...recentDiagnoses.where((x) => x != d)].take(5).toList());
+    } catch (_) {}
+  }
+
   Future<void> submit() async {
     if (diagnosis.text.trim().length < 2) return showError('Diagnosa wajib diisi');
     saving.value = true;
@@ -342,6 +361,7 @@ class CompleteConsultationController extends GetxController {
           },
       };
       await _api.post('/booking/consultations/$id/complete', data: body);
+      _rememberDiagnosis(diagnosis.text.trim());
       showSuccess('Konsultasi selesai. Rekam medis tersimpan.');
       Get.back();
     } catch (e) {
@@ -382,7 +402,9 @@ class CompleteConsultationView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Selesaikan Konsultasi'.tr)),
       body: ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 28), children: [
-        section('Diagnosa', Icons.medical_information_rounded, Tone.lilac, [f(c.diagnosis, 'Diagnosa *', lines: 2), f(c.action, 'Tindakan'), f(c.notes, 'Catatan dokter', lines: 3)]),
+        section('Diagnosa', Icons.medical_information_rounded, Tone.lilac, [
+          if (c.recentDiagnoses.isNotEmpty) Padding(padding: const EdgeInsets.only(bottom: 10), child: Wrap(spacing: 8, runSpacing: 6, children: [for (final d in c.recentDiagnoses) ActionChip(label: Text(d), onPressed: () => c.diagnosis.text = d)])),
+          f(c.diagnosis, 'Diagnosa *', lines: 2), f(c.action, 'Tindakan'), f(c.notes, 'Catatan dokter', lines: 3)]),
         section('Tanda vital', Icons.monitor_heart_rounded, Tone.rose, [
           Row(children: [Expanded(child: f(c.bp, 'Tekanan darah')), const SizedBox(width: 12), Expanded(child: f(c.temp, 'Suhu (°C)', type: TextInputType.number))]),
           Row(children: [Expanded(child: f(c.height, 'Tinggi (cm)', type: TextInputType.number)), const SizedBox(width: 12), Expanded(child: f(c.weight, 'Berat (kg)', type: TextInputType.number))]),

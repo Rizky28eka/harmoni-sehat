@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'chat_view.dart' show dayHeading;
+
 import '../../app/routes/app_routes.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/pastel.dart';
@@ -46,6 +48,16 @@ class NotificationsController extends LoadController<List<Map<String, dynamic>>>
     }
   }
 
+  Future<void> remove(Map<String, dynamic> n) async {
+    data.value = [...?data.value]..removeWhere((x) => x['_id'] == n['_id']);
+    try {
+      await _api.delete('/notifications/${n['_id']}');
+    } catch (e) {
+      showError(e);
+      load(silent: true);
+    }
+  }
+
   Future<void> readAll() async {
     await _api.post('/notifications/read-all');
     _socket.unread.value = 0;
@@ -83,7 +95,10 @@ class NotificationsView extends StatelessWidget {
                     'error' => (Icons.error_rounded, Tone.rose),
                     _ => (Icons.notifications_rounded, Tone.sky),
                   };
-                  return SoftCard(
+                  final day = parseDate(n['createdAt']);
+                  final prevDay = i > 0 ? parseDate(c.data.value![i - 1]['createdAt']) : null;
+                  final header = day != null && (prevDay == null || !DateUtils.isSameDay(prevDay, day));
+                  final card = SoftCard(
                     tone: unread ? tone : null,
                     blobs: unread,
                     radius: 22,
@@ -101,6 +116,16 @@ class NotificationsView extends StatelessWidget {
                       ),
                     ]),
                   );
+                  return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    if (header) Padding(padding: EdgeInsets.fromLTRB(4, i == 0 ? 0 : 14, 0, 8), child: Text(dayHeading(day), style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.textSecondary))),
+                    Dismissible(
+                      key: ValueKey(n['_id']),
+                      direction: DismissDirection.endToStart,
+                      background: Container(decoration: BoxDecoration(color: AppColors.errorColor, borderRadius: BorderRadius.circular(22)), alignment: Alignment.centerRight, padding: const EdgeInsets.only(right: 22), child: const Icon(Icons.delete_rounded, color: Colors.white)),
+                      onDismissed: (_) => c.remove(n),
+                      child: card,
+                    ),
+                  ]);
                 },
               ),
             ),

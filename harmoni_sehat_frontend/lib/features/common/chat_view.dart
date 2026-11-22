@@ -177,7 +177,16 @@ class ChatView extends StatelessWidget {
                     controller: c.scroll,
                     padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                     itemCount: c.messages.length,
-                    itemBuilder: (_, i) => _Bubble(m: c.messages[i], mine: c.messages[i]['pengirim_id']?.toString() == c.me),
+                    itemBuilder: (_, i) {
+                      final m = c.messages[i];
+                      final day = parseDate(m['timestamp']);
+                      final prev = i > 0 ? parseDate(c.messages[i - 1]['timestamp']) : null;
+                      final newDay = day != null && (prev == null || !DateUtils.isSameDay(prev, day));
+                      return Column(children: [
+                        if (newDay) Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Pill(dayHeading(day), tone: Tone.slate, dense: true)),
+                        _Bubble(m: m, mine: m['pengirim_id']?.toString() == c.me),
+                      ]);
+                    },
                   ),
           ),
           SafeArea(
@@ -245,4 +254,13 @@ class _Bubble extends StatelessWidget {
       ),
     );
   }
+}
+
+/// "Today" / "Yesterday" / date, for chat and notification groupings.
+String dayHeading(DateTime d) {
+  final today = DateUtils.dateOnly(DateTime.now());
+  final diff = today.difference(DateUtils.dateOnly(d)).inDays;
+  if (diff == 0) return 'Hari ini'.tr;
+  if (diff == 1) return 'Kemarin'.tr;
+  return fmtDate(d.toIso8601String());
 }

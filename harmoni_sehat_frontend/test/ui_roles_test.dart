@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 
 import 'harness.dart';
 
@@ -127,9 +128,111 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Setujui').first);
       await tester.pumpAndSettle();
       expect(env.api.bodies['POST /admins/manage/verify/dokter/d1']!.single, {'approve': true});
+      // Rejecting asks for a reason that is sent to the applicant.
       await tester.tap(find.widgetWithText(TextButton, 'Tolak').last);
       await tester.pumpAndSettle();
-      expect(env.api.bodies['POST /admins/manage/verify/farmasi/a1']!.single, {'approve': false});
+      expect(find.text('Tolak verifikasi'), findsOneWidget);
+      await tester.enterText(find.byType(TextField).last, 'Nomor SIPA tidak terbaca');
+      await tester.tap(find.widgetWithText(FilledButton, 'Tolak'));
+      await tester.pumpAndSettle();
+      expect(env.api.bodies['POST /admins/manage/verify/farmasi/a1']!.single, {'approve': false, 'reason': 'Nomor SIPA tidak terbaca'});
+    });
+  });
+
+  group('ux improvements', () {
+    testWidgets('shows an offline banner while the API is unreachable', (tester) async {
+      final env = await bootApp(tester, role: 'pasien');
+      expect(find.text('Anda sedang offline. Data mungkin tidak terbaru.'), findsNothing);
+      env.api.offline.value = true;
+      await tester.pumpAndSettle();
+      expect(find.text('Anda sedang offline. Data mungkin tidak terbaru.'), findsOneWidget);
+      env.api.offline.value = false;
+      await tester.pumpAndSettle();
+      expect(find.text('Anda sedang offline. Data mungkin tidak terbaru.'), findsNothing);
+    });
+
+    testWidgets('an existing reminder can be edited', (tester) async {
+      final env = await bootApp(tester, role: 'pasien');
+      env.api.on('GET /me/reminders', (_, __) => [{'_id': 'r1', 'nama_obat': 'Amoxicillin', 'dosis': '500mg', 'jam': ['08:00', '20:00'], 'is_active': true}]);
+      env.api.on('PUT /me/reminders/r1', (b, __) => {});
+      Get.toNamed('/reminders');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Amoxicillin • 500mg'));
+      await tester.pumpAndSettle();
+      expect(find.text('Ubah pengingat'), findsOneWidget);
+      expect(find.widgetWithText(TextField, 'Amoxicillin'), findsOneWidget); // prefilled
+      await tester.enterText(find.widgetWithText(TextField, '500mg'), '250mg');
+      await tester.tap(find.widgetWithText(FilledButton, 'Simpan'));
+      await tester.pumpAndSettle();
+      final body = env.api.bodies['PUT /me/reminders/r1']!.single!;
+      expect(body['dosis'], '250mg');
+      expect(body['jam'], ['08:00', '20:00']);
+    });
+
+    testWidgets('lists notifications under day headings and deletes by swiping', (tester) async {
+      final now = DateTime.now();
+      final env = await bootApp(tester, role: 'pasien', setup: (api) => api.on('GET /notifications', (_, __) => [
+            {'_id': 'n1', 'judul': 'Pembayaran diterima', 'isi': 'ok', 'tipe': 'success', 'is_read': true, 'createdAt': now.toIso8601String()},
+            {'_id': 'n2', 'judul': 'Konsultasi terjadwal', 'isi': 'ok', 'tipe': 'info', 'is_read': true, 'createdAt': now.subtract(const Duration(days: 1)).toIso8601String()},
+          ]));
+      env.api.on('DELETE /notifications/n1', (_, __) => {});
+      Get.toNamed('/notifications');
+      await tester.pumpAndSettle();
+      expect(find.text('Hari ini'), findsOneWidget);
+      expect(find.text('Kemarin'), findsOneWidget);
+      await tester.drag(find.text('Pembayaran diterima'), const Offset(-600, 0));
+      await tester.pumpAndSettle();
+      expect(env.api.calls, contains('DELETE /notifications/n1'));
+      expect(find.text('Pembayaran diterima'), findsNothing);
+    });
+
+    testWidgets('pharmacist sees a low-stock alert that filters the list', (tester) async {
+      await bootApp(tester, role: 'farmasi', setup: (api) => api.on('GET /drugs', (_, __) => [
+            {'_id': 'a', 'nama': 'Amoxicillin', 'harga': 18000, 'stok': 4, 'satuan': 'strip', 'tgl_kadaluarsa': '2030-01-01T00:00:00.000Z'},
+            {'_id': 'b', 'nama': 'Vitamin C', 'harga': 25000, 'stok': 80, 'satuan': 'botol', 'tgl_kadaluarsa': '2030-01-01T00:00:00.000Z'},
+          ]));
+      await tester.tap(find.text('Stok').last);
+      await tester.pumpAndSettle();
+      expect(find.text('1 obat stok menipis'), findsOneWidget);
+      expect(find.text('Vitamin C'), findsOneWidget);
+      await tester.tap(find.text('1 obat stok menipis'));
+      await tester.pumpAndSettle();
+      expect(find.text('Vitamin C'), findsNothing);
+      expect(find.text('Amoxicillin'), findsOneWidget);
+    });
+
+    testWidgets('chat marks day changes with a separator', (tester) async {
+      final env = await bootApp(tester, role: 'pasien');
+      final now = DateTime.now();
+      env.api.on('GET /booking/consultations/c1/messages', (_, __) => [
+            {'_id': 'm1', 'konsultasi_id': 'c1', 'pengirim_id': 'u9', 'isi': 'Kemarin sore', 'tipe': 'text', 'timestamp': now.subtract(const Duration(days: 1)).toIso8601String()},
+            {'_id': 'm2', 'konsultasi_id': 'c1', 'pengirim_id': 'u9', 'isi': 'Hari ini', 'tipe': 'text', 'timestamp': now.toIso8601String()},
+          ]);
+      Get.toNamed('/chat', arguments: {'id': 'c1', 'title': 'dr. Andi'});
+      await tester.pumpAndSettle();
+      expect(find.text('Kemarin'), findsOneWidget);
+      expect(find.text('Hari ini'), findsNWidgets(2)); // the separator pill and the message itself
+    });
+
+    testWidgets('the doctor form offers recently used diagnoses as chips', (tester) async {
+      final env = await bootApp(tester, role: 'dokter');
+      GetStorage().remove('recent_diagnoses'); // other tests also complete consultations and share this store
+      env.api.on('POST /booking/consultations/c1/complete', (b, __) => {});
+      Get.toNamed('/doctor/complete', arguments: 'c1');
+      await tester.pumpAndSettle();
+      expect(find.byType(ActionChip), findsNothing);
+      await tester.enterText(find.widgetWithText(TextField, 'Diagnosa *'), 'Faringitis akut');
+      await tester.scrollUntilVisible(find.text('Simpan & selesai'), 300, scrollable: find.byType(Scrollable).first);
+      await tester.ensureVisible(find.text('Simpan & selesai'));
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, -150));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Simpan & selesai'));
+      await tester.pumpAndSettle();
+      expect(env.api.calls, contains('POST /booking/consultations/c1/complete'));
+
+      Get.toNamed('/doctor/complete', arguments: 'c2');
+      await tester.pumpAndSettle();
+      expect(find.widgetWithText(ActionChip, 'Faringitis akut'), findsOneWidget);
     });
   });
 }

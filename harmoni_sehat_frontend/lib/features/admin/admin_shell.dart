@@ -40,8 +40,19 @@ class AdminController extends GetxController {
   }
 
   Future<void> verify(String kind, String id, bool approve) async {
+    String? reason;
+    if (!approve) {
+      final ctl = TextEditingController();
+      final ok = await Get.dialog<bool>(AlertDialog(
+        title: Text('Tolak verifikasi'.tr),
+        content: TextField(controller: ctl, maxLines: 3, maxLength: 300, decoration: InputDecoration(labelText: 'Alasan penolakan (dikirim ke pemohon)'.tr, alignLabelWithHint: true)),
+        actions: [TextButton(onPressed: () => Get.back(result: false), child: Text('Batal'.tr)), FilledButton(onPressed: () => Get.back(result: true), child: Text('Tolak'.tr))],
+      ));
+      if (ok != true) return;
+      reason = ctl.text.trim();
+    }
     try {
-      await _api.post('/admins/manage/verify/$kind/$id', data: {'approve': approve});
+      await _api.post('/admins/manage/verify/$kind/$id', data: {'approve': approve, if (reason != null && reason.isNotEmpty) 'reason': reason});
       showSuccess(approve ? 'Disetujui' : 'Ditolak');
       await load();
     } catch (e) {
@@ -65,7 +76,7 @@ class _AdminShellState extends State<AdminShell> {
     final c = Get.put(AdminController());
     return Scaffold(
       appBar: AppBar(title: Text(['Statistik', 'Verifikasi', 'Profil'][_index].tr), actions: const [NotificationBell(), SizedBox(width: 8)]),
-      body: IndexedStack(index: _index, children: [_Stats(c), _Verifications(c), const ProfileTab()]),
+      body: Column(children: [const OfflineBanner(), Expanded(child: IndexedStack(index: _index, children: [_Stats(c), _Verifications(c), const ProfileTab()]))]),
       bottomNavigationBar: Obx(() {
         final pending = c.doctors.length + c.pharmacists.length;
         return FloatingNavBar(

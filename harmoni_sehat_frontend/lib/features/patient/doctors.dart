@@ -237,10 +237,40 @@ class DoctorDetailController extends LoadController<Map<String, dynamic>> {
     loadSlots();
   }
 
+  final searching = false.obs;
+
+  /// Jumps to the first day (within two weeks) that still has a free slot and selects it.
+  Future<void> findNearest() async {
+    searching.value = true;
+    try {
+      for (var i = 0; i < 14; i++) {
+        final day = DateTime.now().add(Duration(days: i));
+        final list = asList(await _api.get('/booking/doctors/$id/slots', query: {'date': DateFormat('yyyy-MM-dd').format(day)}));
+        final free = list.where((s) => s['available'] == true).toList();
+        if (free.isNotEmpty) {
+          selectedDate.value = day;
+          slots.assignAll(list);
+          selectedSlot.value = free.first;
+          return;
+        }
+      }
+      showInfo('Tidak ada jadwal kosong dalam 14 hari ke depan');
+    } catch (e) {
+      showError(e);
+    } finally {
+      searching.value = false;
+    }
+  }
+
   Future<void> book() async {
     final slot = selectedSlot.value;
     if (slot == null) return showError('Pilih jam konsultasi terlebih dahulu');
     if (complaint.text.trim().length < 3) return showError('Tuliskan keluhan Anda');
+    final d = data.value!;
+    final when = DateTime.parse(slot['start'] as String).toUtc().add(const Duration(hours: 7));
+    final fee = d.n('biaya_konsultasi');
+    final summary = '${d.s('nama')}\n${DateFormat('EEE, d MMM yyyy • HH:mm', Get.locale?.languageCode == 'en' ? 'en_US' : 'id_ID').format(when)} WIB\n${fee > 0 ? rupiah(fee) : 'Gratis'.tr}';
+    if (!await confirm('Konfirmasi pesanan', summary, ok: 'Lanjut')) return;
     booking.value = true;
     try {
       final r = asMap(await _api.post('/booking/consultations', data: {
@@ -345,7 +375,7 @@ class DoctorDetailView extends StatelessWidget {
         ),
       ),
       if (d.s('bio').isNotEmpty) Padding(padding: const EdgeInsets.fromLTRB(24, 18, 24, 0), child: Text(d.s('bio'), style: const TextStyle(height: 1.5, color: AppColors.textSecondary))),
-      SectionHeading('Pilih tanggal'.tr),
+      Obx(() => SectionHeading('Pilih tanggal'.tr, action: c.searching.value ? '…' : 'Jadwal terdekat'.tr, onAction: c.searching.value ? null : c.findNearest)),
       SizedBox(
         height: 84,
         child: Obx(() {

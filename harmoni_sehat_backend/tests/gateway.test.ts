@@ -123,3 +123,16 @@ describe('ICE servers', () => {
     expect(r.body.data.iceServers.length).toBe(2);
   });
 });
+
+describe('admin verification rejection', () => {
+  it('sends the admin\'s reason to the applicant', async () => {
+    const admin = await createAdminToken();
+    const d = await registerDokter();
+    const dId = (await api().get('/api/v1/auth/me').set(bearer(d.body.token))).body.data.profile._id;
+    const res = await api().post(`/api/v1/admins/manage/verify/dokter/${dId}`).set(bearer(admin)).send({ approve: false, reason: 'Nomor STR tidak terbaca' });
+    expect(res.status).toBe(200);
+    expect(res.body.data.is_verified).toBe(false);
+    const notifs = await api().get('/api/v1/notifications').set(bearer(d.body.token));
+    expect(notifs.body.data.map((n: any) => n.isi)).toContain('Nomor STR tidak terbaca');
+  });
+});

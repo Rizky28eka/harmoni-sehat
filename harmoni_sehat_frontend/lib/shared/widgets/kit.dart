@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/pastel.dart';
+import '../../core/api_client.dart';
 
 /// Organic background shapes drawn inside a [SoftCard] (the "blob" look).
 class BlobPainter extends CustomPainter {
@@ -383,3 +384,33 @@ class GlowAvatar extends StatelessWidget {
 }
 
 double ease(double t) => 1 - math.pow(1 - t, 3).toDouble();
+
+/// Slim banner shown while the API is unreachable; the data below may come from the offline cache.
+class OfflineBanner extends StatelessWidget {
+  const OfflineBanner({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!Get.isRegistered<ApiClient>()) return const SizedBox.shrink();
+    final api = Get.find<ApiClient>();
+    final c = toneOf(context, Tone.butter);
+    return Obx(() => AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          child: api.offline.value
+              ? Container(
+                  width: double.infinity,
+                  color: c.bg,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: SafeArea(
+                    bottom: false,
+                    child: Row(children: [
+                      Icon(Icons.cloud_off_rounded, size: 16, color: c.ink),
+                      const SizedBox(width: 8),
+                      Expanded(child: Text('Anda sedang offline. Data mungkin tidak terbaru.'.tr, style: TextStyle(color: c.ink, fontSize: 12.5, fontWeight: FontWeight.w700))),
+                    ]),
+                  ),
+                )
+              : const SizedBox(width: double.infinity),
+        ));
+  }
+}

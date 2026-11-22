@@ -44,7 +44,7 @@ class _PharmacistShellState extends State<PharmacistShell> {
     final titles = ['Pesanan', 'Stok Obat', 'Profil'];
     return Scaffold(
       appBar: AppBar(title: Text(titles[_index].tr), actions: const [NotificationBell(), SizedBox(width: 8)]),
-      body: IndexedStack(index: _index, children: const [_OrdersQueue(), StockTab(), ProfileTab()]),
+      body: Column(children: [const OfflineBanner(), Expanded(child: IndexedStack(index: _index, children: const [_OrdersQueue(), StockTab(), ProfileTab()]))]),
       bottomNavigationBar: FloatingNavBar(
         index: _index,
         onChanged: (i) => setState(() => _index = i),
@@ -133,13 +133,14 @@ class _OrdersQueue extends StatelessWidget {
 class StockController extends LoadController<List<Map<String, dynamic>>> {
   final _api = Get.find<ApiClient>();
   final query = ''.obs;
+  final lowOnly = false.obs;
 
   @override
   Future<List<Map<String, dynamic>>> fetch() async => asList(await _api.get('/drugs', cache: true));
 
   List<Map<String, dynamic>> get filtered {
     final q = query.value.toLowerCase();
-    final all = data.value ?? [];
+    final all = (data.value ?? []).where((d) => !lowOnly.value || d.n('stok') < 10).toList();
     return q.isEmpty ? all : all.where((d) => d.s('nama').toLowerCase().contains(q)).toList();
   }
 
@@ -205,9 +206,30 @@ class StockTab extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(onPressed: () => c.edit(context), icon: const Icon(Icons.add), label: Text('Tambah obat'.tr)),
       body: Column(children: [
         Padding(padding: const EdgeInsets.fromLTRB(20, 8, 20, 6), child: TextField(onChanged: (v) => c.query.value = v, decoration: InputDecoration(hintText: 'Cari obat'.tr, prefixIcon: const Icon(Icons.search_rounded)))),
+        Obx(() {
+          final low = (c.data.value ?? []).where((d) => d.n('stok') < 10).length;
+          if (low == 0) return const SizedBox.shrink();
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(20, 2, 20, 8),
+            child: SoftCard(
+              tone: Tone.rose,
+              blobs: false,
+              radius: 20,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              onTap: () => c.lowOnly.toggle(),
+              child: Row(children: [
+                Icon(Icons.warning_amber_rounded, color: toneOf(context, Tone.rose).ink),
+                const SizedBox(width: 10),
+                Expanded(child: Text('$low ${'obat stok menipis'.tr}', style: TextStyle(fontWeight: FontWeight.w700, color: toneOf(context, Tone.rose).ink))),
+                Text((c.lowOnly.value ? 'Semua' : 'Tampilkan').tr, style: TextStyle(fontWeight: FontWeight.w800, color: toneOf(context, Tone.rose).ink, fontSize: 12.5)),
+              ]),
+            ),
+          );
+        }),
         Expanded(
           child: Obx(() {
             c.query.value;
+            c.lowOnly.value;
             final list = c.filtered;
             return asyncBody(
               loading: c.loading.value,

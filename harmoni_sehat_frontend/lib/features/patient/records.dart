@@ -118,13 +118,16 @@ class RemindersController extends LoadController<List<Map<String, dynamic>>> {
     }
   }
 
-  Future<void> add(BuildContext context) async {
-    final name = TextEditingController();
-    final dose = TextEditingController();
-    final times = <TimeOfDay>[const TimeOfDay(hour: 8, minute: 0)];
+  /// Create ([existing] == null) or edit a reminder.
+  Future<void> edit(BuildContext context, [Map<String, dynamic>? existing]) async {
+    final name = TextEditingController(text: existing?.s('nama_obat'));
+    final dose = TextEditingController(text: existing?.s('dosis'));
+    final times = <TimeOfDay>[
+      for (final t in (existing?['jam'] as List? ?? const ['08:00'])) TimeOfDay(hour: int.parse(t.toString().substring(0, 2)), minute: int.parse(t.toString().substring(3))),
+    ];
     final ok = await Get.dialog<bool>(StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
-        title: Text('Pengingat obat'.tr),
+        title: Text((existing == null ? 'Pengingat obat' : 'Ubah pengingat').tr),
         content: SingleChildScrollView(
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             TextField(controller: name, decoration: InputDecoration(labelText: 'Nama obat'.tr)),
@@ -150,7 +153,8 @@ class RemindersController extends LoadController<List<Map<String, dynamic>>> {
     if (ok != true || name.text.trim().isEmpty) return;
     String hhmm(TimeOfDay t) => '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
     try {
-      await _api.post('/me/reminders', data: {'nama_obat': name.text.trim(), if (dose.text.trim().isNotEmpty) 'dosis': dose.text.trim(), 'jam': times.map(hhmm).toList()});
+      final body = {'nama_obat': name.text.trim(), 'dosis': dose.text.trim(), 'jam': (times..sort((a, b) => a.hour * 60 + a.minute - (b.hour * 60 + b.minute))).map(hhmm).toList()};
+      existing == null ? await _api.post('/me/reminders', data: body) : await _api.put('/me/reminders/${existing['_id']}', data: body);
       await load(silent: true);
     } catch (e) {
       showError(e);
@@ -166,7 +170,7 @@ class RemindersView extends StatelessWidget {
     final c = Get.put(RemindersController());
     return Scaffold(
       appBar: AppBar(title: Text('Pengingat Obat'.tr), actions: [IconButton(tooltip: 'Aktifkan alarm'.tr, icon: const Icon(Icons.notifications_active_outlined), onPressed: c.enableAlarms)]),
-      floatingActionButton: FloatingActionButton.extended(onPressed: () => c.add(context), icon: const Icon(Icons.add), label: Text('Tambah'.tr)),
+      floatingActionButton: FloatingActionButton.extended(onPressed: () => c.edit(context), icon: const Icon(Icons.add), label: Text('Tambah'.tr)),
       body: Obx(() => asyncBody(
             loading: c.loading.value,
             error: c.error.value,
@@ -197,6 +201,7 @@ class RemindersView extends StatelessWidget {
                       tone: active ? Tone.butter : Tone.slate,
                       variant: i,
                       radius: 26,
+                      onTap: () => c.edit(context, r),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       child: Row(children: [
                         ToneIcon(Icons.alarm_rounded, tone: active ? Tone.butter : Tone.slate, size: 46),

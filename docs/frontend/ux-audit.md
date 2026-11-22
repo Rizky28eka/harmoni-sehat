@@ -19,18 +19,26 @@ Metode: membaca setiap alur di kode, menjalankannya di simulator iOS dengan data
 | Sebagian teks masih Indonesia di mode Inggris | Dilengkapi; ada tes yang gagal bila ada teks UI baru yang belum diterjemahkan |
 | Daftar menampilkan error sesaat saat data dimuat | Konten dibangun setelah data tersedia (bug nyata, ditemukan lewat tes) |
 
-## Belum dikerjakan (rekomendasi, berurutan menurut dampak)
+## Rekomendasi yang kemudian diimplementasikan
 
-1. **Banner offline.** Cache offline sudah ada, tetapi pengguna tidak diberi tahu bahwa data yang tampil mungkin usang.
-2. **Pengingat obat tidak bisa diedit**, hanya dinyalakan/dimatikan atau dihapus. Perlu layar ubah.
-3. **Booking: belum ada "jadwal terdekat".** Pengguna harus menelusuri tanggal satu per satu; tombol "Jadwal terdekat" akan memangkas langkah.
-4. **Belum ada konfirmasi sebelum bayar** (ringkasan dokter, jam, biaya). Saat ini langsung berpindah ke layar pembayaran.
-5. **Chat:** tidak ada pemisah tanggal, tidak ada indikator pesan belum dibaca saat dibuka kembali, dan kirim foto tanpa pratinjau.
-6. **Aksesibilitas:** label semantik untuk ikon-saja (sebagian sudah ada tooltip), dukungan teks besar belum diuji, dan kontrasnya baru diperiksa secara manual untuk teks sekunder.
-7. **Notifikasi tidak dikelompokkan** per hari dan tidak bisa dihapus satu per satu.
-8. **Dokter:** form "Selesaikan konsultasi" panjang; template diagnosa/resep yang sering dipakai akan mempercepat.
-9. **Apoteker:** tidak ada peringatan stok menipis di dasbor selain warna angka.
-10. **Admin:** tidak ada alasan penolakan saat menolak verifikasi.
+| Rekomendasi | Hasil |
+| --- | --- |
+| Banner offline | Banner di semua shell saat API tidak terjangkau; hilang otomatis saat tersambung lagi |
+| Pengingat obat bisa diedit | Ketuk kartu pengingat untuk mengubah nama, dosis, dan jam |
+| Booking: jadwal terdekat | Tombol "Jadwal terdekat" mencari slot kosong pertama dalam 14 hari dan langsung memilihnya |
+| Konfirmasi sebelum bayar | Dialog ringkasan (dokter, waktu, biaya) sebelum pesanan dibuat |
+| Chat: pemisah tanggal | Penanda Hari ini / Kemarin / tanggal |
+| Notifikasi dikelompokkan dan bisa dihapus | Judul per hari, geser untuk menghapus |
+| Dokter: percepat form | Lima diagnosa terakhir muncul sebagai chip satu ketukan |
+| Apoteker: stok menipis | Banner jumlah obat berstok < 10, ketuk untuk menyaring |
+| Admin: alasan penolakan | Dialog alasan; teksnya dikirim sebagai notifikasi ke pemohon (backend ikut berubah) |
+
+## Masih terbuka
+
+1. **Chat:** belum ada penanda pesan belum dibaca saat membuka kembali percakapan, dan kirim foto belum punya pratinjau.
+2. **Aksesibilitas:** label semantik untuk ikon-saja belum diaudit menyeluruh, dukungan teks besar belum diuji, dan kontras baru diperiksa manual untuk teks sekunder.
+3. **Template resep** (bukan hanya diagnosa) untuk kasus yang sering muncul.
+4. **Uji dengan pengguna nyata.** Semua temuan di atas bersifat heuristik.
 
 ## Batasan audit
 

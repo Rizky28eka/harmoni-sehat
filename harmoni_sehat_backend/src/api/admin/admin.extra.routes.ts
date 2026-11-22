@@ -25,6 +25,8 @@ router.get('/pending-verifications', async (_req, res, next) => {
   }
 });
 
+const reasonOf = (req: any) => String(req.body?.reason ?? '').trim().slice(0, 300);
+
 router.post('/verify/dokter/:id', async (req, res, next) => {
   try {
     const approve = req.body?.approve !== false;
@@ -32,7 +34,7 @@ router.post('/verify/dokter/:id', async (req, res, next) => {
     if (!d) throw new AppError('Dokter tidak ditemukan', 404);
     await notify(String(d.user_id), {
       judul: approve ? 'Akun dokter terverifikasi' : 'Verifikasi ditolak',
-      isi: approve ? 'Anda sudah dapat menerima konsultasi.' : 'Periksa kembali data STR Anda.',
+      isi: approve ? 'Anda sudah dapat menerima konsultasi.' : reasonOf(req) || 'Periksa kembali data STR Anda.',
       tipe: approve ? 'success' : 'error',
     });
     res.json({ status: 'success', data: d });
@@ -48,7 +50,7 @@ router.post('/verify/farmasi/:id', async (req, res, next) => {
     if (!a) throw new AppError('Apoteker tidak ditemukan', 404);
     await notify(String(a.user_id), {
       judul: approve ? 'Akun apoteker terverifikasi' : 'Verifikasi ditolak',
-      isi: approve ? 'Anda sudah dapat mengelola pesanan obat.' : 'Periksa kembali data SIPA Anda.',
+      isi: approve ? 'Anda sudah dapat mengelola pesanan obat.' : reasonOf(req) || 'Periksa kembali data SIPA Anda.',
       tipe: approve ? 'success' : 'error',
     });
     res.json({ status: 'success', data: a });

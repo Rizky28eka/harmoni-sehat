@@ -118,7 +118,7 @@ class _PatientShellState extends State<PatientShell> {
     final titles = ['Beranda', 'Konsultasi', 'Obat', 'Profil'];
     return Scaffold(
       appBar: _index == 0 ? null : AppBar(title: Text(titles[_index].tr), actions: const [NotificationBell(), SizedBox(width: 8)]),
-      body: IndexedStack(index: _index, children: const [_HomeTab(), ConsultationsTab(), _PharmacyTab(), ProfileTab()]),
+      body: Column(children: [const OfflineBanner(), Expanded(child: IndexedStack(index: _index, children: const [_HomeTab(), ConsultationsTab(), _PharmacyTab(), ProfileTab()]))]),
       bottomNavigationBar: FloatingNavBar(
         index: _index,
         onChanged: (i) => setState(() => _index = i),

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:get/get.dart' show BoolExtension;
 import 'package:get_storage/get_storage.dart';
 
 import 'config.dart';
@@ -56,6 +57,9 @@ class ApiClient {
       _dio.interceptors.add(LogInterceptor(requestBody: false, responseBody: false));
     }
   }
+
+  /// True while the last network call failed to reach the server (UI shows an offline banner).
+  final offline = false.obs;
 
   final SessionService _session;
   final Dio _dio;
@@ -124,9 +128,11 @@ class ApiClient {
     try {
       final res = await _send(() => _dio.get(path, queryParameters: query));
       final data = _unwrap(res.data);
+      offline.value = false;
       if (cache) await _cache.write(key, jsonEncode(data));
       return data;
     } on ApiException catch (e) {
+      if (e.isNetwork) offline.value = true;
       if (cache && e.isNetwork) {
         final hit = _cache.read(key);
         if (hit is String) return jsonDecode(hit);

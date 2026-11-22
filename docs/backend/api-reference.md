@@ -92,7 +92,7 @@ Membatalkan konsultasi/pesanan yang sudah dibayar memanggil Midtrans Core API (`
 | `GET/POST/PUT/DELETE /me/reminders` | Pengingat minum obat (dikirim sebagai notifikasi pada jam WIB yang ditentukan). |
 | `GET /me/medical-timeline`, `GET /me/medical-records/:id/pdf-link` | Linimasa rekam medis & tautan PDF bertoken 5 menit. |
 | `POST /me/consent {version}`, `DELETE /me/account {password}` | Persetujuan data & hapus akun (anonimisasi, UU PDP). |
-| `GET /admins/manage/stats`, `/admins/manage/pending-verifications`, `POST /admins/manage/verify/(dokter\|farmasi)/:id {approve}` | Khusus admin. |
+| `GET /admins/manage/stats`, `/admins/manage/pending-verifications`, `POST /admins/manage/verify/(dokter\|farmasi)/:id {approve, reason?}` | Khusus admin. |
 | CRUD `/users`, `/roles`, `/doctors`, `/patients`, `/drugs`, `/clinics`, `/specializations`, `/payment-methods`, … | Modul CRUD dasar, dilindungi RBAC + row-level scope. Lihat `accessPolicy` di tiap `*.routes.ts`. |
 
 ## Socket.IO

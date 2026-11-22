@@ -97,6 +97,11 @@ void main() {
       await tester.ensureVisible(find.textContaining('Pesan & Bayar'));
       await tester.tap(find.textContaining('Pesan & Bayar'));
       await tester.pumpAndSettle();
+      // A summary dialog asks for confirmation before booking.
+      expect(find.text('Konfirmasi pesanan'), findsOneWidget);
+      expect(find.textContaining('dr. Andi Pratama'), findsWidgets);
+      await tester.tap(find.widgetWithText(FilledButton, 'Lanjut'));
+      await tester.pumpAndSettle();
 
       final body = env.api.bodies['POST /booking/consultations']!.single!;
       expect(body, {'dokter_id': 'd1', 'jadwal_id': 'j1', 'start': start.toIso8601String(), 'keluhan': 'Demam tiga hari'});
@@ -269,5 +274,30 @@ void main() {
     expect(find.text('Dark mode'), findsOneWidget);
     expect(find.text('Sign out'), findsOneWidget);
     expect(find.text('Home'), findsWidgets);
+  });
+
+  group('booking shortcuts', () {
+    testWidgets('"next available" jumps to the first free slot and selects it', (tester) async {
+      final env = await bootApp(tester, role: 'pasien');
+      final first = DateTime.now().add(const Duration(days: 3));
+      final start = DateTime.utc(first.year, first.month, first.day, 3, 30); // 10:30 WIB
+      env.api.on('GET /booking/doctors/d1', (_, __) => {...doctorJson(), 'jadwal': [], 'ulasan': []});
+      env.api.on('GET /booking/doctors/d1/slots', (_, q) {
+        final date = DateTime.parse(q!['date'] as String);
+        final daysAhead = DateUtils.dateOnly(date).difference(DateUtils.dateOnly(DateTime.now())).inDays;
+        final free = daysAhead >= 3;
+        return [
+          {'jadwal_id': 'j1', 'klinik_id': 'k1', 'start': DateTime.utc(date.year, date.month, date.day, 3, 30).toIso8601String(), 'end': DateTime.utc(date.year, date.month, date.day, 4).toIso8601String(), 'available': free},
+        ];
+      });
+      Get.toNamed('/doctors/detail', arguments: 'd1');
+      await tester.pumpAndSettle();
+      expect(start.hour, 3);
+
+      await tester.tap(find.text('Jadwal terdekat'));
+      await tester.pumpAndSettle();
+      final chip = tester.widget<ChoiceChip>(find.widgetWithText(ChoiceChip, '10:30'));
+      expect(chip.selected, isTrue);
+    });
   });
 }
