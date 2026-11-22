@@ -107,7 +107,7 @@ class ShopView extends StatelessWidget {
                 onRefresh: () async { await c.load(); await c.refreshCart(); },
                 child: GridView.builder(
                   padding: const EdgeInsets.fromLTRB(20, 6, 20, 100),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, mainAxisSpacing: 12, crossAxisSpacing: 12, mainAxisExtent: 224),
+                  gridDelegate: twoColumnGrid(context, 224),
                   itemCount: c.drugs.length,
                   itemBuilder: (_, i) => _DrugTile(drug: c.drugs[i], c: c, index: i),
                 ),

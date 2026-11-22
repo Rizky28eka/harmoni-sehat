@@ -374,13 +374,10 @@ class _ServiceGrid extends StatelessWidget {
     ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: GridView.count(
-        crossAxisCount: 2,
+      child: GridView(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 1.55,
+        gridDelegate: twoColumnGrid(context, 122),
         children: [
           for (var i = 0; i < items.length; i++)
             SoftCard(

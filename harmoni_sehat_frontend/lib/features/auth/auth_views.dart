@@ -47,6 +47,7 @@ Widget _passwordField(TextEditingController c, RxBool obscure, {String label = '
       obscureText: obscure.value,
       validator: validator,
       suffixIcon: IconButton(
+        tooltip: (obscure.value ? 'Tampilkan password' : 'Sembunyikan password').tr,
         icon: Icon(
           obscure.value ? Icons.visibility_off_outlined : Icons.visibility_outlined,
           color: AppColors.textSecondary,

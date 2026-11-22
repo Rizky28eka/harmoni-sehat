@@ -33,12 +33,21 @@ Metode: membaca setiap alur di kode, menjalankannya di simulator iOS dengan data
 | Apoteker: stok menipis | Banner jumlah obat berstok < 10, ketuk untuk menyaring |
 | Admin: alasan penolakan | Dialog alasan; teksnya dikirim sebagai notifikasi ke pemohon (backend ikut berubah) |
 
+## Diselesaikan di putaran berikutnya
+
+| Item | Hasil |
+| --- | --- |
+| Chat: pesan belum dibaca | Penanda "Pesan baru" tepat di atas pesan pertama yang belum dibaca saat percakapan dibuka |
+| Chat: pratinjau foto | Dialog pratinjau sebelum foto dikirim |
+| Template resep | Simpan resep sebagai template bernama, terapkan dengan satu ketukan, hapus dari chip (tersimpan di perangkat) |
+| Aksesibilitas: label | Label semantik untuk navigasi (termasuk lencana), jalur minggu (tanggal + ada jadwal), tooltip lonceng, tombol lihat/sembunyikan password, tombol kirim/foto; ikon dekoratif dikeluarkan dari pembaca layar |
+| Aksesibilitas: teks besar | Grid kartu memakai tinggi yang ikut skala teks. Uji otomatis pada skala 1,3× dan 1,8× di 6 layar menemukan dan memperbaiki overflow di beranda pasien, dasbor dokter, dan statistik admin |
+
 ## Masih terbuka
 
-1. **Chat:** belum ada penanda pesan belum dibaca saat membuka kembali percakapan, dan kirim foto belum punya pratinjau.
-2. **Aksesibilitas:** label semantik untuk ikon-saja belum diaudit menyeluruh, dukungan teks besar belum diuji, dan kontras baru diperiksa manual untuk teks sekunder.
-3. **Template resep** (bukan hanya diagnosa) untuk kasus yang sering muncul.
-4. **Uji dengan pengguna nyata.** Semua temuan di atas bersifat heuristik.
+1. **Aksesibilitas belum diuji dengan pembaca layar sungguhan** (VoiceOver/TalkBack): yang diuji hanya keberadaan label dan tata letak pada teks besar.
+2. **Template resep hanya di perangkat**, tidak ikut berpindah antar perangkat.
+3. **Uji dengan pengguna nyata.** Semua temuan di atas bersifat heuristik.
 
 ## Batasan audit
 

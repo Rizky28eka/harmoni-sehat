@@ -97,13 +97,10 @@ class _DoctorHome extends StatelessWidget {
                   const SizedBox(height: 8),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: GridView.count(
-                      crossAxisCount: 2,
+                    child: GridView(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 1.35,
+                      gridDelegate: twoColumnGrid(context, 138),
                       children: [
                         stat('Akan datang', '${d.n('upcoming').toInt()}', Icons.event_rounded, Tone.sky, 0),
                         stat('Selesai', '${d.n('completed').toInt()}', Icons.task_alt_rounded, Tone.mint, 1),
@@ -285,6 +282,12 @@ class CompleteConsultationController extends GetxController {
   final items = <Map<String, dynamic>>[].obs;
   final saving = false.obs;
 
+  @override
+  void onInit() {
+    super.onInit();
+    loadTemplates();
+  }
+
   Future<void> addDrug() async {
     final search = TextEditingController();
     final results = <Map<String, dynamic>>[].obs;
@@ -339,6 +342,47 @@ class CompleteConsultationController extends GetxController {
     try {
       GetStorage().write(_recentKey, [d, ...recentDiagnoses.where((x) => x != d)].take(5).toList());
     } catch (_) {}
+  }
+
+  /// Reusable prescriptions ("Flu ringan", "Gastritis"…), kept on this device.
+  static const _tplKey = 'rx_templates';
+  final templates = <Map<String, dynamic>>[].obs;
+
+  void loadTemplates() {
+    try {
+      final v = GetStorage().read(_tplKey);
+      templates.assignAll(v is List ? v.whereType<Map>().map((e) => Map<String, dynamic>.from(e)) : <Map<String, dynamic>>[]);
+    } catch (_) {}
+  }
+
+  void _persistTemplates() {
+    try {
+      GetStorage().write(_tplKey, templates.toList());
+    } catch (_) {}
+  }
+
+  Future<void> saveTemplate() async {
+    if (items.isEmpty) return showError('Tambahkan obat terlebih dahulu');
+    final ctl = TextEditingController();
+    final ok = await Get.dialog<bool>(AlertDialog(
+      title: Text('Simpan sebagai template'.tr),
+      content: TextField(controller: ctl, decoration: InputDecoration(labelText: 'Nama template'.tr)),
+      actions: [TextButton(onPressed: () => Get.back(result: false), child: Text('Batal'.tr)), FilledButton(onPressed: () => Get.back(result: true), child: Text('Simpan'.tr))],
+    ));
+    final name = ctl.text.trim();
+    if (ok != true || name.isEmpty) return;
+    templates.removeWhere((t) => t['name'] == name);
+    templates.insert(0, {'name': name, 'items': items.map((e) => Map<String, dynamic>.from(e)).toList()});
+    if (templates.length > 12) templates.removeRange(12, templates.length);
+    _persistTemplates();
+    showSuccess('Template disimpan');
+  }
+
+  void applyTemplate(Map<String, dynamic> t) => items.assignAll((t['items'] as List).whereType<Map>().map((e) => Map<String, dynamic>.from(e)));
+
+  void deleteTemplate(Map<String, dynamic> t) {
+    templates.remove(t);
+    _persistTemplates();
   }
 
   Future<void> submit() async {
@@ -411,6 +455,14 @@ class CompleteConsultationView extends StatelessWidget {
           f(c.allergies, 'Alergi (pisahkan dengan koma)'),
         ]),
         section('Resep', Icons.medication_rounded, Tone.peach, [
+          Obx(() => c.templates.isEmpty
+              ? const SizedBox.shrink()
+              : Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Wrap(spacing: 8, runSpacing: 6, children: [
+                    for (final t in c.templates) InputChip(avatar: const Icon(Icons.bookmark_rounded, size: 16), label: Text('${t['name']}'), onPressed: () => c.applyTemplate(t), onDeleted: () => c.deleteTemplate(t), deleteButtonTooltipMessage: 'Hapus'.tr),
+                  ]),
+                )),
           Obx(() => Column(children: [
                 for (var i = 0; i < c.items.length; i++)
                   Padding(
@@ -432,7 +484,8 @@ class CompleteConsultationView extends StatelessWidget {
                     ),
                   ),
               ])),
-          Padding(padding: const EdgeInsets.only(bottom: 12), child: OutlinedButton.icon(onPressed: c.addDrug, icon: const Icon(Icons.add_rounded), label: Text('Tambah obat'.tr))),
+          Padding(padding: const EdgeInsets.only(bottom: 8), child: OutlinedButton.icon(onPressed: c.addDrug, icon: const Icon(Icons.add_rounded), label: Text('Tambah obat'.tr))),
+          Obx(() => c.items.isEmpty ? const SizedBox(height: 4) : Padding(padding: const EdgeInsets.only(bottom: 8), child: TextButton.icon(onPressed: c.saveTemplate, icon: const Icon(Icons.bookmark_add_outlined), label: Text('Simpan sebagai template'.tr)))),
           f(c.prescriptionNote, 'Catatan resep (opsional)'),
         ]),
         Obx(() => FilledButton(onPressed: c.saving.value ? null : c.submit, child: c.saving.value ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white)) : Text('Simpan & selesai'.tr))),

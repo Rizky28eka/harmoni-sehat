@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
+import 'package:harmoni_sehat_frontend/features/doctor/doctor_shell.dart' show CompleteConsultationController;
+
 import 'harness.dart';
 
 void main() {
@@ -233,6 +235,54 @@ void main() {
       Get.toNamed('/doctor/complete', arguments: 'c2');
       await tester.pumpAndSettle();
       expect(find.widgetWithText(ActionChip, 'Faringitis akut'), findsOneWidget);
+    });
+
+    testWidgets('chat flags where the unread messages begin', (tester) async {
+      final env = await bootApp(tester, role: 'pasien');
+      final now = DateTime.now().toIso8601String();
+      env.api.on('GET /booking/consultations/c1/messages', (_, __) => [
+            {'_id': 'm1', 'konsultasi_id': 'c1', 'pengirim_id': 'u9', 'isi': 'Sudah dibaca', 'tipe': 'text', 'timestamp': now, 'is_read': true},
+            {'_id': 'm2', 'konsultasi_id': 'c1', 'pengirim_id': 'u9', 'isi': 'Belum dibaca satu', 'tipe': 'text', 'timestamp': now, 'is_read': false},
+            {'_id': 'm3', 'konsultasi_id': 'c1', 'pengirim_id': 'u9', 'isi': 'Belum dibaca dua', 'tipe': 'text', 'timestamp': now, 'is_read': false},
+          ]);
+      Get.toNamed('/chat', arguments: {'id': 'c1', 'title': 'dr. Andi'});
+      await tester.pumpAndSettle();
+      expect(find.text('Pesan baru'), findsOneWidget);
+      // The marker sits directly above the first unread message, not the read one.
+      final markerY = tester.getTopLeft(find.text('Pesan baru')).dy;
+      expect(markerY, greaterThan(tester.getTopLeft(find.text('Sudah dibaca')).dy));
+      expect(markerY, lessThan(tester.getTopLeft(find.text('Belum dibaca satu')).dy));
+    });
+
+    testWidgets('a prescription can be saved as a template and re-applied', (tester) async {
+      final env = await bootApp(tester, role: 'dokter');
+      GetStorage().remove('rx_templates');
+      env.api.on('POST /booking/consultations/c1/complete', (b, __) => {});
+      Get.toNamed('/doctor/complete', arguments: 'c1');
+      await tester.pumpAndSettle();
+      final c = Get.find<CompleteConsultationController>();
+      c.items.add({'obat_id': 'dr1', 'nama': 'Paracetamol', 'dosis': '500mg', 'jumlah': 10, 'aturan_pakai': '3x1'});
+      await tester.pumpAndSettle();
+
+      final save = find.text('Simpan sebagai template');
+      await tester.scrollUntilVisible(save, 300, scrollable: find.byType(Scrollable).first);
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, -200)); // clear the bottom edge
+      await tester.pumpAndSettle();
+      await tester.tap(save);
+      await tester.pumpAndSettle();
+      await tester.enterText(find.widgetWithText(TextField, 'Nama template'), 'Demam ringan');
+      await tester.tap(find.widgetWithText(FilledButton, 'Simpan'));
+      await tester.pumpAndSettle();
+
+      // Clear the list, then apply the template from its chip.
+      c.items.clear();
+      await tester.pumpAndSettle();
+      final chip = find.widgetWithText(InputChip, 'Demam ringan');
+      await tester.scrollUntilVisible(chip, -300, scrollable: find.byType(Scrollable).first);
+      await tester.tap(chip);
+      await tester.pumpAndSettle();
+      expect(c.items.single['nama'], 'Paracetamol');
+      expect(c.items.single['jumlah'], 10);
     });
   });
 }

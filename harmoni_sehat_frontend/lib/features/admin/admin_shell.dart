@@ -106,13 +106,10 @@ class _Stats extends StatelessWidget {
         builder: () => RefreshIndicator(
           onRefresh: c.load,
           child: ListView(padding: const EdgeInsets.fromLTRB(20, 4, 20, 24), children: [
-            GridView.count(
-              crossAxisCount: 2,
+            GridView(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 1.3,
+              gridDelegate: twoColumnGrid(context, 142),
               children: [
                 _tile(context, 'Pasien', '${c.stats.value!.n('pasien').toInt()}', Icons.people_rounded, Tone.sky, 0),
                 _tile(context, 'Dokter aktif', '${c.stats.value!.n('dokter').toInt()}', Icons.medical_services_rounded, Tone.mint, 1),

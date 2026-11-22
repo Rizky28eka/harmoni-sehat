@@ -90,11 +90,14 @@ class ToneIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = toneOf(context, tone);
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(color: c.bg, borderRadius: BorderRadius.circular(round ? size : size * 0.36)),
-      child: Icon(icon, color: c.ink, size: iconSize ?? size * 0.5),
+    // Purely decorative: the adjacent text carries the meaning.
+    return ExcludeSemantics(
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(color: c.bg, borderRadius: BorderRadius.circular(round ? size : size * 0.36)),
+        child: Icon(icon, color: c.ink, size: iconSize ?? size * 0.5),
+      ),
     );
   }
 }
@@ -171,7 +174,12 @@ class WeekStrip extends StatelessWidget {
             final d = start.add(Duration(days: i));
             final sel = dayOnly(selected) == d;
             final isToday = d == today;
-            return GestureDetector(
+            return Semantics(
+              button: true,
+              selected: sel,
+              label: DateFormat('EEEE, d MMMM', lang).format(d) + (marked.contains(d) ? ', ${'ada jadwal'.tr}' : ''),
+              excludeSemantics: true,
+              child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () => onSelect(d),
               child: Column(children: [
@@ -188,7 +196,7 @@ class WeekStrip extends StatelessWidget {
                 const SizedBox(height: 5),
                 Container(width: 5, height: 5, decoration: BoxDecoration(shape: BoxShape.circle, color: marked.contains(d) ? AppColors.accentRose : Colors.transparent)),
               ]),
-            );
+            ));
           }),
         ),
     ]);
@@ -224,7 +232,12 @@ class FloatingNavBar extends StatelessWidget {
       final it = items[i];
       final sel = i == index;
       return Expanded(
-        child: InkResponse(
+        child: Semantics(
+          button: true,
+          selected: sel,
+          label: it.badge > 0 ? '${it.label}, ${it.badge}' : it.label,
+          excludeSemantics: true,
+          child: InkResponse(
           onTap: () => onChanged(i),
           radius: 36,
           child: Padding(
@@ -240,7 +253,7 @@ class FloatingNavBar extends StatelessWidget {
               Text(it.label, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, fontWeight: sel ? FontWeight.w700 : FontWeight.w500, color: sel ? AppColors.primaryColor : AppColors.textMuted)),
             ]),
           ),
-        ),
+        )),
       );
     }
 
@@ -414,3 +427,8 @@ class OfflineBanner extends StatelessWidget {
         ));
   }
 }
+
+/// Grid cell height that grows with the user's text size (fixed aspect ratios clip large text).
+double scaledExtent(BuildContext context, double base) => base * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
+
+SliverGridDelegate twoColumnGrid(BuildContext context, double baseHeight) => SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, mainAxisSpacing: 12, crossAxisSpacing: 12, mainAxisExtent: scaledExtent(context, baseHeight));

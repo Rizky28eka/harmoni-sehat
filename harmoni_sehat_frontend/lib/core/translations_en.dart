@@ -1,6 +1,16 @@
 /// Indonesian (source language, used as key) → English.
 /// Keep keys sorted; i18n_test.dart verifies every UI string has an entry.
 const Map<String, String> enStrings = {
+  'Simpan sebagai template': 'Save as template',
+  'Nama template': 'Template name',
+  'Template disimpan': 'Template saved',
+  'Tambahkan obat terlebih dahulu': 'Add a medicine first',
+  'Pesan baru': 'New messages',
+  'Kirim foto ini?': 'Send this photo?',
+  'Kirim foto': 'Send photo',
+  'ada jadwal': 'has appointments',
+  'Tampilkan password': 'Show password',
+  'Sembunyikan password': 'Hide password',
   'Tolak verifikasi': 'Reject verification',
   'Alasan penolakan (dikirim ke pemohon)': 'Reason (sent to the applicant)',
   'obat stok menipis': 'medicines low on stock',

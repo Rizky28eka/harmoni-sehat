@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -30,6 +31,8 @@ class ChatController extends GetxController {
   final input = TextEditingController();
   final scroll = ScrollController();
   final sending = false.obs;
+  /// Id of the first message from the other side that was unread when the chat opened.
+  final firstUnreadId = RxnString();
 
   final _subs = <StreamSubscription>[];
   Timer? _typingTimer;
@@ -46,6 +49,8 @@ class ChatController extends GetxController {
   Future<void> _init() async {
     try {
       messages.assignAll(asList(await _api.get('/booking/consultations/$consultationId/messages')));
+      final unread = messages.where((m) => m['pengirim_id']?.toString() != _me && m['is_read'] != true).toList();
+      firstUnreadId.value = unread.isEmpty ? null : unread.first['_id']?.toString();
       final joined = await _socket.joinChat(consultationId);
       if (joined['ok'] != true && joined['error'] == 'forbidden') {
         error.value = 'Anda tidak memiliki akses ke obrolan ini.';
@@ -107,6 +112,13 @@ class ChatController extends GetxController {
   Future<void> attachImage() async {
     final file = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 80, maxWidth: 1600);
     if (file == null) return;
+    // Show what is about to be sent; a mis-tapped photo in a medical chat should be easy to back out of.
+    final ok = await Get.dialog<bool>(AlertDialog(
+      title: Text('Kirim foto ini?'.tr),
+      content: ClipRRect(borderRadius: BorderRadius.circular(16), child: Image.file(File(file.path), fit: BoxFit.cover, height: 260, errorBuilder: (_, __, ___) => const Icon(Icons.image_rounded, size: 80))),
+      actions: [TextButton(onPressed: () => Get.back(result: false), child: Text('Batal'.tr)), FilledButton(onPressed: () => Get.back(result: true), child: Text('Kirim'.tr))],
+    ));
+    if (ok != true) return;
     try {
       final media = asMap(await _api.upload('/media/upload', file.path));
       await send(text: 'Foto', type: 'image', fileUrl: media['url']?.toString());
@@ -183,6 +195,7 @@ class ChatView extends StatelessWidget {
                       final prev = i > 0 ? parseDate(c.messages[i - 1]['timestamp']) : null;
                       final newDay = day != null && (prev == null || !DateUtils.isSameDay(prev, day));
                       return Column(children: [
+                        if (m['_id']?.toString() == c.firstUnreadId.value) Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Pill('Pesan baru'.tr, tone: Tone.rose, icon: Icons.mark_chat_unread_rounded, dense: true)),
                         if (newDay) Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Pill(dayHeading(day), tone: Tone.slate, dense: true)),
                         _Bubble(m: m, mine: m['pengirim_id']?.toString() == c.me),
                       ]);
@@ -193,7 +206,7 @@ class ChatView extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(12, 4, 12, 10),
               child: Row(children: [
-                IconButton.filledTonal(icon: const Icon(Icons.add_photo_alternate_outlined), onPressed: c.attachImage),
+                IconButton.filledTonal(tooltip: 'Kirim foto'.tr, icon: const Icon(Icons.add_photo_alternate_outlined), onPressed: c.attachImage),
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
@@ -212,7 +225,7 @@ class ChatView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Obx(() => IconButton.filled(style: IconButton.styleFrom(minimumSize: const Size(52, 52)), onPressed: c.sending.value ? null : () => c.send(), icon: const Icon(Icons.send_rounded))),
+                Obx(() => IconButton.filled(tooltip: 'Kirim'.tr, style: IconButton.styleFrom(minimumSize: const Size(52, 52)), onPressed: c.sending.value ? null : () => c.send(), icon: const Icon(Icons.send_rounded))),
               ]),
             ),
           ),

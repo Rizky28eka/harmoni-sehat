@@ -147,6 +147,7 @@ class NotificationBell extends StatelessWidget {
             color: Theme.of(context).colorScheme.surfaceContainerHighest,
             shape: const CircleBorder(),
             child: IconButton(
+              tooltip: 'Notifikasi'.tr,
               onPressed: () => Get.toNamed(AppRoutes.notifications),
               icon: Badge(isLabelVisible: socket.unread.value > 0, label: Text('${socket.unread.value}'), child: const Icon(Icons.notifications_none_rounded)),
             ),
