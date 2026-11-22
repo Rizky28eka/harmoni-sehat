@@ -35,7 +35,7 @@ class APIFeatures<T extends Document> {
     if (this.queryString.search) {
       const searchQuery = this.queryString.search;
       const orConditions = searchableFields.map((field) => ({
-        [field]: { $regex: searchQuery, $options: 'i' }, // Case-insensitive search
+        [field]: { $regex: String(searchQuery).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').slice(0, 64), $options: 'i' }, // Case-insensitive search
       }));
       this.query = this.query.find({ $or: orConditions });
     }

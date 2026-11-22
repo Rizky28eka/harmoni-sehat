@@ -8,8 +8,8 @@ import { AppError } from '../../utils/AppError';
 class UserController {
   async createUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const { email, password } = req.body;
-      const user = await userService.createUser(email, password);
+      const { email, password, role } = req.body;
+      const user = await userService.createUser(email, password, role);
       res.status(201).json(new ApiResponse(201, user, 'User berhasil ditambahkan'));
     } catch (error: any) {
       next(new AppError(error.message, error.statusCode || 500));

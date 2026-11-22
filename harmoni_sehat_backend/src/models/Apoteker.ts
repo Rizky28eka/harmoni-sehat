@@ -1,3 +1,5 @@
+import { ownerScope } from '../plugins/ownerScope';
+import { apotekerScope } from './scopes';
 import { Schema, model, Document, Types } from 'mongoose';
 import { generateCustomId } from '../utils/idGenerator';
 
@@ -6,6 +8,7 @@ export interface IApoteker extends Document {
   user_id: Types.ObjectId;
   nama: string;
   nomor_sipa: string;
+  is_verified: boolean;
 }
 
 const ApotekerSchema = new Schema<IApoteker>(
@@ -26,6 +29,10 @@ const ApotekerSchema = new Schema<IApoteker>(
       required: true,
       trim: true,
     },
+    is_verified: {
+      type: Boolean,
+      default: false,
+    },
     nomor_sipa: {
       type: String,
       required: true,
@@ -35,6 +42,8 @@ const ApotekerSchema = new Schema<IApoteker>(
   },
   { _id: false },
 ); // Disable default _id generation
+
+ownerScope(ApotekerSchema, apotekerScope);
 
 const Apoteker = model<IApoteker>('Apoteker', ApotekerSchema);
 

@@ -1,3 +1,5 @@
+import { ownerScope } from '../plugins/ownerScope';
+import { drugCartScope } from './scopes';
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IDrugCart extends Document {
@@ -30,6 +32,8 @@ const DrugCartSchema = new Schema<IDrugCart>(
   },
   { timestamps: true },
 );
+
+ownerScope(DrugCartSchema, drugCartScope);
 
 const DrugCart = model<IDrugCart>('DrugCart', DrugCartSchema);
 

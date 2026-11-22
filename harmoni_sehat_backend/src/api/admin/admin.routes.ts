@@ -1,9 +1,11 @@
+import { accessPolicy } from '../../middlewares/accessPolicy';
 import { Router } from 'express';
 import adminController from './admin.controller';
 import { validate } from '../../middlewares/validator';
 import { createAdminSchema, updateAdminSchema } from './admin.validation';
 
 const router = Router();
+router.use(accessPolicy(["admin"], ["admin"]));
 
 router.route('/')
   .post(validate(createAdminSchema), adminController.createAdmin)

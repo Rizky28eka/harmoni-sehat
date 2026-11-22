@@ -1,3 +1,5 @@
+import { ownerScope } from '../plugins/ownerScope';
+import { userOwnedScope } from './scopes';
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface INotification extends Document {
@@ -6,6 +8,7 @@ export interface INotification extends Document {
   isi: string;
   tipe: 'info' | 'warning' | 'error' | 'success';
   is_read: boolean;
+  data?: Record<string, string>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +37,7 @@ const NotificationSchema = new Schema<INotification>(
       required: true,
       trim: true,
     },
+    data: { type: Map, of: String },
     is_read: {
       type: Boolean,
       default: false,
@@ -41,6 +45,8 @@ const NotificationSchema = new Schema<INotification>(
   },
   { timestamps: true },
 );
+
+ownerScope(NotificationSchema, userOwnedScope('user_id'));
 
 const Notification = model<INotification>('Notification', NotificationSchema);
 

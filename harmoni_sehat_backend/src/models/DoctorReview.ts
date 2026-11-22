@@ -1,8 +1,10 @@
+import { ownerScope } from '../plugins/ownerScope';
+import { reviewScope } from './scopes';
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IDoctorReview extends Document {
-  pasien_id: Types.ObjectId; // Refers to Pasien's custom _id
-  dokter_id: Types.ObjectId; // Refers to Dokter's custom _id
+  pasien_id: string; // Refers to Pasien's custom _id
+  dokter_id: string; // Refers to Dokter's custom _id
   konsultasi_id: Types.ObjectId;
   rating: number;
   komentar?: string;
@@ -15,13 +17,13 @@ export interface IDoctorReview extends Document {
 const DoctorReviewSchema = new Schema<IDoctorReview>(
   {
     pasien_id: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'Pasien',
       required: true,
       index: true, // Add index for efficient lookups
     },
     dokter_id: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'Dokter',
       required: true,
       index: true, // Add index for efficient lookups
@@ -52,6 +54,8 @@ const DoctorReviewSchema = new Schema<IDoctorReview>(
     },
   },
 );
+
+ownerScope(DoctorReviewSchema, reviewScope);
 
 const DoctorReview = model<IDoctorReview>('DoctorReview', DoctorReviewSchema);
 

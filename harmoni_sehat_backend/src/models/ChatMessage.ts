@@ -1,3 +1,5 @@
+import { ownerScope } from '../plugins/ownerScope';
+import { chatMessageScope } from './scopes';
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IChatMessage extends Document {
@@ -46,6 +48,8 @@ const ChatMessageSchema = new Schema<IChatMessage>({
     default: Date.now,
   },
 });
+
+ownerScope(ChatMessageSchema, chatMessageScope);
 
 const ChatMessage = model<IChatMessage>('ChatMessage', ChatMessageSchema);
 

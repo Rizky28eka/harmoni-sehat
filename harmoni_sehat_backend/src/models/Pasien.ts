@@ -1,3 +1,5 @@
+import { ownerScope } from '../plugins/ownerScope';
+import { pasienScope } from './scopes';
 import { Schema, model, Document, Types } from 'mongoose';
 import { generateCustomId } from '../utils/idGenerator';
 
@@ -60,6 +62,8 @@ const PasienSchema = new Schema<IPasien>(
   },
   { _id: false },
 ); // Disable default _id generation
+
+ownerScope(PasienSchema, pasienScope);
 
 const Pasien = model<IPasien>('Pasien', PasienSchema);
 

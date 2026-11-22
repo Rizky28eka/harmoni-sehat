@@ -1,6 +1,9 @@
+import { ownerScope } from '../plugins/ownerScope';
+import { mediaWriteOwnScope } from './scopes';
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IMedia extends Document {
+  uploaded_by?: Types.ObjectId;
   model_type: string; // e.g., 'User', 'HealthArticle'
   model_id: Types.ObjectId; // ID of the associated model
   url: string;
@@ -12,6 +15,7 @@ export interface IMedia extends Document {
 
 const MediaSchema = new Schema<IMedia>(
   {
+    uploaded_by: { type: Schema.Types.ObjectId, ref: 'User', index: true },
     model_type: {
       type: String,
       required: true,
@@ -20,7 +24,7 @@ const MediaSchema = new Schema<IMedia>(
     },
     model_id: {
       type: Schema.Types.ObjectId,
-      required: true,
+      required: false,
       index: true, // Add index for efficient lookups
     },
     url: {
@@ -41,6 +45,8 @@ const MediaSchema = new Schema<IMedia>(
   },
   { timestamps: true },
 );
+
+ownerScope(MediaSchema, mediaWriteOwnScope);
 
 const Media = model<IMedia>('Media', MediaSchema);
 

@@ -1,11 +1,17 @@
+import { ownerScope } from '../plugins/ownerScope';
+import { consultationScope } from './scopes';
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IConsultation extends Document {
-  pasien_id: Types.ObjectId; // Refers to Pasien's custom _id
-  dokter_id: Types.ObjectId; // Refers to Dokter's custom _id
+  pasien_id: string; // Refers to Pasien's custom _id
+  dokter_id: string; // Refers to Dokter's custom _id
   jadwal_id: Types.ObjectId;
   tanggal: Date;
-  status: 'pending' | 'scheduled' | 'completed' | 'cancelled';
+  status: 'pending' | 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
+  biaya: number;
+  slot_key?: string;
+  expires_at?: Date;
+  cancel_reason?: string;
   keluhan: string;
   diagnosa?: string;
   tindakan?: string;
@@ -18,13 +24,13 @@ export interface IConsultation extends Document {
 const ConsultationSchema = new Schema<IConsultation>(
   {
     pasien_id: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'Pasien',
       required: true,
       index: true, // Add index for efficient lookups
     },
     dokter_id: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: 'Dokter',
       required: true,
       index: true, // Add index for efficient lookups
@@ -40,9 +46,13 @@ const ConsultationSchema = new Schema<IConsultation>(
     },
     status: {
       type: String,
-      enum: ['pending', 'scheduled', 'completed', 'cancelled'],
+      enum: ['pending', 'scheduled', 'ongoing', 'completed', 'cancelled'],
       default: 'pending',
     },
+    biaya: { type: Number, default: 0, min: 0 },
+    slot_key: { type: String, unique: true, sparse: true },
+    expires_at: { type: Date },
+    cancel_reason: { type: String, trim: true },
     keluhan: {
       type: String,
       required: true,
@@ -67,6 +77,8 @@ const ConsultationSchema = new Schema<IConsultation>(
   },
   { timestamps: true },
 );
+
+ownerScope(ConsultationSchema, consultationScope);
 
 const Consultation = model<IConsultation>('Consultation', ConsultationSchema);
 

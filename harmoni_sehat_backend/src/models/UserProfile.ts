@@ -1,3 +1,5 @@
+import { ownerScope } from '../plugins/ownerScope';
+import { userOwnedScope } from './scopes';
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IUserProfile extends Document {
@@ -26,6 +28,8 @@ const UserProfileSchema = new Schema<IUserProfile>(
   },
   { timestamps: true },
 );
+
+ownerScope(UserProfileSchema, userOwnedScope('user_id'));
 
 const UserProfile = model<IUserProfile>('UserProfile', UserProfileSchema);
 

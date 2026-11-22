@@ -1,19 +1,19 @@
 import { Router } from 'express';
+import { accessPolicy } from '../../middlewares/accessPolicy';
 import userController from './user.controller';
 import { validate } from '../../middlewares/validator';
-import { createUserValidation, updateUserValidation } from './user.validation';
-import protect from '../../middlewares/protect';
-import authorize from '../../middlewares/authorize';
+import { createUserSchema, updateUserSchema } from './user.validation';
 
 const router = Router();
+router.use(accessPolicy(['admin'], ['admin']));
 
 router.route('/')
-  .post(createUserValidation, validate, userController.createUser)
-  .get(protect, authorize('admin'), userController.getAllUsers);
+  .post(validate(createUserSchema), userController.createUser)
+  .get(userController.getAllUsers);
 
 router.route('/:id')
   .get(userController.getUserById)
-  .put(updateUserValidation, validate, userController.updateUser)
+  .put(validate(updateUserSchema), userController.updateUser)
   .delete(userController.deleteUser);
 
 export default router;

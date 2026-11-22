@@ -1,8 +1,15 @@
+import { ownerScope } from '../plugins/ownerScope';
+import { drugOrderScope } from './scopes';
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IDrugOrder extends Document {
   pasien_id: string; // Refers to Pasien's custom _id
   kode_pesanan: string;
+  resep_id?: Types.ObjectId;
+  transaksi_id?: Types.ObjectId;
+  catatan_pengiriman?: string;
+  no_resi?: string;
+  payment_status: 'unpaid' | 'paid';
   total_harga: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   alamat_pengiriman: string;
@@ -18,6 +25,11 @@ const DrugOrderSchema = new Schema<IDrugOrder>(
       required: true,
       index: true, // Add index for efficient lookups
     },
+    resep_id: { type: Schema.Types.ObjectId, ref: 'Prescription' },
+    transaksi_id: { type: Schema.Types.ObjectId, ref: 'Transaction' },
+    catatan_pengiriman: { type: String, trim: true },
+    no_resi: { type: String, trim: true },
+    payment_status: { type: String, enum: ['unpaid', 'paid'], default: 'unpaid' },
     kode_pesanan: {
       type: String,
       required: true,
@@ -42,6 +54,8 @@ const DrugOrderSchema = new Schema<IDrugOrder>(
   },
   { timestamps: true },
 );
+
+ownerScope(DrugOrderSchema, drugOrderScope);
 
 const DrugOrder = model<IDrugOrder>('DrugOrder', DrugOrderSchema);
 

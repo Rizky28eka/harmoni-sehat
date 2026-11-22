@@ -1,9 +1,11 @@
+import { accessPolicy } from '../../middlewares/accessPolicy';
 import { Router } from 'express';
 import transactionController from './transaction.controller';
 import { validate } from '../../middlewares/validator';
 import { createTransactionSchema, updateTransactionSchema } from './transaction.validation';
 
 const router = Router();
+router.use(accessPolicy("any", []));
 
 router.route('/')
   .post(validate(createTransactionSchema), transactionController.createTransaction)

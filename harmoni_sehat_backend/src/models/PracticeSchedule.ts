@@ -6,6 +6,7 @@ export interface IPracticeSchedule extends Document {
   hari: 'Senin' | 'Selasa' | 'Rabu' | 'Kamis' | 'Jumat' | 'Sabtu' | 'Minggu';
   jam_mulai: string;
   jam_selesai: string;
+  durasi_menit: number;
   is_active: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -39,6 +40,12 @@ const PracticeScheduleSchema = new Schema<IPracticeSchedule>(
       type: String,
       required: true,
       match: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, // HH:mm format
+    },
+    durasi_menit: {
+      type: Number,
+      default: 30,
+      min: 5,
+      max: 240,
     },
     is_active: {
       type: Boolean,

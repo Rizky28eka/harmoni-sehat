@@ -1,9 +1,11 @@
+import { accessPolicy } from '../../middlewares/accessPolicy';
 import { Router } from 'express';
 import roleController from './role.controller';
 import { validate } from '../../middlewares/validator';
 import { createRoleSchema, updateRoleSchema } from './role.validation';
 
 const router = Router();
+router.use(accessPolicy(["admin"], ["admin"]));
 
 router.route('/')
   .post(validate(createRoleSchema), roleController.createRole)

@@ -1,9 +1,11 @@
+import { accessPolicy } from '../../middlewares/accessPolicy';
 import { Router } from 'express';
 import refreshTokenController from './refreshToken.controller';
 import { validate } from '../../middlewares/validator';
 import { createRefreshTokenSchema, updateRefreshTokenSchema } from './refreshToken.validation';
 
 const router = Router();
+router.use(accessPolicy(["admin"], ["admin"]));
 
 router.route('/')
   .post(validate(createRefreshTokenSchema), refreshTokenController.createRefreshToken)

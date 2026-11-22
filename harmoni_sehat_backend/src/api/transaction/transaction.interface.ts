@@ -5,7 +5,7 @@ import { ITransaction } from '../../models/Transaction';
 export interface CreateTransactionDto {
   user_id: Types.ObjectId; // Will be ObjectId in service
   total_biaya: number;
-  status?: 'pending' | 'completed' | 'failed' | 'refunded';
+  status?: 'pending' | 'completed' | 'failed' | 'refunded' | 'expired';
   metode_pembayaran_id: Types.ObjectId; // Will be ObjectId in service
   external_id?: string;
   transaksiable_id: Types.ObjectId; // Will be ObjectId in service
@@ -14,7 +14,7 @@ export interface CreateTransactionDto {
 
 export interface UpdateTransactionDto {
   total_biaya?: number;
-  status?: 'pending' | 'completed' | 'failed' | 'refunded';
+  status?: 'pending' | 'completed' | 'failed' | 'refunded' | 'expired';
   metode_pembayaran_id?: string;
   external_id?: string;
   transaksiable_id?: string;
@@ -27,7 +27,7 @@ export interface ITransactionResponseDto {
   id: string;
   user_id: string;
   total_biaya: number;
-  status: 'pending' | 'completed' | 'failed' | 'refunded';
+  status: 'pending' | 'completed' | 'failed' | 'refunded' | 'expired';
   metode_pembayaran_id: string;
   external_id?: string;
   transaksiable_id: string;

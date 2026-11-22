@@ -34,7 +34,7 @@ export interface IConsultationResponseDto {
   dokter_id: string;
   jadwal_id: string;
   tanggal: Date;
-  status: 'pending' | 'scheduled' | 'completed' | 'cancelled';
+  status: 'pending' | 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
   keluhan: string;
   diagnosa?: string;
   tindakan?: string;
@@ -44,8 +44,8 @@ export interface IConsultationResponseDto {
 
 export const toConsultationResponseDto = (consultation: IConsultationModel): IConsultationResponseDto => ({
   id: (consultation._id as Types.ObjectId).toString(),
-  pasien_id: (consultation.pasien_id as Types.ObjectId).toString(),
-  dokter_id: (consultation.dokter_id as Types.ObjectId).toString(),
+  pasien_id: String(consultation.pasien_id),
+  dokter_id: String(consultation.dokter_id),
   jadwal_id: (consultation.jadwal_id as Types.ObjectId).toString(),
   tanggal: consultation.tanggal,
   status: consultation.status,

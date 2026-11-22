@@ -1,3 +1,5 @@
+import { ownerScope } from '../plugins/ownerScope';
+import { dokterScope } from './scopes';
 import { Schema, model, Document, Types } from 'mongoose';
 import { generateCustomId } from '../utils/idGenerator';
 
@@ -11,6 +13,7 @@ export interface IDokter extends Document {
   foto?: string;
   bio?: string;
   status: 'active' | 'inactive';
+  is_verified: boolean;
 }
 
 const DokterSchema = new Schema<IDokter>(
@@ -53,6 +56,10 @@ const DokterSchema = new Schema<IDokter>(
     bio: {
       type: String,
     },
+    is_verified: {
+      type: Boolean,
+      default: false,
+    },
     status: {
       type: String,
       enum: ['active', 'inactive'],
@@ -61,6 +68,8 @@ const DokterSchema = new Schema<IDokter>(
   },
   { _id: false },
 ); // Disable default _id generation
+
+ownerScope(DokterSchema, dokterScope);
 
 const Dokter = model<IDokter>('Dokter', DokterSchema);
 

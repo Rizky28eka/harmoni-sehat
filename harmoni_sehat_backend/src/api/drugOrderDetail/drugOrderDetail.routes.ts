@@ -1,9 +1,11 @@
+import { accessPolicy } from '../../middlewares/accessPolicy';
 import { Router } from 'express';
 import drugOrderDetailController from './drugOrderDetail.controller';
 import { validate } from '../../middlewares/validator';
 import { createDrugOrderDetailSchema, updateDrugOrderDetailSchema } from './drugOrderDetail.validation';
 
 const router = Router();
+router.use(accessPolicy(["pasien", "farmasi"], []));
 
 router.route('/')
   .post(validate(createDrugOrderDetailSchema), drugOrderDetailController.createDrugOrderDetail)

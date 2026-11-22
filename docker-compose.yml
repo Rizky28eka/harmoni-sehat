@@ -1,0 +1,27 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes: [mongo_data:/data/db]
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      retries: 5
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+  api:
+    build: ./harmoni_sehat_backend
+    restart: unless-stopped
+    depends_on:
+      mongo: { condition: service_healthy }
+    env_file: ./harmoni_sehat_backend/.env
+    environment:
+      MONGO_URI: mongodb://mongo:27017/harmoni_sehat
+      REDIS_URL: redis://redis:6379
+      PORT: 8000
+    ports: ["8000:8000"]
+    volumes: [uploads:/app/uploads]
+volumes:
+  mongo_data:
+  uploads:

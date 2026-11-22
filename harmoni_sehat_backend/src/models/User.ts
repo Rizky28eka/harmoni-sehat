@@ -5,6 +5,8 @@ export interface IUser extends Document {
   email: string;
   password?: string;
   is_active: boolean;
+  consent_version?: string;
+  consent_at?: Date;
   role: Types.ObjectId; // Add role field
   passwordResetToken?: string;
   passwordResetExpires?: Date;
@@ -53,6 +55,8 @@ const UserSchema = new Schema<IUser>(
       required: true,
       index: true, // Add index for efficient lookups
     },
+    consent_version: String,
+    consent_at: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
   },

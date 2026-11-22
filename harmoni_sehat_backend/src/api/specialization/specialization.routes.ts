@@ -1,9 +1,11 @@
+import { accessPolicy } from '../../middlewares/accessPolicy';
 import { Router } from 'express';
 import specializationController from './specialization.controller';
 import { validate } from '../../middlewares/validator';
 import { createSpecializationSchema, updateSpecializationSchema } from './specialization.validation';
 
 const router = Router();
+router.use(accessPolicy("public", ["admin"]));
 
 router.route('/')
   .post(validate(createSpecializationSchema), specializationController.createSpecialization)

@@ -1,9 +1,11 @@
+import { accessPolicy } from '../../middlewares/accessPolicy';
 import { Router } from 'express';
 import chatMessageController from './chatMessage.controller';
 import { validate } from '../../middlewares/validator';
 import { createChatMessageSchema, updateChatMessageSchema } from './chatMessage.validation';
 
 const router = Router();
+router.use(accessPolicy("any", "any"));
 
 router.route('/')
   .post(validate(createChatMessageSchema), chatMessageController.createChatMessage)

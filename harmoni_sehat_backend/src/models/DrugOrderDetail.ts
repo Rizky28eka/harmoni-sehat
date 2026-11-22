@@ -1,3 +1,5 @@
+import { ownerScope } from '../plugins/ownerScope';
+import { drugOrderDetailScope } from './scopes';
 import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IDrugOrderDetail extends Document {
@@ -42,6 +44,8 @@ const DrugOrderDetailSchema = new Schema<IDrugOrderDetail>(
   },
   { timestamps: true },
 );
+
+ownerScope(DrugOrderDetailSchema, drugOrderDetailScope);
 
 const DrugOrderDetail = model<IDrugOrderDetail>('DrugOrderDetail', DrugOrderDetailSchema);
 
