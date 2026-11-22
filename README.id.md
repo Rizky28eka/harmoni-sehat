@@ -35,7 +35,7 @@
 
 **Pasien**
 - Mencari dokter, lalu memesan slot konsultasi dan membayar secara online.
-- Chat real-time (Socket.IO) dan tautan video konsultasi (Jitsi Meet) untuk setiap janji temu.
+- Chat real-time (Socket.IO) dan panggilan suara/video dalam aplikasi (WebRTC, signaling lewat Socket.IO) untuk setiap janji temu.
 - Rekam medis dan linimasa medis, dengan ekspor PDF.
 - Resep digital yang bisa ditebus di apotek, serta toko obat dan keranjang.
 - Pengingat minum obat dan asisten kesehatan berbasis AI (Google Gemini).
@@ -74,7 +74,7 @@ flowchart LR
     A --> P["Midtrans<br/>pembayaran"]
     A --> G["Google Gemini<br/>asisten AI"]
     A --> E["SMTP<br/>email"]
-    A --> J["Jitsi Meet<br/>video call"]
+    A --> J["WebRTC<br/>panggilan suara/video"]
 ```
 
 API disusun secara modular: setiap domain (booking, konsultasi, resep, pesanan obat, toko, dan seterusnya) memiliki route, controller, service, dan validasi sendiri di `harmoni_sehat_backend/src/api/`.
@@ -86,7 +86,7 @@ API disusun secara modular: setiap domain (booking, konsultasi, resep, pesanan o
 | Klien seluler | Flutter (Dart), GetX, Dio, Socket.IO client, secure storage |
 | Backend | Node.js, TypeScript, Express, Zod, Socket.IO |
 | Database | MongoDB (Mongoose), Redis (opsional) |
-| Integrasi | Midtrans (pembayaran), Google Gemini (AI), Nodemailer (email), Jitsi Meet (video) |
+| Integrasi | Midtrans (pembayaran), Google Gemini (AI), Nodemailer (email), WebRTC (panggilan), Cloudinary/S3 (unggahan) |
 | Kualitas | Jest, Supertest, mongodb-memory-server, ESLint, Prettier |
 | Infrastruktur | Docker Compose (API, MongoDB 7, Redis 7) |
 
@@ -161,7 +161,7 @@ Modul utama: `auth`, `me`, `patients`, `doctors`, `clinics`, `practiceSchedule`,
 
 Event chat real-time (Socket.IO): `chat:join`, `chat:message`, `chat:typing`, `chat:read`.
 
-Referensi lengkap: [`docs/backend/api-reference.md`](docs/backend/api-reference.md).
+Referensi lengkap: [`docs/backend/api-reference.md`](docs/backend/api-reference.md). Swagger UI interaktif di `/api/docs` (OpenAPI di `/api/openapi.json`).
 
 ## Pengujian
 

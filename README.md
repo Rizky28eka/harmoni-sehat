@@ -35,7 +35,7 @@
 
 **Patients**
 - Browse and search doctors, then book a consultation slot and pay online.
-- Real-time chat (Socket.IO) and a video-consultation link (Jitsi Meet) for each appointment.
+- Real-time chat (Socket.IO) and in-app voice/video calls (WebRTC, signaling over Socket.IO) for each appointment.
 - Medical records and a medical timeline, with PDF export.
 - E-prescriptions that can be redeemed at a pharmacy, plus a medicine shop and cart.
 - Medication reminders and an AI health assistant (Google Gemini).
@@ -74,7 +74,7 @@ flowchart LR
     A --> P["Midtrans<br/>payments"]
     A --> G["Google Gemini<br/>AI assistant"]
     A --> E["SMTP<br/>email"]
-    A --> J["Jitsi Meet<br/>video call"]
+    A --> J["WebRTC<br/>voice/video call"]
 ```
 
 The API follows a modular layout: each domain (booking, consultation, prescription, drug orders, shop, and so on) has its own routes, controller, service, and validation under `harmoni_sehat_backend/src/api/`.
@@ -86,7 +86,7 @@ The API follows a modular layout: each domain (booking, consultation, prescripti
 | Mobile client | Flutter (Dart), GetX, Dio, Socket.IO client, secure storage |
 | Backend | Node.js, TypeScript, Express, Zod, Socket.IO |
 | Database | MongoDB (Mongoose), Redis (optional) |
-| Integrations | Midtrans (payments), Google Gemini (AI), Nodemailer (email), Jitsi Meet (video) |
+| Integrations | Midtrans (payments), Google Gemini (AI), Nodemailer (email), WebRTC (calls), Cloudinary/S3 (uploads) |
 | Quality | Jest, Supertest, mongodb-memory-server, ESLint, Prettier |
 | Infrastructure | Docker Compose (API, MongoDB 7, Redis 7) |
 
@@ -161,7 +161,7 @@ Main modules: `auth`, `me`, `patients`, `doctors`, `clinics`, `practiceSchedule`
 
 Real-time chat events (Socket.IO): `chat:join`, `chat:message`, `chat:typing`, `chat:read`.
 
-Full reference: [`docs/backend/api-reference.md`](docs/backend/api-reference.md).
+Full reference: [`docs/backend/api-reference.md`](docs/backend/api-reference.md). Interactive Swagger UI at `/api/docs` (OpenAPI at `/api/openapi.json`).
 
 ## Testing
 
