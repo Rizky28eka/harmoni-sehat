@@ -63,4 +63,31 @@ class AppTheme {
       ),
     ),
   );
+
+  static final ThemeData darkTheme = ThemeData(
+    brightness: Brightness.dark,
+    primaryColor: AppColors.primaryColor,
+    scaffoldBackgroundColor: const Color(0xFF121212),
+    visualDensity: VisualDensity.adaptivePlatformDensity,
+    textTheme: GoogleFonts.montserratTextTheme(ThemeData.dark().textTheme),
+    colorScheme: const ColorScheme.dark(
+      primary: AppColors.primaryColor,
+      secondary: AppColors.secondaryColor,
+      error: Color(0xFFEF5350),
+      surface: Color(0xFF1E1E1E),
+    ),
+    appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF1B3A1D), foregroundColor: Colors.white, elevation: 0),
+    inputDecorationTheme: InputDecorationTheme(
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: const BorderSide(color: AppColors.primaryColor, width: 2),
+      ),
+    ),
+    cardTheme: CardThemeData(
+      color: const Color(0xFF1E1E1E),
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    ),
+  );
 }

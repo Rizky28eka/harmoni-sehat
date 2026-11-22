@@ -39,11 +39,20 @@ dependencies:
   get_storage: ^2.1.1
   dio: ^5.8.0+1
   flutter_svg: ^2.2.1
+  flutter_secure_storage: ^9.2.4
+  socket_io_client: ^3.1.2
+  intl: ^0.20.2
+  url_launcher: ^6.3.1
+  image_picker: ^1.1.2
+  cached_network_image: ^3.4.1
+  flutter_localizations:
+    sdk: flutter
   
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  http_mock_adapter: ^0.6.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
