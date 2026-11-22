@@ -113,3 +113,56 @@ export const verifyMidtransSignature = (body: any): boolean => {
 };
 
 export const canSimulate = () => isMockPayments() && NODE_ENV !== 'production';
+
+const coreBase = () => (MIDTRANS_IS_PRODUCTION ? 'https://api.midtrans.com/v2' : 'https://api.sandbox.midtrans.com/v2');
+
+export interface RefundResult {
+  ok: boolean;
+  error?: string;
+}
+
+/**
+ * Refunds a settled transaction through the gateway (Midtrans Core API) and records the outcome.
+ * In sandbox/mock mode (no server key) the refund is recorded as successful immediately.
+ * Never throws: a failed refund is stored as `refund_status: 'failed'` so an admin can retry.
+ */
+export const refundTransaction = async (txId: any, reason = 'Pembatalan'): Promise<RefundResult> => {
+  const tx = await asSystem(() => Transaction.findOne({ _id: txId, status: 'completed' }));
+  if (!tx) return { ok: false, error: 'Transaksi tidak ditemukan atau belum dibayar' };
+
+  const markRefunded = () =>
+    asSystem(() => Transaction.updateOne({ _id: tx._id }, { status: 'refunded', refund_status: 'refunded', refunded_at: new Date(), $unset: { refund_error: 1 } }));
+  const markFailed = (error: string) =>
+    asSystem(() => Transaction.updateOne({ _id: tx._id }, { refund_status: 'failed', refund_error: error.slice(0, 300) }));
+
+  if (isMockPayments()) {
+    await markRefunded();
+    return { ok: true };
+  }
+
+  try {
+    const res = await fetch(`${coreBase()}/${encodeURIComponent(tx.order_id)}/refund`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Basic ${Buffer.from(`${MIDTRANS_SERVER_KEY}:`).toString('base64')}`,
+      },
+      // Stable refund_key makes the call idempotent, so retries can never refund twice.
+      body: JSON.stringify({ refund_key: `rf-${tx.order_id}`, amount: Math.round(tx.total_biaya), reason }),
+    });
+    const body: any = await res.json().catch(() => ({}));
+    // Midtrans answers HTTP 200 and reports the real outcome in `status_code`.
+    if (res.ok && String(body.status_code) === '200') {
+      await markRefunded();
+      return { ok: true };
+    }
+    const error = `Refund ditolak gateway (${body.status_code ?? res.status}): ${body.status_message ?? 'tanpa pesan'}`;
+    await markFailed(error);
+    return { ok: false, error };
+  } catch (err: any) {
+    const error = `Gagal menghubungi gateway: ${err?.message ?? 'unknown'}`;
+    await markFailed(error);
+    return { ok: false, error };
+  }
+};

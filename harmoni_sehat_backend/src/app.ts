@@ -3,6 +3,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
+import swaggerUi from 'swagger-ui-express';
+import { openapi } from './docs/openapi';
 import errorHandler from './middlewares/errorHandler';
 import sanitize from './middlewares/sanitize';
 import { AppError } from './utils/AppError';
@@ -48,6 +50,12 @@ const app = express();
 
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
+
+// API docs are mounted before helmet: swagger-ui needs inline scripts that the default CSP blocks.
+if (NODE_ENV !== 'production' || process.env.DOCS_ENABLED === 'true') {
+  app.get('/api/openapi.json', (_req, res) => res.json(openapi));
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(openapi, { customSiteTitle: 'Harmoni Sehat API' }));
+}
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(
   cors({

@@ -14,7 +14,7 @@ import { AppError } from '../../utils/AppError';
 import { Actor } from '../../utils/actor';
 import { asSystem } from '../../utils/requestContext';
 import { generateSlots, dayNameOf, parseWibDate, toMinutes } from '../../services/schedule';
-import { createPayment, onPaid, onFailed, failTransaction } from '../../services/payment';
+import { createPayment, onPaid, onFailed, failTransaction, refundTransaction } from '../../services/payment';
 import { notify } from '../../services/notify';
 import { cached } from '../../utils/cache';
 import { analyzeSentiment } from '../gemini/gemini.service';
@@ -251,7 +251,8 @@ export const cancelConsultation = async (actor: Actor, id: string, reason?: stri
 
   if (paid) {
     // Record the refund; the actual money movement is done via the gateway dashboard.
-    await asSystem(() => Transaction.updateOne({ transaksiable_id: c._id, status: 'completed' }, { status: 'refunded' }));
+    const paidTx = await asSystem(() => Transaction.findOne({ transaksiable_id: c._id, status: 'completed' }));
+    if (paidTx) await refundTransaction(paidTx._id, updated.cancel_reason ?? 'Konsultasi dibatalkan');
   } else {
     const tx = await asSystem(() => Transaction.findOne({ transaksiable_id: c._id, status: 'pending' }));
     if (tx) await asSystem(() => Transaction.updateOne({ _id: tx._id }, { status: 'failed' }));

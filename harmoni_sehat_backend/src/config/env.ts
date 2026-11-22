@@ -39,8 +39,26 @@ export const FCM_SERVICE_ACCOUNT_PATH = process.env.FCM_SERVICE_ACCOUNT_PATH || 
 
 // Media storage: 'local' (default) or 'cloudinary'
 export const UPLOAD_DIR = process.env.UPLOAD_DIR || 'uploads';
-export const CLOUDINARY_URL = process.env.CLOUDINARY_URL || '';
 export const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`;
 
 // Field-level encryption key for sensitive medical data (32 bytes, hex or any string => sha256)
 export const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || '';
+
+// Object storage. STORAGE_DRIVER: local | cloudinary | s3 (auto-detected from credentials when unset)
+export const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME || '';
+export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY || '';
+export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET || '';
+export const S3_BUCKET = process.env.S3_BUCKET || '';
+export const S3_REGION = process.env.S3_REGION || 'ap-southeast-1';
+export const S3_ENDPOINT = process.env.S3_ENDPOINT || ''; // for R2 / MinIO / other S3-compatible stores
+export const S3_ACCESS_KEY_ID = process.env.S3_ACCESS_KEY_ID || '';
+export const S3_SECRET_ACCESS_KEY = process.env.S3_SECRET_ACCESS_KEY || '';
+export const S3_PUBLIC_URL = process.env.S3_PUBLIC_URL || ''; // CDN / public base URL of the bucket
+export const STORAGE_DRIVER =
+  process.env.STORAGE_DRIVER ||
+  (CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET ? 'cloudinary' : S3_BUCKET && S3_ACCESS_KEY_ID ? 's3' : 'local');
+
+// WebRTC. Without TURN, calls only work when both peers can reach each other through STUN.
+export const STUN_URLS = (process.env.STUN_URLS || 'stun:stun.l.google.com:19302').split(',').map((s) => s.trim()).filter(Boolean);
+export const TURN_URLS = (process.env.TURN_URLS || '').split(',').map((s) => s.trim()).filter(Boolean);
+export const TURN_SECRET = process.env.TURN_SECRET || ''; // coturn `static-auth-secret` (ephemeral credentials)

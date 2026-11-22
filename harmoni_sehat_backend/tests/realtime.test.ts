@@ -89,6 +89,46 @@ describe('socket chat', () => {
   });
 });
 
+describe('webrtc signaling', () => {
+  const next = (s: Socket, ev: string) => new Promise<any>((r) => s.once(ev, r));
+
+  it('relays call setup between participants only, and tears down on disconnect', async () => {
+    const { d, p, c } = await scheduledConsultation();
+    const outsider = await registerPasien();
+    const id = String(c._id);
+    const sp = await connect(p.body.token);
+    const sd = await connect(d.body.token);
+    const so = await connect(outsider.body.token);
+    await emitAck(sp, 'chat:join', { konsultasiId: id });
+    await emitAck(sd, 'chat:join', { konsultasiId: id });
+
+    // Outsider cannot ring, and cannot inject signals.
+    expect((await emitAck(so, 'call:invite', { konsultasiId: id })).ok).toBe(false);
+
+    const incoming = next(sd, 'call:incoming');
+    expect((await emitAck(sp, 'call:invite', { konsultasiId: id, video: true })).ok).toBe(true);
+    expect((await incoming).video).toBe(true);
+    expect((await emitAck(sd, 'call:invite', { konsultasiId: id })).error).toBe('busy');
+
+    // The caller cannot accept their own call; the callee can.
+    expect((await emitAck(sp, 'call:accept', { konsultasiId: id })).ok).toBe(false);
+    const accepted = next(sp, 'call:accepted');
+    expect((await emitAck(sd, 'call:accept', { konsultasiId: id })).ok).toBe(true);
+    await accepted;
+
+    const offer = next(sd, 'call:signal');
+    sp.emit('call:signal', { konsultasiId: id, type: 'offer', data: { sdp: 'v=0', type: 'offer' } });
+    expect((await offer).type).toBe('offer');
+    so.emit('call:signal', { konsultasiId: id, type: 'offer', data: { sdp: 'evil' } });
+    sp.emit('call:signal', { konsultasiId: id, type: 'drop-table', data: {} });
+
+    const ended = next(sd, 'call:ended');
+    sp.close();
+    expect((await ended).reason).toBe('disconnected');
+    [sd, so].forEach((s) => s.close());
+  });
+});
+
 describe('misc endpoints', () => {
   it('accepts a real PNG upload and rejects a disguised file', async () => {
     const p = await registerPasien();

@@ -11,6 +11,9 @@ export interface ITransaction extends Document {
   payment_url?: string;
   payment_token?: string;
   paid_at?: Date;
+  refund_status: 'none' | 'refunded' | 'failed';
+  refund_error?: string;
+  refunded_at?: Date;
   external_id?: string; // Transaction ID from payment gateway
   transaksiable_id: Types.ObjectId; // ID of the related entity (e.g., Consultation, DrugOrder)
   transaksiable_type: string; // Type of the related entity (e.g., 'Consultation', 'DrugOrder')
@@ -44,6 +47,9 @@ const TransactionSchema = new Schema<ITransaction>(
     payment_url: { type: String },
     payment_token: { type: String },
     paid_at: { type: Date },
+    refund_status: { type: String, enum: ['none', 'refunded', 'failed'], default: 'none', index: true },
+    refund_error: { type: String },
+    refunded_at: { type: Date },
     external_id: {
       type: String,
       trim: true,

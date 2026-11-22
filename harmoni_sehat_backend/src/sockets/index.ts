@@ -11,6 +11,10 @@ import { asSystem } from '../utils/requestContext';
 import { notify } from '../services/notify';
 
 let io: Server | null = null;
+
+/** Active 1:1 calls keyed by consultation id. In-memory: a call never outlives its sockets. */
+interface CallState { initiator: string; video: boolean; state: 'ringing' | 'active'; }
+export const calls = new Map<string, CallState>();
 export const getIO = () => io;
 
 const CHAT_STATUSES = ['scheduled', 'ongoing'];
@@ -102,6 +106,71 @@ export const initSocket = (server: HttpServer) => {
         }
       },
     );
+
+    /* ---------------------------------------------------------- WebRTC signaling */
+    const MAX_SIGNAL_BYTES = 20_000;
+    const inRoom = (id: string) => socket.rooms.has(`consultation:${id}`);
+    const myCalls = (socket.data as any).calls ?? ((socket.data as any).calls = new Set<string>());
+
+    const endCall = (id: string, reason: string) => {
+      if (calls.delete(id)) io!.to(`consultation:${id}`).emit('call:ended', { konsultasiId: id, reason });
+      myCalls.delete(id);
+    };
+
+    socket.on('call:invite', async (payload: { konsultasiId: string; video?: boolean }, ack?: (r: any) => void) => {
+      try {
+        const id = String(payload?.konsultasiId ?? '');
+        const c = await findParticipantConsultation(id, actor);
+        if (!c || !inRoom(id)) return ack?.({ ok: false, error: 'forbidden' });
+        if (!CHAT_STATUSES.includes(c.status)) return ack?.({ ok: false, error: 'consultation_not_active' });
+        if (calls.has(id)) return ack?.({ ok: false, error: 'busy' });
+        calls.set(id, { initiator: actor.userId, video: payload.video !== false, state: 'ringing' });
+        myCalls.add(id);
+        socket.to(`consultation:${id}`).emit('call:incoming', { konsultasiId: id, from: actor.userId, video: payload.video !== false });
+        const peer = await asSystem(async (): Promise<{ user_id: any } | null> =>
+          actor.role === 'pasien' ? Dokter.findById(c.dokter_id).select('user_id') : Pasien.findById(c.pasien_id).select('user_id'));
+        if (peer) await notify(String(peer.user_id), { judul: 'Panggilan masuk', isi: 'Konsultasi video/suara menunggu Anda', tipe: 'info', data: { type: 'call', id } });
+        ack?.({ ok: true });
+        // Unanswered calls stop ringing after 45s.
+        setTimeout(() => { if (calls.get(id)?.state === 'ringing') endCall(id, 'timeout'); }, 45_000).unref();
+      } catch {
+        ack?.({ ok: false, error: 'error' });
+      }
+    });
+
+    socket.on('call:accept', (payload: { konsultasiId: string }, ack?: (r: any) => void) => {
+      const id = String(payload?.konsultasiId ?? '');
+      const call = calls.get(id);
+      // Only the other participant (not the caller) can answer.
+      if (!call || !inRoom(id) || call.initiator === actor.userId || call.state !== 'ringing') return ack?.({ ok: false });
+      call.state = 'active';
+      myCalls.add(id);
+      socket.to(`consultation:${id}`).emit('call:accepted', { konsultasiId: id, by: actor.userId });
+      ack?.({ ok: true, video: call.video });
+    });
+
+    socket.on('call:reject', (payload: { konsultasiId: string }) => {
+      const id = String(payload?.konsultasiId ?? '');
+      const call = calls.get(id);
+      if (call && inRoom(id) && call.initiator !== actor.userId) endCall(id, 'rejected');
+    });
+
+    socket.on('call:signal', (payload: { konsultasiId: string; type: string; data: unknown }) => {
+      const id = String(payload?.konsultasiId ?? '');
+      if (!calls.has(id) || !inRoom(id)) return;
+      if (!['offer', 'answer', 'candidate'].includes(payload.type)) return;
+      if (JSON.stringify(payload.data ?? '').length > MAX_SIGNAL_BYTES) return;
+      socket.to(`consultation:${id}`).emit('call:signal', { konsultasiId: id, from: actor.userId, type: payload.type, data: payload.data });
+    });
+
+    socket.on('call:end', (payload: { konsultasiId: string }) => {
+      const id = String(payload?.konsultasiId ?? '');
+      if (calls.has(id) && inRoom(id)) endCall(id, 'ended');
+    });
+
+    socket.on('disconnect', () => {
+      for (const id of [...myCalls]) endCall(id, 'disconnected');
+    });
 
     socket.on('chat:typing', (payload: { konsultasiId: string; typing: boolean }) => {
       if (socket.rooms.has(`consultation:${payload?.konsultasiId}`)) {

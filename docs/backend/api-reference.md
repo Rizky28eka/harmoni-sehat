@@ -1,5 +1,7 @@
 # Referensi API Harmoni Sehat
 
+> Dokumentasi interaktif (Swagger UI): `GET /api/docs` · spesifikasi OpenAPI: `GET /api/openapi.json` (aktif di non-production, atau `DOCS_ENABLED=true`). Spesifikasi divalidasi dan diuji terhadap rute yang benar-benar ada.
+
 Base URL: `/api/v1`. Semua endpoint (kecuali yang ditandai **publik**) membutuhkan header `Authorization: Bearer <accessToken>`.
 
 Format respons: `{ "status": "success", "data": ... }` atau `{ "statusCode", "data", "message", "success" }` (modul CRUD).
@@ -47,6 +49,7 @@ Password: min. 8 karakter, huruf besar, huruf kecil, angka, dan simbol `@$!%*?&`
 | POST | `/booking/consultations/:id/start` | dokter | `scheduled` → `ongoing`. |
 | POST | `/booking/consultations/:id/complete` | dokter | `diagnosa` + opsional vital, `alergi`, `resep.obat[]`. Membuat rekam medis (+resep). |
 | POST | `/booking/consultations/:id/review` | pasien | `rating 1-5, komentar`. Sekali per konsultasi. |
+| GET | `/booking/ice-servers` | semua | Konfigurasi ICE untuk WebRTC (STUN + kredensial TURN sementara bila dikonfigurasi). |
 | GET/POST/PUT/DELETE | `/booking/my/schedules[/:id]` | dokter | Kelola jadwal praktik (tidak boleh tumpang tindih). |
 | GET | `/booking/my/summary` | dokter | Antrean hari ini, statistik. |
 
@@ -74,6 +77,9 @@ Status konsultasi: `pending` (menunggu bayar) → `scheduled` → `ongoing` → 
 
 Pesanan yang tidak dibayar dalam 30 menit dibatalkan otomatis dan stok dikembalikan.
 
+### Refund
+Membatalkan konsultasi/pesanan yang sudah dibayar memanggil Midtrans Core API (`POST /v2/{order_id}/refund`, `refund_key` tetap sehingga aman diulang). Hasil dicatat di `Transaction.refund_status` (`refunded` | `failed`). Refund yang ditolak gateway **tidak hilang**: muncul di `GET /admins/manage/refunds/failed` dan dapat diulang dengan `POST /admins/manage/refunds/:orderId/retry`. Tanpa `MIDTRANS_SERVER_KEY` (sandbox) refund langsung dicatat berhasil.
+
 ## Lainnya
 
 | Path | Keterangan |
@@ -81,7 +87,7 @@ Pesanan yang tidak dibayar dalam 30 menit dibatalkan otomatis dan stok dikembali
 | `POST /gemini/chat` | Asisten AI (`message`, `history[]`). Deteksi kondisi darurat tanpa memanggil model; rekomendasi spesialis + dokter. Rate limit 10/menit. |
 | `GET /notifications`, `/notifications/unread-count`, `POST /notifications/read-all`, `/notifications/:id/read` | Notifikasi milik sendiri. |
 | `POST /notifications/devices {token, platform}` / `DELETE /notifications/devices/:token` | Daftar token FCM. |
-| `POST /media/upload` (multipart `file`) | JPG/PNG/WEBP/PDF ≤ 5 MB, divalidasi *magic bytes*. |
+| `POST /media/upload` (multipart `file`) | JPG/PNG/WEBP/PDF ≤ 5 MB, divalidasi *magic bytes*. Disimpan lewat driver `STORAGE_DRIVER`: `local` (default), `cloudinary` (upload bertanda tangan), atau `s3` (S3/R2/MinIO). |
 | `GET /health-articles[/:idOrSlug]` | **Publik**, hanya artikel `published`. Tulis: dokter terverifikasi & admin. |
 | `GET/POST/PUT/DELETE /me/reminders` | Pengingat minum obat (dikirim sebagai notifikasi pada jam WIB yang ditentukan). |
 | `GET /me/medical-timeline`, `GET /me/medical-records/:id/pdf-link` | Linimasa rekam medis & tautan PDF bertoken 5 menit. |
@@ -101,3 +107,16 @@ Koneksi: `io(SERVER_URL, { auth: { token: accessToken } })`. Tanpa token valid k
 | `chat:read` | `{ konsultasiId }` | — |
 
 Server → client: `chat:message`, `chat:typing`, `chat:read`, `notification`.
+
+### Panggilan suara/video (WebRTC)
+
+Media mengalir peer-to-peer; server hanya merelai signaling. Syarat: peserta harus sudah `chat:join` dan konsultasi `scheduled`/`ongoing`.
+
+| Event (client → server) | Payload | Keterangan |
+| --- | --- | --- |
+| `call:invite` | `{ konsultasiId, video? }` | Ack `{ ok }` atau `error: busy \| forbidden \| consultation_not_active`. Berdering 45 detik. |
+| `call:accept` / `call:reject` | `{ konsultasiId }` | Hanya lawan bicara (bukan penelepon). |
+| `call:signal` | `{ konsultasiId, type: offer\|answer\|candidate, data }` | Direlai ke peserta lain; payload maks. ±20 KB. |
+| `call:end` | `{ konsultasiId }` | Juga otomatis saat salah satu socket terputus. |
+
+Server → client: `call:incoming`, `call:accepted`, `call:signal`, `call:ended { reason: ended\|rejected\|timeout\|disconnected }`. Ambil `iceServers` dari `GET /booking/ice-servers`.

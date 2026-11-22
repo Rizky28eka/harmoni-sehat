@@ -11,7 +11,7 @@ import Transaction from '../../models/Transaction';
 import { AppError } from '../../utils/AppError';
 import { Actor } from '../../utils/actor';
 import { asSystem } from '../../utils/requestContext';
-import { createPayment, onPaid, onFailed, failTransaction } from '../../services/payment';
+import { createPayment, onPaid, onFailed, failTransaction, refundTransaction } from '../../services/payment';
 import { notify } from '../../services/notify';
 
 const PENDING_TTL_MS = 30 * 60 * 1000;
@@ -228,7 +228,7 @@ export const cancelOrder = async (actor: Actor, id: string, reason?: string) => 
   await restock(updated._id);
 
   if (order.payment_status === 'paid') {
-    await asSystem(() => Transaction.updateOne({ _id: order.transaksi_id, status: 'completed' }, { status: 'refunded' }));
+    await refundTransaction(order.transaksi_id, reason ?? 'Pesanan dibatalkan');
   } else if (order.transaksi_id) {
     const tx = await asSystem(() => Transaction.findById(order.transaksi_id));
     if (tx?.status === 'pending') await failTransaction(tx.order_id, 'failed');

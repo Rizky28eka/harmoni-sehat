@@ -23,6 +23,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1175.0",
     "@faker-js/faker": "^9.9.0",
     "@google/generative-ai": "^0.24.1",
     "@types/nodemailer": "^6.4.17",
@@ -42,9 +43,11 @@
     "nodemailer": "^7.0.5",
     "pdfkit": "^0.21.0",
     "socket.io": "^4.8.1",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@apidevtools/swagger-parser": "^13.1.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/body-parser": "^1.19.6",
     "@types/cors": "^2.8.19",
@@ -56,6 +59,7 @@
     "@types/node": "^24.0.13",
     "@types/pdfkit": "^0.17.7",
     "@types/supertest": "^7.2.1",
+    "@types/swagger-ui-express": "^4.1.8",
     "@typescript-eslint/eslint-plugin": "^8.36.0",
     "@typescript-eslint/parser": "^8.36.0",
     "eslint": "^8.57.0",

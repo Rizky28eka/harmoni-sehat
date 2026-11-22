@@ -8,6 +8,7 @@ import DrugOrder from '../../models/DrugOrder';
 import Transaction from '../../models/Transaction';
 import { AppError } from '../../utils/AppError';
 import { notify } from '../../services/notify';
+import { refundTransaction } from '../../services/payment';
 
 const router = Router();
 router.use(accessPolicy(['admin'], ['admin']));
@@ -80,6 +81,23 @@ router.get('/stats', async (_req, res, next) => {
   } catch (e) {
     next(e);
   }
+});
+
+/** Refunds the gateway rejected (or could not be reached): needs an admin's attention. */
+router.get('/refunds/failed', async (_req, res, next) => {
+  try {
+    res.json({ status: 'success', data: await Transaction.find({ refund_status: 'failed' }).sort({ updatedAt: -1 }).limit(100).lean() });
+  } catch (e) { next(e); }
+});
+
+router.post('/refunds/:orderId/retry', async (req, res, next) => {
+  try {
+    const tx = await Transaction.findOne({ order_id: req.params.orderId, status: 'completed', refund_status: 'failed' });
+    if (!tx) throw new AppError('Tidak ada refund gagal untuk order ini', 404);
+    const result = await refundTransaction(tx._id, 'Retry oleh admin');
+    if (!result.ok) throw new AppError(result.error ?? 'Refund gagal', 502);
+    res.json({ status: 'success', data: await Transaction.findById(tx._id) });
+  } catch (e) { next(e); }
 });
 
 export default router;

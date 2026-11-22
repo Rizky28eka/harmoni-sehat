@@ -6,6 +6,7 @@ import { validate } from '../../middlewares/validator';
 import { getActor } from '../../utils/actor';
 import { requireVerifiedProfessional } from '../../middlewares/verified';
 import * as svc from './booking.service';
+import { getIceServers } from '../../services/ice';
 
 const router = Router();
 router.use(protect);
@@ -99,6 +100,9 @@ router.post('/consultations/:id/review', authorize('pasien'),
     const r = await svc.reviewConsultation(await getActor(req), req.params.id, req.body.rating, req.body.komentar);
     res.status(201).json({ status: 'success', data: r });
   }));
+
+/* ----- WebRTC ----- */
+router.get('/ice-servers', h(async (req) => ({ iceServers: getIceServers(String((req as any).user._id)) })));
 
 /* ----- doctor self-service ----- */
 const scheduleSchema = z.object({
