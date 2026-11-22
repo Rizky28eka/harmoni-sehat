@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:harmoni_sehat_frontend/app/theme/app_colors.dart';
+import '../../app/theme/app_colors.dart';
 
 class CustomTextFormField extends StatelessWidget {
   final TextEditingController controller;
@@ -29,6 +29,7 @@ class CustomTextFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextFormField(
       controller: controller,
       obscureText: obscureText,
@@ -37,33 +38,39 @@ class CustomTextFormField extends StatelessWidget {
       onTap: onTap,
       readOnly: readOnly,
       maxLines: obscureText ? 1 : maxLines,
+      style: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w500,
+        color: isDark ? Colors.white : AppColors.textPrimary,
+      ),
       decoration: InputDecoration(
         labelText: labelText,
         prefixIcon: prefixIcon != null
-            ? Icon(prefixIcon, color: AppColors.textSecondary)
+            ? Icon(prefixIcon, color: AppColors.textSecondary, size: 20)
             : null,
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        fillColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderColor),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: isDark ? AppColors.darkBorderColor : AppColors.borderColor),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.borderColor),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: isDark ? AppColors.darkBorderColor : AppColors.borderColor),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primaryColor, width: 1.5),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.primaryColor, width: 1.8),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.errorColor, width: 1.5),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.errorColor, width: 1.5),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.errorColor, width: 1.8),
         ),
       ),
     );

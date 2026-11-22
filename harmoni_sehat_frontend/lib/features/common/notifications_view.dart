@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../app/routes/app_routes.dart';
+import '../../app/theme/app_colors.dart';
 import '../../core/api_client.dart';
 import '../../core/format.dart';
 import '../../core/session.dart';
@@ -68,18 +69,35 @@ class NotificationsView extends StatelessWidget {
             builder: () => RefreshIndicator(
               onRefresh: c.load,
               child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 itemCount: c.data.value!.length,
-                separatorBuilder: (_, __) => const Divider(height: 1),
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
                 itemBuilder: (_, i) {
                   final n = c.data.value![i];
                   final unread = n['is_read'] != true;
-                  return ListTile(
-                    tileColor: unread ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.06) : null,
-                    leading: Icon(switch (n['tipe']) { 'success' => Icons.check_circle_outline, 'warning' => Icons.warning_amber, 'error' => Icons.error_outline, _ => Icons.info_outline }),
-                    title: Text(n['judul']?.toString() ?? '', style: TextStyle(fontWeight: unread ? FontWeight.bold : FontWeight.normal)),
-                    subtitle: Text('${n['isi'] ?? ''}\n${fmtDateTime(n['createdAt'])}'),
-                    isThreeLine: true,
-                    onTap: () => c.open(n),
+                  final (icon, color, bg) = switch (n['tipe']) {
+                    'success' => (Icons.check_circle_outline, AppColors.successColor, AppColors.primaryLight),
+                    'warning' => (Icons.warning_amber, AppColors.warningColor, AppColors.accentAmberLight),
+                    'error' => (Icons.error_outline, AppColors.errorColor, AppColors.accentRoseLight),
+                    _ => (Icons.info_outline, AppColors.secondaryColor, AppColors.secondaryLight),
+                  };
+                  return Card(
+                    color: unread ? AppColors.primaryLight.withValues(alpha: 0.15) : null,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+                        child: Icon(icon, color: color, size: 22),
+                      ),
+                      title: Text(n['judul']?.toString() ?? '', style: TextStyle(fontWeight: unread ? FontWeight.bold : FontWeight.w600, fontSize: 14)),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text('${n['isi'] ?? ''}\n${fmtDateTime(n['createdAt'])}', style: const TextStyle(fontSize: 12)),
+                      ),
+                      isThreeLine: true,
+                      onTap: () => c.open(n),
+                    ),
                   );
                 },
               ),

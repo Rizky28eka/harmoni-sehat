@@ -6,6 +6,7 @@ import '../../core/api_client.dart';
 import '../../core/format.dart';
 import '../../core/socket_service.dart';
 import '../../core/ui.dart';
+import '../../app/theme/app_colors.dart';
 import '../common/notifications_view.dart';
 import '../common/settings_view.dart';
 import '../patient/consultations.dart';
@@ -60,11 +61,25 @@ class _DoctorHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.put(DoctorHomeController());
-    Widget stat(String label, String value, IconData icon) => Expanded(
+    Widget stat(String label, String value, IconData icon, Color color, Color bg) => Expanded(
           child: Card(
+            margin: const EdgeInsets.all(4),
             child: Padding(
               padding: const EdgeInsets.all(14),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Icon(icon, color: Theme.of(context).colorScheme.primary), const SizedBox(height: 8), Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)), Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12))]),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
+                    child: Icon(icon, color: color, size: 20),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 2),
+                  Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                ],
+              ),
             ),
           ),
         );
@@ -78,8 +93,15 @@ class _DoctorHome extends StatelessWidget {
             child: ListView(padding: const EdgeInsets.all(16), children: [
               Text(greeting(), style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
-              Row(children: [stat('Akan datang', '${c.data.value!.n('upcoming').toInt()}', Icons.event), stat('Selesai', '${c.data.value!.n('completed').toInt()}', Icons.task_alt)]),
-              Row(children: [stat('Rating', c.data.value!.n('rating') == 0 ? '-' : c.data.value!.n('rating').toStringAsFixed(1), Icons.star_outline), stat('Pendapatan', rupiah(c.data.value!.n('pendapatan')), Icons.payments_outlined)]),
+              Row(children: [
+                stat('Akan datang', '${c.data.value!.n('upcoming').toInt()}', Icons.event, AppColors.secondaryColor, AppColors.secondaryLight),
+                stat('Selesai', '${c.data.value!.n('completed').toInt()}', Icons.task_alt, AppColors.successColor, AppColors.primaryLight),
+              ]),
+              const SizedBox(height: 4),
+              Row(children: [
+                stat('Rating', c.data.value!.n('rating') == 0 ? '-' : c.data.value!.n('rating').toStringAsFixed(1), Icons.star_outline, AppColors.accentAmber, AppColors.accentAmberLight),
+                stat('Pendapatan', rupiah(c.data.value!.n('pendapatan')), Icons.payments_outlined, AppColors.accentIndigo, AppColors.accentIndigoLight),
+              ]),
               const SectionTitle('Antrean hari ini'),
               if (asList(c.data.value!['today']).isEmpty) Padding(padding: EdgeInsets.all(16), child: Text('Tidak ada konsultasi hari ini.'.tr, style: TextStyle(color: Colors.grey))),
               for (final x in asList(c.data.value!['today']))

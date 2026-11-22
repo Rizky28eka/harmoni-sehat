@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../app/routes/app_routes.dart';
+import '../../app/theme/app_colors.dart';
 import '../../core/api_client.dart';
 import '../../core/format.dart';
 import '../../core/ui.dart';
@@ -145,10 +146,19 @@ class ArticlesView extends StatelessWidget {
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
                     child: ListTile(
-                      leading: const Icon(Icons.article_outlined),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      leading: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: AppColors.secondaryLight,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.article_outlined, color: AppColors.secondaryColor, size: 22),
+                      ),
                       title: Text(a.s('judul'), style: const TextStyle(fontWeight: FontWeight.w600)),
-                      subtitle: Text(fmtDate(a['createdAt'])),
-                      trailing: const Icon(Icons.chevron_right),
+                      subtitle: Text(fmtDate(a['createdAt']), style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                      trailing: const Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 18),
                       onTap: () => Get.toNamed(AppRoutes.articleDetail, arguments: a.s('slug')),
                     ),
                   );

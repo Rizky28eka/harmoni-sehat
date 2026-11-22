@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../app/theme/app_colors.dart';
+
 import '../../core/api_client.dart';
 import '../../core/reminder_scheduler.dart';
 import '../../core/format.dart';
@@ -54,13 +56,25 @@ class RecordsTab extends StatelessWidget {
                     padding: const EdgeInsets.all(14),
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       Row(children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          margin: const EdgeInsets.only(right: 10),
+                          decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(10)),
+                          child: const Icon(Icons.description_outlined, color: AppColors.primaryDark, size: 20),
+                        ),
                         Expanded(child: Text(r.s('diagnosis'), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                        IconButton(tooltip: 'Ekspor PDF'.tr, icon: const Icon(Icons.picture_as_pdf_outlined), onPressed: () => c.exportPdf(r['_id'].toString())),
+                        IconButton(tooltip: 'Ekspor PDF'.tr, icon: const Icon(Icons.picture_as_pdf_outlined, color: AppColors.primaryColor), onPressed: () => c.exportPdf(r['_id'].toString())),
                       ]),
                       Text('${fmtDate(r['tanggal_rekam_medis'])}${dokter.isNotEmpty ? ' • ${dokter.s('nama')}' : ''}', style: const TextStyle(color: Colors.grey)),
                       if (vitals.isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Text(vitals)),
                       if (r.s('catatan_dokter').isNotEmpty) Padding(padding: const EdgeInsets.only(top: 6), child: Text(r.s('catatan_dokter'))),
-                      if ((r['alergi'] as List?)?.isNotEmpty ?? false) Padding(padding: const EdgeInsets.only(top: 6), child: Text('${'Alergi'.tr}: ${(r['alergi'] as List).join(', ')}', style: const TextStyle(color: Colors.red))),
+                      if ((r['alergi'] as List?)?.isNotEmpty ?? false)
+                        Container(
+                          margin: const EdgeInsets.only(top: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(color: AppColors.accentRoseLight, borderRadius: BorderRadius.circular(8)),
+                          child: Text('${'Alergi'.tr}: ${(r['alergi'] as List).join(', ')}', style: const TextStyle(color: AppColors.accentRose, fontWeight: FontWeight.w600, fontSize: 12)),
+                        ),
                     ]),
                   ),
                 );

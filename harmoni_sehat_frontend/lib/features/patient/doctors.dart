@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../app/routes/app_routes.dart';
+import '../../app/theme/app_colors.dart';
 import '../../core/api_client.dart';
 import '../../core/format.dart';
 import '../../core/ui.dart';
@@ -164,7 +165,7 @@ class DoctorCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
         onTap: () => Get.toNamed(AppRoutes.doctorDetail, arguments: d['_id'].toString()),
         child: Padding(
           padding: const EdgeInsets.all(14),
@@ -174,13 +175,31 @@ class DoctorCard extends StatelessWidget {
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(d['nama']?.toString() ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                Text(spec['nama']?.toString() ?? 'Dokter', style: const TextStyle(color: Colors.grey)),
-                const SizedBox(height: 6),
+                const SizedBox(height: 2),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(6)),
+                  child: Text(spec['nama']?.toString() ?? 'Dokter', style: const TextStyle(color: AppColors.primaryDark, fontSize: 11, fontWeight: FontWeight.w600)),
+                ),
+                const SizedBox(height: 8),
                 Row(children: [
-                  const Icon(Icons.star, color: Colors.amber, size: 16),
-                  Text(' ${rating == 0 ? 'Baru'.tr : rating.toStringAsFixed(1)}${(d['jumlah_ulasan'] ?? 0) > 0 ? ' (${d['jumlah_ulasan']})' : ''}'),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(color: AppColors.accentAmberLight, borderRadius: BorderRadius.circular(6)),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.star, color: AppColors.accentAmber, size: 14),
+                        const SizedBox(width: 2),
+                        Text(
+                          ' ${rating == 0 ? 'Baru'.tr : rating.toStringAsFixed(1)}${(d['jumlah_ulasan'] ?? 0) > 0 ? ' (${d['jumlah_ulasan']})' : ''}',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFFB45309)),
+                        ),
+                      ],
+                    ),
+                  ),
                   const Spacer(),
-                  Text(rupiah(d['biaya_konsultasi'] as num?), style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(rupiah(d['biaya_konsultasi'] as num?), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.primaryColor)),
                 ]),
               ]),
             ),
@@ -289,27 +308,55 @@ class DoctorDetailView extends StatelessWidget {
     final reviews = asList(d['ulasan']);
     final days = List.generate(14, (i) => DateTime.now().add(Duration(days: i + (DateTime.now().hour >= 20 ? 1 : 0))));
     return ListView(padding: const EdgeInsets.all(16), children: [
-      Row(children: [
-        Avatar(name: d.s('nama'), url: d['foto']?.toString(), radius: 40),
-        const SizedBox(width: 16),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(d.s('nama'), style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-            Text(spec['nama']?.toString() ?? 'Dokter', style: const TextStyle(color: Colors.grey)),
-            const SizedBox(height: 6),
-            Row(children: [
-              const Icon(Icons.star, color: Colors.amber, size: 18),
-              Text(' ${d.n('rating') == 0 ? 'Baru'.tr : d.n('rating').toStringAsFixed(1)} • ${d.n('jumlah_ulasan').toInt()} ${'ulasan'.tr}'),
-            ]),
-          ]),
+      Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                Avatar(name: d.s('nama'), url: d['foto']?.toString(), radius: 36),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(d.s('nama'), style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 3),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(6)),
+                      child: Text(spec['nama']?.toString() ?? 'Dokter', style: const TextStyle(color: AppColors.primaryDark, fontSize: 11, fontWeight: FontWeight.w600)),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(children: [
+                      const Icon(Icons.star, color: Colors.amber, size: 16),
+                      Text(' ${d.n('rating') == 0 ? 'Baru'.tr : d.n('rating').toStringAsFixed(1)} • ${d.n('jumlah_ulasan').toInt()} ${'ulasan'.tr}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    ]),
+                  ]),
+                ),
+              ]),
+              if (d.s('bio').isNotEmpty) ...[
+                const Divider(height: 24),
+                Text(d.s('bio'), style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.4)),
+              ],
+            ],
+          ),
         ),
-      ]),
-      if (d.s('bio').isNotEmpty) ...[const SizedBox(height: 16), Text(d.s('bio'))],
-      const SizedBox(height: 8),
-      ListTile(contentPadding: EdgeInsets.zero, leading: const Icon(Icons.payments_outlined), title: Text('Biaya konsultasi'.tr), trailing: Text(rupiah(d.n('biaya_konsultasi')), style: const TextStyle(fontWeight: FontWeight.bold))),
-      const Divider(),
+      ),
+      const SizedBox(height: 12),
+      Card(
+        child: ListTile(
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(10)),
+            child: const Icon(Icons.payments_outlined, color: AppColors.primaryColor, size: 22),
+          ),
+          title: Text('Biaya konsultasi'.tr, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          trailing: Text(rupiah(d.n('biaya_konsultasi')), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.primaryColor)),
+        ),
+      ),
+      const SizedBox(height: 16),
       Text('Pilih tanggal'.tr, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-      const SizedBox(height: 8),
+      const SizedBox(height: 10),
       SizedBox(
         height: 72,
         child: Obx(() {
@@ -323,12 +370,19 @@ class DoctorDetailView extends StatelessWidget {
                 final sel = DateUtils.isSameDay(day, selectedDay);
                 return GestureDetector(
                   onTap: () => c.pickDate(day),
-                  child: Container(
-                    width: 56,
-                    decoration: BoxDecoration(color: sel ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: 58,
+                    decoration: BoxDecoration(
+                      color: sel ? AppColors.primaryColor : Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: sel ? AppColors.primaryColor : AppColors.borderColor, width: 1.2),
+                      boxShadow: sel ? [BoxShadow(color: AppColors.primaryColor.withValues(alpha: 0.28), blurRadius: 8, offset: const Offset(0, 3))] : null,
+                    ),
                     child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      Text(DateFormat('E', 'id_ID').format(day), style: TextStyle(color: sel ? Colors.white : null, fontSize: 12)),
-                      Text('${day.day}', style: TextStyle(color: sel ? Colors.white : null, fontWeight: FontWeight.bold, fontSize: 18)),
+                      Text(DateFormat('E', 'id_ID').format(day), style: TextStyle(color: sel ? Colors.white : AppColors.textSecondary, fontSize: 12, fontWeight: FontWeight.w500)),
+                      const SizedBox(height: 2),
+                      Text('${day.day}', style: TextStyle(color: sel ? Colors.white : AppColors.textPrimary, fontWeight: FontWeight.bold, fontSize: 18)),
                     ]),
                   ),
                 );
@@ -341,7 +395,7 @@ class DoctorDetailView extends StatelessWidget {
       const SizedBox(height: 8),
       Obx(() {
         if (c.slotsLoading.value) return const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()));
-        if (c.slots.isEmpty) return Padding(padding: EdgeInsets.all(12), child: Text('Tidak ada jadwal praktik pada tanggal ini.'.tr, style: TextStyle(color: Colors.grey)));
+        if (c.slots.isEmpty) return Padding(padding: const EdgeInsets.all(12), child: Text('Tidak ada jadwal praktik pada tanggal ini.'.tr, style: const TextStyle(color: Colors.grey)));
         return Wrap(spacing: 8, runSpacing: 8, children: [
           for (final s in c.slots)
             ChoiceChip(
@@ -356,18 +410,25 @@ class DoctorDetailView extends StatelessWidget {
       const SizedBox(height: 16),
       Obx(() => FilledButton.icon(
             onPressed: c.booking.value ? null : c.book,
-            icon: c.booking.value ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.event_available),
+            icon: c.booking.value ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.event_available),
             label: Text(d.n('biaya_konsultasi') > 0 ? '${'Pesan & Bayar'.tr} ${rupiah(d.n('biaya_konsultasi'))}' : 'Pesan Konsultasi'.tr),
             style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
           )),
       if (reviews.isNotEmpty) ...[
         const SizedBox(height: 24),
         Text('Ulasan pasien'.tr, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
         for (final r in reviews)
-          ListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Row(children: [for (var i = 0; i < 5; i++) Icon(i < (r['rating'] as num) ? Icons.star : Icons.star_border, color: Colors.amber, size: 16)]),
-            subtitle: Text('${r['komentar'] ?? ''}${r['balasan'] != null ? '\n↳ ${'Dokter'.tr}: ${r['balasan']}' : ''}'),
+          Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [for (var i = 0; i < 5; i++) Icon(i < (r['rating'] as num) ? Icons.star : Icons.star_border, color: Colors.amber, size: 16)]),
+                const SizedBox(height: 4),
+                Text('${r['komentar'] ?? ''}${r['balasan'] != null ? '\n↳ ${'Dokter'.tr}: ${r['balasan']}' : ''}', style: const TextStyle(fontSize: 13, height: 1.3)),
+              ]),
+            ),
           ),
       ],
     ]);

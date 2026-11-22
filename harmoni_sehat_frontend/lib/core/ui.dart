@@ -7,7 +7,7 @@ import 'translations.dart';
 
 void showSuccess(String msg) => _snack('Berhasil', msg, AppColors.primaryColor);
 void showError(Object e) => _snack('Gagal', e is ApiException ? e.message : e.toString(), AppColors.errorColor);
-void showInfo(String msg) => _snack('Info', msg, Colors.blueGrey);
+void showInfo(String msg) => _snack('Info', msg, AppColors.secondaryColor);
 
 /// Seam for tests: they replace this to capture messages instead of mounting real snackbars.
 void Function(String title, String message, Color color) snackPresenter = _showSnackbar;
@@ -16,14 +16,26 @@ void _snack(String title, String msg, Color color) => snackPresenter(title.tr, l
 
 void _showSnackbar(String title, String msg, Color color) {
   if (Get.isSnackbarOpen) Get.closeCurrentSnackbar();
-  Get.snackbar(title, msg,
-      backgroundColor: color, colorText: Colors.white, margin: const EdgeInsets.all(12), duration: const Duration(seconds: 3), snackPosition: SnackPosition.BOTTOM);
+  Get.snackbar(
+    title,
+    msg,
+    backgroundColor: color,
+    colorText: Colors.white,
+    margin: const EdgeInsets.all(16),
+    borderRadius: 14,
+    duration: const Duration(seconds: 3),
+    snackPosition: SnackPosition.BOTTOM,
+    boxShadows: [
+      BoxShadow(
+        color: color.withValues(alpha: 0.3),
+        blurRadius: 12,
+        offset: const Offset(0, 4),
+      ),
+    ],
+  );
 }
 
 /// Loading / error / empty / content switcher used by list screens.
-///
-/// A function (not a widget) on purpose: [builder] runs synchronously inside the caller's `Obx`,
-/// so Rx reads in it stay reactive, yet it is only invoked once data exists, so `data.value!` is safe.
 Widget asyncBody({
   required bool loading,
   String? error,
@@ -33,28 +45,74 @@ Widget asyncBody({
   String emptyText = 'Belum ada data',
   IconData emptyIcon = Icons.inbox_outlined,
 }) {
-  if (loading) return const Center(child: CircularProgressIndicator());
+  if (loading) {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.all(32),
+        child: CircularProgressIndicator(strokeWidth: 3),
+      ),
+    );
+  }
   if (error != null) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Icon(Icons.cloud_off_outlined, size: 48, color: AppColors.textSecondary),
-          const SizedBox(height: 12),
-          Text(localizeMessage(error), textAlign: TextAlign.center),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: Text('Coba lagi'.tr)),
-        ]),
+        padding: const EdgeInsets.all(28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.errorColor.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.cloud_off_outlined, size: 44, color: AppColors.errorColor),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              localizeMessage(error),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh, size: 18),
+              label: Text('Coba lagi'.tr),
+            ),
+          ],
+        ),
       ),
     );
   }
   if (isEmpty) {
     return Center(
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(emptyIcon, size: 56, color: AppColors.textSecondary.withValues(alpha: 0.6)),
-        const SizedBox(height: 8),
-        Text(emptyText.tr, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
-      ]),
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight.withValues(alpha: 0.5),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(emptyIcon, size: 48, color: AppColors.primaryColor.withValues(alpha: 0.7)),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              emptyText.tr,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
   return builder();
@@ -93,14 +151,14 @@ class StatusChip extends StatelessWidget {
 
   static const _map = <String, (String, Color)>{
     'pending': ('Menunggu', Colors.orange),
-    'scheduled': ('Terjadwal', Colors.blue),
-    'ongoing': ('Berlangsung', Colors.teal),
-    'completed': ('Selesai', Colors.green),
-    'cancelled': ('Dibatalkan', Colors.red),
-    'processing': ('Diproses', Colors.blue),
-    'shipped': ('Dikirim', Colors.indigo),
-    'delivered': ('Diterima', Colors.green),
-    'failed': ('Gagal', Colors.red),
+    'scheduled': ('Terjadwal', Color(0xFF0284C7)),
+    'ongoing': ('Berlangsung', Color(0xFF0E9F6E)),
+    'completed': ('Selesai', Color(0xFF10B981)),
+    'cancelled': ('Dibatalkan', Color(0xFFEF4444)),
+    'processing': ('Diproses', Color(0xFF0284C7)),
+    'shipped': ('Dikirim', Color(0xFF6366F1)),
+    'delivered': ('Diterima', Color(0xFF10B981)),
+    'failed': ('Gagal', Color(0xFFEF4444)),
     'expired': ('Kedaluwarsa', Colors.grey),
     'refunded': ('Dana kembali', Colors.purple),
   };
@@ -110,8 +168,26 @@ class StatusChip extends StatelessWidget {
     final (label, color) = _map[status] ?? (status, Colors.grey);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20)),
-      child: Text(label.tr, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.w600)),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 0.8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            margin: const EdgeInsets.only(right: 5),
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          Text(
+            label.tr,
+            style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -125,11 +201,24 @@ class Avatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final initials = name.trim().isEmpty ? '?' : name.trim().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).take(2).map((w) => w[0].toUpperCase()).join();
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: AppColors.primaryColor.withValues(alpha: 0.15),
-      foregroundImage: (url != null && url!.startsWith('http')) ? NetworkImage(url!) : null,
-      child: Text(initials, style: const TextStyle(color: AppColors.primaryColor, fontWeight: FontWeight.bold)),
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: AppColors.primaryLight, width: 2),
+      ),
+      child: CircleAvatar(
+        radius: radius,
+        backgroundColor: AppColors.primaryLight,
+        foregroundImage: (url != null && url!.startsWith('http')) ? NetworkImage(url!) : null,
+        child: Text(
+          initials,
+          style: TextStyle(
+            color: AppColors.primaryColor,
+            fontWeight: FontWeight.bold,
+            fontSize: radius * 0.72,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -142,17 +231,53 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
-        child: Row(children: [
-          Expanded(child: Text(text.tr, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
-          if (action != null) TextButton(onPressed: onAction, child: Text(action!.tr)),
-        ]),
+        padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
+        child: Row(
+          children: [
+            Container(
+              width: 3.5,
+              height: 16,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                text.tr,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ),
+            if (action != null)
+              TextButton(
+                onPressed: onAction,
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  action!.tr,
+                  style: const TextStyle(
+                    color: AppColors.primaryColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+          ],
+        ),
       );
 }
 
 Future<bool> confirm(String title, String message, {String ok = 'Ya'}) async {
   final res = await Get.dialog<bool>(AlertDialog(
-    title: Text(title.tr),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+    title: Text(title.tr, style: const TextStyle(fontWeight: FontWeight.w700)),
     content: Text(message.tr),
     actions: [
       TextButton(onPressed: () => Get.back(result: false), child: Text('Batal'.tr)),

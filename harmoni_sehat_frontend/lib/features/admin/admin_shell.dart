@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../app/theme/app_colors.dart';
 import '../../core/api_client.dart';
 import '../../core/format.dart';
 import '../../core/ui.dart';
@@ -90,10 +91,10 @@ class _Stats extends StatelessWidget {
           onRefresh: c.load,
           child: ListView(padding: const EdgeInsets.all(16), children: [
             Wrap(spacing: 12, runSpacing: 12, children: [
-              _tile(context, 'Pasien', '${c.stats.value!.n('pasien').toInt()}', Icons.people_outline),
-              _tile(context, 'Dokter aktif', '${c.stats.value!.n('dokter').toInt()}', Icons.medical_services_outlined),
-              _tile(context, 'Apoteker aktif', '${c.stats.value!.n('apoteker').toInt()}', Icons.local_pharmacy_outlined),
-              _tile(context, 'Pendapatan', rupiah(c.stats.value!.n('pendapatan')), Icons.payments_outlined),
+              _tile(context, 'Pasien', '${c.stats.value!.n('pasien').toInt()}', Icons.people_outline, AppColors.secondaryColor, AppColors.secondaryLight),
+              _tile(context, 'Dokter aktif', '${c.stats.value!.n('dokter').toInt()}', Icons.medical_services_outlined, AppColors.primaryColor, AppColors.primaryLight),
+              _tile(context, 'Apoteker aktif', '${c.stats.value!.n('apoteker').toInt()}', Icons.local_pharmacy_outlined, AppColors.accentAmber, AppColors.accentAmberLight),
+              _tile(context, 'Pendapatan', rupiah(c.stats.value!.n('pendapatan')), Icons.payments_outlined, AppColors.accentIndigo, AppColors.accentIndigoLight),
             ]),
             const SectionTitle('Konsultasi'),
             _breakdown(c.stats.value!.m('konsultasi')),
@@ -103,9 +104,27 @@ class _Stats extends StatelessWidget {
         ),
       ));
 
-  Widget _tile(BuildContext context, String label, String value, IconData icon) => SizedBox(
+  Widget _tile(BuildContext context, String label, String value, IconData icon, Color color, Color bg) => SizedBox(
         width: (MediaQuery.of(context).size.width - 44) / 2,
-        child: Card(child: Padding(padding: const EdgeInsets.all(14), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Icon(icon, color: Theme.of(context).colorScheme.primary), const SizedBox(height: 8), Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)), Text(label, style: const TextStyle(color: Colors.grey))]))),
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
+                  child: Icon(icon, color: color, size: 20),
+                ),
+                const SizedBox(height: 10),
+                Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 2),
+                Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+              ],
+            ),
+          ),
+        ),
       );
 
   Widget _breakdown(Map<String, dynamic> m) => m.isEmpty

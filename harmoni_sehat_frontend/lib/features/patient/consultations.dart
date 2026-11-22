@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/routes/app_routes.dart';
+import '../../app/theme/app_colors.dart';
 import '../../core/api_client.dart';
 import '../../core/format.dart';
 import '../../core/session.dart';
@@ -61,9 +62,13 @@ class ConsultationsTab extends StatelessWidget {
                     return Card(
                       margin: const EdgeInsets.only(bottom: 10),
                       child: ListTile(
-                        leading: Avatar(name: other.s('nama'), url: other['foto']?.toString()),
-                        title: Text(other.s('nama', 'Pengguna'), style: const TextStyle(fontWeight: FontWeight.w600)),
-                        subtitle: Text('${fmtDateTime(x['tanggal'])}\n${x.s('keluhan')}', maxLines: 2, overflow: TextOverflow.ellipsis),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        leading: Avatar(name: other.s('nama'), url: other['foto']?.toString(), radius: 24),
+                        title: Text(other.s('nama', 'Pengguna'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text('${fmtDateTime(x['tanggal'])}\n${x.s('keluhan')}', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+                        ),
                         isThreeLine: true,
                         trailing: StatusChip(x.s('status')),
                         onTap: () => Get.toNamed(AppRoutes.consultation, arguments: x['_id'].toString())?.then((_) => c.load(silent: true)),

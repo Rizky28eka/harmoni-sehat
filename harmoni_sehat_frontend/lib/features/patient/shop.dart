@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../app/routes/app_routes.dart';
+import '../../app/theme/app_colors.dart';
 import '../../core/api_client.dart';
 import '../../core/format.dart';
 import '../../core/session.dart';
@@ -136,16 +137,24 @@ class _DrugTile extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(children: [
-          Container(width: 52, height: 52, decoration: BoxDecoration(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.medication, color: Colors.green)),
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: AppColors.primaryLight,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(Icons.medication, color: AppColors.primaryColor, size: 28),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(drug.s('nama'), style: const TextStyle(fontWeight: FontWeight.w600)),
-              Text('${drug.s('kategori')} • ${'per'.tr} ${drug.s('satuan')}', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              Text('${drug.s('kategori')} • ${'per'.tr} ${drug.s('satuan')}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
               const SizedBox(height: 4),
               Row(children: [
-                Text(rupiah(drug.n('harga')), style: const TextStyle(fontWeight: FontWeight.bold)),
-                if (drug['butuh_resep'] == true) ...[const SizedBox(width: 8), Chip(label: Text('Resep'.tr, style: TextStyle(fontSize: 10)), visualDensity: VisualDensity.compact, padding: EdgeInsets.zero)],
+                Text(rupiah(drug.n('harga')), style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primaryColor)),
+                if (drug['butuh_resep'] == true) ...[const SizedBox(width: 8), Chip(label: Text('Resep'.tr, style: const TextStyle(fontSize: 10)), visualDensity: VisualDensity.compact, padding: EdgeInsets.zero)],
               ]),
               if (drug.n('stok') < 10) Text('${'Sisa'.tr} ${drug.n('stok').toInt()}', style: const TextStyle(color: Colors.orange, fontSize: 11)),
             ]),
