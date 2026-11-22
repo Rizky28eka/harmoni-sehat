@@ -24,7 +24,8 @@ The Harmoni Sehat backend is built with modern technologies to ensure performanc
 -   **Database**: MongoDB (with Mongoose ODM)
 -   **Authentication**: JWT (JSON Web Tokens)
 -   **Validation**: Zod
--   **Testing**: Jest
+-   **Real-time**: Socket.IO
+-   **Testing**: Jest + Supertest + mongodb-memory-server
 
 ### Frontend
 
@@ -69,17 +70,41 @@ harmoni_sehat_project/
 └── LICENSE                  # Project license
 ```
 
-## ⚙️ How to Run (General)
+## ✨ Fitur
 
-To get the Harmoni Sehat project up and running locally, you will need to set up both the backend and the frontend components.
+- **Pasien**: cari dokter (filter spesialisasi/rating/biaya), booking slot + pembayaran, chat real-time & video call, rekam medis (PDF), resep → tebus di apotek, toko obat (keranjang, checkout, pelacakan), asisten AI (deteksi darurat + rekomendasi dokter), pengingat obat, artikel kesehatan, notifikasi.
+- **Dokter**: jadwal praktik, antrean harian, konsultasi, rekam medis & resep digital, ulasan.
+- **Apoteker**: antrean pesanan, pengiriman, manajemen stok.
+- **Admin**: verifikasi STR/SIPA, statistik.
+- **Keamanan**: RBAC + row-level access, refresh token berotasi, rate limiting, helmet, sanitasi NoSQL injection, enkripsi field rekam medis (AES-256-GCM), hapus akun (UU PDP).
 
-### 1. Backend Setup
+## ⚙️ Menjalankan
 
-Navigate to the `harmoni_sehat_backend/` directory and follow the instructions in the [Backend Setup Guide](docs/backend/setup-guide.md).
+### Cepat dengan Docker
+```bash
+cp harmoni_sehat_backend/.env.example harmoni_sehat_backend/.env   # isi JWT_SECRET
+docker compose up --build
+docker compose exec api node dist/utils/seeder.js   # opsional: data demo (non-production)
+```
 
-### 2. Frontend Setup
+### Manual
+```bash
+# Backend (butuh MongoDB)
+cd harmoni_sehat_backend
+cp .env.example .env        # WAJIB isi JWT_SECRET dan MONGO_URI
+npm install
+npm run seed                # data demo (password: Harmoni123!)
+npm run dev
+npm test                    # 39 test integrasi (MongoDB in-memory)
 
-Navigate to the `harmoni_sehat_frontend/` directory and follow the instructions in the [Frontend How-To-Run Guide](docs/frontend/how-to-run.md).
+# Frontend
+cd harmoni_sehat_frontend
+flutter pub get
+flutter run --dart-define=API_BASE_URL=http://<IP>:8000/api/v1
+flutter test
+```
+
+Dokumentasi lengkap: [API](docs/backend/api-reference.md) · [Frontend](docs/frontend/how-to-run.md).
 
 ## 📚 Documentation
 
