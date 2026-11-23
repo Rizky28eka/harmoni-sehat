@@ -72,9 +72,9 @@ void main() {
     await Get.find<SessionService>().clear();
 
     await t.pumpWidget(const MyApp());
-    await wait(t, 1);
-    await shot(t, 'onboarding', 0.5);
-    await wait(t, 3);
+    await shot(t, 'splash', 0.4);
+    await wait(t, 2.5);
+    await shot(t, 'onboarding', 3);
 
     // ── Login ──
     Get.offAllNamed(AppRoutes.login);
@@ -109,6 +109,8 @@ void main() {
     await shot(t, 'patient-records', 2.5);
     Get.back();
     await wait(t, 1);
+    await tapIcon(t, Icons.person_outline);
+    await shot(t, 'patient-profile');
     Get.toNamed(AppRoutes.aiChat);
     await shot(t, 'patient-ai');
     Get.back();
